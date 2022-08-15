@@ -4,8 +4,13 @@ import javax.security.auth.login.LoginException;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import io.github.stonley890.commands.CommandsManager;
 
 public class App extends JavaPlugin implements Listener {
 
@@ -28,8 +33,39 @@ public class App extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerChatEvent (PlayerChatEvent event) {
         String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
-        io.github.stonley890.Bot.getJDA().getTextChannelById("974114329886605433").sendMessage(chatMessage).queue();
+        String channelId = CommandsManager.getChatChannel();
+        if (channelId != "none") {
+            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+        }
         
+        
+    }
+
+    @EventHandler
+    public void onPlayerJoinEvent (PlayerJoinEvent event) {
+        String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
+        String channelId = CommandsManager.getChatChannel();
+        if (channelId != "none") {
+            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuitEvent (PlayerQuitEvent event) {
+        String chatMessage = "**" + event.getPlayer().getName() + " left the game**";
+        String channelId = CommandsManager.getChatChannel();
+        if (channelId != "none") {
+            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDeathEvent (PlayerDeathEvent event) {
+        String chatMessage = "**" + event.getDeathMessage() + "**";
+        String channelId = CommandsManager.getChatChannel();
+        if (channelId != "none") {
+            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+        }
     }
 
     @Override
