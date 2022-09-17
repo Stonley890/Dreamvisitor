@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.shanerx.mojang.Mojang;
 
 import io.github.stonley890.commands.CommandsManager;
 import net.dv8tion.jda.api.entities.User;
@@ -22,41 +23,62 @@ public class EventListener extends ListenerAdapter {
         String chatChannel = CommandsManager.getChatChannel();
         String whitelistChannel = CommandsManager.getWhitelistChannel();
         String memberRole = CommandsManager.getMemberRole();
+        String step3Role = CommandsManager.getStep3Role();
 
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
+        // If in whitelist channel and username is "legal"
         if (channelId.equals(whitelistChannel) && user.isBot() == false && !p.matcher(username).find()) {
-            Bukkit.getLogger().info("Finding " + username + ".");
-            OfflinePlayer player = Bukkit.getOfflinePlayer(username);
-            
-            if (player.isWhitelisted() == false) {
-                Bukkit.getLogger().info("Whitelisting " + player + ".");
-                player.setWhitelisted(true);
-                if (memberRole != "none") {
-                try {
-                    event.getGuild().addRoleToMember(event.getAuthor(),
-                            event.getGuild().getRoleById(memberRole)).queue();
-                } catch (HierarchyException exception) {
-                    event.getChannel().sendMessage("Insufficient permissions! Bot role need higher priority!").queue();
-                }
-            }
-                event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
-            } else if (player.isWhitelisted() == true) {
-                Bukkit.getLogger().info(player + " is already whitelisted.");
-                event.getMessage().addReaction(Emoji.fromFormatted("❗")).queue();
-                event.getChannel().sendMessage("That user is already whitelisted!").queue();
-            }
+            // Connect to Mojang services
+            Mojang mojang = new Mojang();
+            mojang.connect();
+            // Check for valid UUID
+            try {
+                mojang.getUUIDOfUsername(username);
+                // Get OfflinePlayer from username
+                OfflinePlayer player = Bukkit.getOfflinePlayer(username);
 
+                // If player is not whitelisted, add them and change roles
+                if (player.isWhitelisted() == false) {
+                    Bukkit.getLogger().info("[Dreamvisitor] Whitelisting " + username + ".");
+                    player.setWhitelisted(true);
+                    // Change roles if assigned
+                    if (memberRole != "none") {
+                        try {
+                            event.getGuild().addRoleToMember(event.getAuthor(),
+                                    event.getGuild().getRoleById(memberRole)).queue();
+                            event.getGuild().addRoleToMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
+                                    .queue();
+                        } catch (HierarchyException exception) {
+
+                        }
+                    }
+                    // Reply with success
+                    event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
+                } else if (player.isWhitelisted() == true) {
+                    // If user is already whitelisted, send error.
+                    Bukkit.getLogger().info("[Dreamvisitor] " + username + " is already whitelisted.");
+                    event.getMessage().addReaction(Emoji.fromFormatted("❗")).queue();
+                    event.getChannel().sendMessage("That user is already whitelisted!").queue();
+                }
+            } catch (Exception e) {
+                // username does not exist alert
+                event.getChannel().sendMessage("That username does not exist!").queue();
+                event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+            }
             
 
         } else if (channelId.equals(whitelistChannel) && user.isBot() == false) {
+            // illegal username
             event.getChannel().sendMessage("That username contains illegal characters!").queue();
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
         }
 
+        // If in chat channel, send to Minecraft
         if (channelId.equals(chatChannel) && user.isBot() == false) {
-            Bukkit.broadcastMessage("\u00A73[Discord] \u00A77<" + event.getAuthor().getName() + "> "
-                    + event.getMessage().getContentRaw());
+            Bukkit.getServer().getOnlinePlayers().forEach(
+                    Player -> Player.sendMessage("\u00A73[Discord] \u00A77<" + event.getAuthor().getName() + "> "
+                            + event.getMessage().getContentRaw()));
 
         }
     }

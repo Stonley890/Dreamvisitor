@@ -17,10 +17,11 @@ public class Bot {
     public Bot() throws LoginException {
         String token = "BOT_TOKEN";
 
-        JDABuilder builder = JDABuilder.createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS);
+        JDABuilder builder = JDABuilder.createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT,
+                GatewayIntent.GUILD_MEMBERS);
         builder.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER);
         builder.setStatus(OnlineStatus.ONLINE);
-        builder.setActivity(Activity.watching("Merry Christmas: The New World"));
+        builder.setActivity(Activity.watching("you closely..."));
 
         jda = builder.build();
 
@@ -29,14 +30,5 @@ public class Bot {
 
     public static JDA getJDA() {
         return jda;
-    }
-
-    public static void main(String[] args) {
-        try {
-            Bot bot = new Bot();
-        } catch (LoginException exception) {
-            System.out.println("ERROR: Provided bot token is invalid!");
-        }
-
     }
 }
