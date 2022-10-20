@@ -34,11 +34,6 @@
       <version>5.0.0-alpha.17</version>
     </dependency>
     <dependency>
-      <groupId>com.github.jikoo.OpenInv</groupId>
-      <artifactId>openinvapi</artifactId>
-      <version>4.2.1</version>
-    </dependency>
-    <dependency>
       <groupId>com.github.SparklingComet</groupId>
       <artifactId>java-mojang-api</artifactId>
       <version>-SNAPSHOT</version>

@@ -2,13 +2,11 @@ main: io.github.stonley890.App
 name: Dreamvisitor
 version: 1.0
 api-version: 1.18
-description: A plugin created by Bog for WoF:TNW to add Discord automation.
+description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
 
 commands:
-  offlineec:
-    description: Get an offline player's Ender Chest.
+  pausechat:
+    description: Pauses chat for non-ops.
     usage: /<command> 
-  offlineinv:
-    description: Get an offline player's inventory.
-    usage: /<command>
+    permission: minecraft.command.op
