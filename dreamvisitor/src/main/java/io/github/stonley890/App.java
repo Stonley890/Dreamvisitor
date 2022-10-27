@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -16,6 +17,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.stonley890.commands.CommandsManager;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 public class App extends JavaPlugin implements Listener {
 
@@ -45,20 +48,36 @@ public class App extends JavaPlugin implements Listener {
 
         plugin = this;
 
+        // Config
+        getDataFolder().mkdir();
+        saveDefaultConfig();
+
+        if (getConfig().getBoolean("chatPaused")) {
+            chatPaused = true;
+        }
     }
 
     public static App getPlugin() {
         return plugin;
     }
 
+    public FileConfiguration getConfig() {
+        return App.getPlugin().getConfig();
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // pausechat command
         if (label.equalsIgnoreCase("pausechat")) {
+            Role memberRole = Bot.getJDA().getRoleById(CommandsManager.getMemberRole());
+            TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
             if (chatPaused == true) {
                 chatPaused = false;
+                getConfig().set("chatPaused", false);
                 Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been unpaused.");
             } else {
                 chatPaused = true;
+                getConfig().set("chatPaused", true);
                 Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been paused.");
             }
 
@@ -69,6 +88,9 @@ public class App extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
         // Send chat messages to Discord
+        if (event.getMessage().contains(" test ")) {
+            event.getPlayer().sendMessage("That isn't allowed!");
+        }
         if (chatPaused != true && event.getPlayer().isOp() == false || event.getPlayer().isOp() == true) {
             String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
             String channelId = CommandsManager.getChatChannel();

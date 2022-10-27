@@ -59,18 +59,18 @@ public class EventListener extends ListenerAdapter {
                     // If user is already whitelisted, send error.
                     Bukkit.getLogger().info("[Dreamvisitor] " + username + " is already whitelisted.");
                     event.getMessage().addReaction(Emoji.fromFormatted("❗")).queue();
-                    event.getChannel().sendMessage("That user is already whitelisted!").queue();
+                    event.getChannel().sendMessage(username + " is already whitelisted!").queue();
                 }
             } catch (Exception e) {
                 // username does not exist alert
-                event.getChannel().sendMessage("That username does not exist!").queue();
+                event.getChannel().sendMessage(username +" does not exist!").queue();
                 event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
             }
             
 
         } else if (channelId.equals(whitelistChannel) && user.isBot() == false) {
             // illegal username
-            event.getChannel().sendMessage("That username contains illegal characters!").queue();
+            event.getChannel().sendMessage(username + " contains illegal characters!").queue();
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
         }
 

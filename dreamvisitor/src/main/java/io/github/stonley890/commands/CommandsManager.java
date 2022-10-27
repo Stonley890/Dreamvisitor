@@ -149,12 +149,16 @@ public class CommandsManager extends ListenerAdapter {
         List<CommandData> commandData = new ArrayList<>();
         commandData.add(Commands.slash("setgamechat", "Set the channel that game chat occurs in.")
                 .addOption(OptionType.CHANNEL, "channel", "The channel to set.", true, false));
+        
         commandData.add(Commands.slash("setwhitelist", "Set the channel that whitelists players.")
                 .addOption(OptionType.CHANNEL, "channel", "The channel to set.", true, false));
+        
         commandData.add(Commands.slash("setmemberrole", "Set the member role.").addOption(OptionType.ROLE, "role",
                 "The role to set.", true, false));
+        
         commandData.add(Commands.slash("setstep3role", "Set the Step 3 role.").addOption(OptionType.ROLE, "role",
                 "The role to set.", true, false));
+        
         commandData.add(Commands.slash("list", "List online players."));
 
         OptionData tempbanOption1 = new OptionData(OptionType.STRING, "username", "The Minecraft member to tempban.", true);
