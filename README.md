@@ -20,3 +20,6 @@ A plugin created by Bog for WoF:TNW to add Discord automation.
 - `/setstep3role` - sets the role to remove from users upon whitelist
 #### User Commands
 - `/list` - List the online players. Only works in the assigned game chat channel.
+### Minecraft Commands
+#### Admin Commands
+- `/pausechat` - Pauses chat for non-OPs
