@@ -21,7 +21,7 @@ public class Bot {
                 GatewayIntent.GUILD_MEMBERS);
         builder.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER);
         builder.setStatus(OnlineStatus.ONLINE);
-        builder.setActivity(Activity.watching("you closely..."));
+        builder.setActivity(Activity.watching("Wings of Fire: The New World"));
 
         jda = builder.build();
 

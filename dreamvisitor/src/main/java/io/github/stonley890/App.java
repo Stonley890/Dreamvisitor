@@ -38,22 +38,26 @@ public class App extends JavaPlugin implements Listener {
             Bukkit.getLogger().warning("ERROR: Bot login failed!");
             e.printStackTrace();
         }
+        // Wait for bot ready
         try {
             Bot.getJDA().awaitReady();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        // Send server start message in log channel
         Bot.getJDA().getGuilds()
                 .forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been started.").queue());
 
         plugin = this;
 
-        // Config
+        // Create config if needed
         getDataFolder().mkdir();
         saveDefaultConfig();
 
+        // If chat was previously paused, restore and notify in console
         if (getConfig().getBoolean("chatPaused")) {
             chatPaused = true;
+            Bukkit.getServer().getLogger().info("[Dreamvisitor] Chat is currently paused! Use /pausechat to allow users to chat.");
         }
     }
 
@@ -71,14 +75,17 @@ public class App extends JavaPlugin implements Listener {
         if (label.equalsIgnoreCase("pausechat")) {
             Role memberRole = Bot.getJDA().getRoleById(CommandsManager.getMemberRole());
             TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
+            // If chat is paused, unpause. If not, pause
             if (chatPaused == true) {
                 chatPaused = false;
                 getConfig().set("chatPaused", false);
                 Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been unpaused.");
+                Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel()).sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft").queue();
             } else {
                 chatPaused = true;
                 getConfig().set("chatPaused", true);
                 Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been paused.");
+                Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel()).sendMessage("**Chat has been paused. Messages will not be sent to Minecraft").queue();
             }
 
         }
@@ -88,9 +95,7 @@ public class App extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
         // Send chat messages to Discord
-        if (event.getMessage().contains(" test ")) {
-            event.getPlayer().sendMessage("That isn't allowed!");
-        }
+        // IF chat is not paused AND the player is not an operator OR the player is an operator, send message
         if (chatPaused != true && event.getPlayer().isOp() == false || event.getPlayer().isOp() == true) {
             String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
             String channelId = CommandsManager.getChatChannel();
@@ -136,7 +141,7 @@ public class App extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        getLogger().info("Dreamvisitor disable process.");
+        getLogger().info("Closing bot instance.");
         Bot.getJDA().getGuilds()
                 .forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been shutdown.").queue());
         // Shut down bot

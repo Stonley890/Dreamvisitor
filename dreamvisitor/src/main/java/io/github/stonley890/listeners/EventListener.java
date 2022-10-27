@@ -50,32 +50,32 @@ public class EventListener extends ListenerAdapter {
                             event.getGuild().addRoleToMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
                                     .queue();
                         } catch (HierarchyException exception) {
-
+                            event.getChannel().sendMessage("**An error has occured! Staff have been notified.**").queue();
+                            event.getGuild().getSystemChannel().sendMessage("There was an error: " + exception).queue();
                         }
                     }
                     // Reply with success
                     event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
                 } else if (player.isWhitelisted() == true) {
                     // If user is already whitelisted, send error.
-                    Bukkit.getLogger().info("[Dreamvisitor] " + username + " is already whitelisted.");
                     event.getMessage().addReaction(Emoji.fromFormatted("❗")).queue();
-                    event.getChannel().sendMessage(username + " is already whitelisted!").queue();
+                    event.getChannel().sendMessage("`" + username + "` is already whitelisted!").queue();
                 }
             } catch (Exception e) {
                 // username does not exist alert
-                event.getChannel().sendMessage(username +" does not exist!").queue();
+                event.getChannel().sendMessage("`" + username + "` does not exist!").queue();
                 event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
             }
             
 
         } else if (channelId.equals(whitelistChannel) && user.isBot() == false) {
             // illegal username
-            event.getChannel().sendMessage(username + " contains illegal characters!").queue();
+            event.getChannel().sendMessage("`" + username + "` contains illegal characters!").queue();
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
         }
 
-        // If in chat channel, send to Minecraft
-        if (channelId.equals(chatChannel) && user.isBot() == false) {
+        // If in chat channel and chat is not paused, send to Minecraft
+        if (channelId.equals(chatChannel) && user.isBot() == false && Bukkit.getConfig().getBoolean("chatpaused")) == false {
             Bukkit.getServer().getOnlinePlayers().forEach(
                     Player -> Player.sendMessage("\u00A73[Discord] \u00A77<" + event.getAuthor().getName() + "> "
                             + event.getMessage().getContentRaw()));

@@ -1,6 +1,11 @@
+# The channel ID of the game chat
 chatChannelID: 880269118975119410
+# The channel ID of the whitelist chat
 whitelistChannelID: 858461513991323688
+# The role ID of step 3
 step3RoleID: 848779796200161342
+# The role ID of member
 memberRoleID: 848788549079793684
 
+# Don't change unless you know what you're doing!
 chatPaused: false

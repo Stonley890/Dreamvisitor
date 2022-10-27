@@ -41,28 +41,28 @@ public class CommandsManager extends ListenerAdapter {
                 gameChatChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
                 event.reply("Game chat channel set to " + gameChatChannel.getAsMention()).queue();
             } else {
-                event.reply(noPermissionError);
+                event.reply(noPermissionError).setEphemeral(true).queue();
             }
         } else if (command.equals("setwhitelist")) {
             if (event.getMember().getPermissions().contains(Permission.ADMINISTRATOR)) {
                 whitelistChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
                 event.reply("Whitelist channel set to " + whitelistChannel.getAsMention()).queue();
             } else {
-                event.reply(noPermissionError);
+                event.reply(noPermissionError).setEphemeral(true).queue();
             }
         } else if (command.equals("setmemberrole")) {
             if (event.getMember().getPermissions().contains(Permission.ADMINISTRATOR)) {
                 memberRole = event.getOption("role", OptionMapping::getAsRole);
                 event.reply("Member role set to **" + memberRole.getName() + "**").queue();
             } else {
-                event.reply(noPermissionError);
+                event.reply(noPermissionError).setEphemeral(true).queue();
             }
         } else if (command.equals("setstep3role")) {
             if (event.getMember().getPermissions().contains(Permission.ADMINISTRATOR)) {
                 step3role = event.getOption("role", OptionMapping::getAsRole);
                 event.reply("Step 3 role set to **" + step3role.getName() + "**").queue();
             } else {
-                event.reply(noPermissionError);
+                event.reply(noPermissionError).setEphemeral(true).queue();
             }
         } else if (command.equals("list")) {
             Bukkit.getLogger().info("List command requested");
@@ -73,13 +73,13 @@ public class CommandsManager extends ListenerAdapter {
                     Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
                     for (Player player : players) {
                         if (online.length() > 0) {
-                            online.append(", ");
+                            online.append("`, `");
                         }
                         online.append(player.getName());
                     }
 
 
-                    event.reply("**There are " + players.size() + " player(s) online:** " + online.toString()).queue();
+                    event.reply("**There are " + players.size() + " player(s) online:** `" + online.toString() + "`").queue();
                 } else {
                     event.reply("**There are no players online.**").queue();
                 }
@@ -94,7 +94,7 @@ public class CommandsManager extends ListenerAdapter {
                 String member = event.getOption("username", OptionMapping::getAsString);
                 int hours = event.getOption("hours", OptionMapping::getAsInt);
                 String reason = event.getOption("reason", OptionMapping::getAsString);
-                // Add ban
+                // Add ban if player is online
                 if (Bukkit.getServer().getPlayer(member) != null) {
                     Date date = new Date(System.currentTimeMillis() + 60*60*1000*hours);
                     Bukkit.getServer().getBanList(BanList.Type.NAME).addBan(member, reason, date, null);
@@ -112,6 +112,22 @@ public class CommandsManager extends ListenerAdapter {
                 } else {
                     event.reply("**Player is offline!**").setEphemeral(true).queue();
                 }
+            }
+        // msg command 
+        } else if (command.equals("msg")) {
+            String username = event.getOption("username");
+            // Check for correct channel
+            if (event.getChannel() == gameChatChannel) {
+                // Check for player online
+                if (Bukkit.getServer().getPlayer(username) != null) {
+                    Bukkit.getServer().getPlayer(username).sendMessage("Message from " + event.getMember() + ": " + event.getOption("message"));
+                    event.getGuild().getSystemChannel().sendMessage("**Message from " + event.getMember().getAsMention() + " to **`" event.getOption("username") + "`**:** ", event.getOption("message")).queue();
+                    event.reply("Message sent!").queue();
+                } else {
+                    event.reply("`" + username + "` is not online!").setEphemeral(true).queue();
+                }
+            } else {
+                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true).queue();
             }
         }
     }
@@ -164,7 +180,11 @@ public class CommandsManager extends ListenerAdapter {
         OptionData tempbanOption1 = new OptionData(OptionType.STRING, "username", "The Minecraft member to tempban.", true);
         OptionData tempbanOption2 = new OptionData(OptionType.INTEGER, "hours", "The number of hours to enforce the tempban.", true);
         OptionData tempbanOption3 = new OptionData(OptionType.STRING, "reason", "Reason for tempban.", true);
-        commandData.add(Commands.slash("tempban", "Tempban a player from the Minecraft Server.").addOptions(tempbanOption1, tempbanOption2, tempbanOption3));
+        commandData.add(Commands.slash("tempban", "Tempban a player from the Minecraft server.").addOptions(tempbanOption1, tempbanOption2, tempbanOption3));
+
+        OptionData msgOption1 = new OptionData(OptionType.STRING, "username", "The user you want to message.", true);
+        OptionData msgOption2 = new OptionData(OptionType.STRING, "message", "The message to send.", true);
+        commandData.add(Commands.slash("msg", "Message a player on the Minecraft server.").addOptions(msgOption1, msgOption2));
 
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
