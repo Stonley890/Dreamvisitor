@@ -7,11 +7,13 @@ import java.util.List;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.stonley890.App;
+import io.github.stonley890.Bot;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Role;
@@ -31,6 +33,14 @@ public class CommandsManager extends ListenerAdapter {
     private static Role memberRole;
     private static Role step3role;
 
+    public static void initChannelsRoles() {
+        FileConfiguration config = App.getPlugin().getConfig();
+        gameChatChannel = Bot.getJDA().getTextChannelById(config.getString("chatChannelID"));
+        whitelistChannel = Bot.getJDA().getTextChannelById(config.getString("whitelistChannelID"));
+        memberRole = Bot.getJDA().getRoleById(config.getString("memberRoleID"));
+        step3role = Bot.getJDA().getRoleById(config.getString("step3RoleID"));
+    }
+
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         String command = event.getName();
@@ -38,29 +48,41 @@ public class CommandsManager extends ListenerAdapter {
 
         if (command.equals("setgamechat")) {
             if (event.getMember().getPermissions().contains(Permission.ADMINISTRATOR)) {
+
                 gameChatChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
                 event.reply("Game chat channel set to " + gameChatChannel.getAsMention()).queue();
+                App.getPlugin().getConfig().set("chatChannelID", gameChatChannel.getId());
+
             } else {
                 event.reply(noPermissionError).setEphemeral(true).queue();
             }
         } else if (command.equals("setwhitelist")) {
             if (event.getMember().getPermissions().contains(Permission.ADMINISTRATOR)) {
+
                 whitelistChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
                 event.reply("Whitelist channel set to " + whitelistChannel.getAsMention()).queue();
+                App.getPlugin().getConfig().set("whitelistChannelID", whitelistChannel.getId());
+
             } else {
                 event.reply(noPermissionError).setEphemeral(true).queue();
             }
         } else if (command.equals("setmemberrole")) {
             if (event.getMember().getPermissions().contains(Permission.ADMINISTRATOR)) {
+
                 memberRole = event.getOption("role", OptionMapping::getAsRole);
                 event.reply("Member role set to **" + memberRole.getName() + "**").queue();
+                App.getPlugin().getConfig().set("memberRoleID", memberRole.getId());
+
             } else {
                 event.reply(noPermissionError).setEphemeral(true).queue();
             }
         } else if (command.equals("setstep3role")) {
             if (event.getMember().getPermissions().contains(Permission.ADMINISTRATOR)) {
+
                 step3role = event.getOption("role", OptionMapping::getAsRole);
                 event.reply("Step 3 role set to **" + step3role.getName() + "**").queue();
+                App.getPlugin().getConfig().set("step3RoleID", step3role.getId());
+
             } else {
                 event.reply(noPermissionError).setEphemeral(true).queue();
             }
@@ -115,14 +137,15 @@ public class CommandsManager extends ListenerAdapter {
             }
         // msg command 
         } else if (command.equals("msg")) {
-            String username = event.getOption("username");
+            String username = event.getOption("username", OptionMapping::getAsString);
+            String msg = event.getOption("message", OptionMapping::getAsString);
             // Check for correct channel
             if (event.getChannel() == gameChatChannel) {
                 // Check for player online
                 if (Bukkit.getServer().getPlayer(username) != null) {
-                    Bukkit.getServer().getPlayer(username).sendMessage("Message from " + event.getMember() + ": " + event.getOption("message"));
-                    event.getGuild().getSystemChannel().sendMessage("**Message from " + event.getMember().getAsMention() + " to **`" event.getOption("username") + "`**:** ", event.getOption("message")).queue();
-                    event.reply("Message sent!").queue();
+                    Bukkit.getServer().getPlayer(username).sendMessage("\u00A77[\u00A73" + event.getMember().getEffectiveName() + "\u00A77 -> \u00A73me\u00A77] \u00A7r" + msg);
+                    event.getGuild().getSystemChannel().sendMessage("Message from " + event.getMember().getAsMention() + " to `" + username + "`: " + msg).queue();
+                    event.reply("Message sent!").setEphemeral(true).queue();
                 } else {
                     event.reply("`" + username + "` is not online!").setEphemeral(true).queue();
                 }
@@ -130,6 +153,7 @@ public class CommandsManager extends ListenerAdapter {
                 event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true).queue();
             }
         }
+        App.getPlugin().saveConfig();
     }
 
     public static String getChatChannel() {

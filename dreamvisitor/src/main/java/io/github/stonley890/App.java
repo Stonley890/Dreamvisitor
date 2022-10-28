@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -28,14 +27,21 @@ public class App extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
 
+        plugin = this;
+
         getLogger()
                 .info("Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
         getServer().getPluginManager().registerEvents(this, this);
+
+        // Create config if needed
+        getDataFolder().mkdir();
+        saveDefaultConfig();
+
         // Start Discord bot
         try {
             new Bot();
         } catch (LoginException e) {
-            Bukkit.getLogger().warning("ERROR: Bot login failed!");
+            Bukkit.getLogger().warning("ERROR: Bot login failed! Get new bot token and add it to the config!");
             e.printStackTrace();
         }
         // Wait for bot ready
@@ -48,11 +54,8 @@ public class App extends JavaPlugin implements Listener {
         Bot.getJDA().getGuilds()
                 .forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been started.").queue());
 
-        plugin = this;
-
-        // Create config if needed
-        getDataFolder().mkdir();
-        saveDefaultConfig();
+        // Get channels
+        CommandsManager.initChannelsRoles();
 
         // If chat was previously paused, restore and notify in console
         if (getConfig().getBoolean("chatPaused")) {
@@ -65,28 +68,29 @@ public class App extends JavaPlugin implements Listener {
         return plugin;
     }
 
-    public FileConfiguration getConfig() {
-        return App.getPlugin().getConfig();
-    }
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // pausechat command
         if (label.equalsIgnoreCase("pausechat")) {
-            Role memberRole = Bot.getJDA().getRoleById(CommandsManager.getMemberRole());
+            //Role memberRole = Bot.getJDA().getRoleById(CommandsManager.getMemberRole());
             TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
             // If chat is paused, unpause. If not, pause
             if (chatPaused == true) {
                 chatPaused = false;
                 getConfig().set("chatPaused", false);
                 Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been unpaused.");
-                Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel()).sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft").queue();
+                if (chatChannel != null) {
+                    chatChannel.sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft**").queue();
+                }
             } else {
                 chatPaused = true;
                 getConfig().set("chatPaused", true);
                 Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been paused.");
-                Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel()).sendMessage("**Chat has been paused. Messages will not be sent to Minecraft").queue();
+                if (chatChannel != null) {
+                    chatChannel.sendMessage("**Chat has been paused. Messages will not be sent to Minecraft**").queue();
+                }
             }
+            saveConfig();
 
         }
         return true;

@@ -15,7 +15,7 @@ public class Bot {
     private static JDA jda;
 
     public Bot() throws LoginException {
-        String token = "BOT_TOKEN";
+        String token = App.getPlugin().getConfig().getString("bot-token");
 
         JDABuilder builder = JDABuilder.createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT,
                 GatewayIntent.GUILD_MEMBERS);

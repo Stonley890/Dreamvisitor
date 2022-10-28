@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.shanerx.mojang.Mojang;
 
+import io.github.stonley890.App;
 import io.github.stonley890.commands.CommandsManager;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -75,7 +76,7 @@ public class EventListener extends ListenerAdapter {
         }
 
         // If in chat channel and chat is not paused, send to Minecraft
-        if (channelId.equals(chatChannel) && user.isBot() == false && Bukkit.getConfig().getBoolean("chatpaused")) == false {
+        if (channelId.equals(chatChannel) && user.isBot() == false && App.getPlugin().getConfig().getBoolean("chatPaused") == false) {
             Bukkit.getServer().getOnlinePlayers().forEach(
                     Player -> Player.sendMessage("\u00A73[Discord] \u00A77<" + event.getAuthor().getName() + "> "
                             + event.getMessage().getContentRaw()));
