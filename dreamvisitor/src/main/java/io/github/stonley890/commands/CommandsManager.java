@@ -143,7 +143,7 @@ public class CommandsManager extends ListenerAdapter {
             if (event.getChannel() == gameChatChannel) {
                 // Check for player online
                 if (Bukkit.getServer().getPlayer(username) != null) {
-                    Bukkit.getServer().getPlayer(username).sendMessage("\u00A77[\u00A73" + event.getMember().getEffectiveName() + "\u00A77 -> \u00A73me\u00A77] \u00A7r" + msg);
+                    Bukkit.getServer().getPlayer(username).sendMessage("\u00A77[\u00A73" + event.getMember().getName() + "\u00A77 -> \u00A73me\u00A77] \u00A7r" + msg);
                     event.getGuild().getSystemChannel().sendMessage("Message from " + event.getMember().getAsMention() + " to `" + username + "`: " + msg).queue();
                     event.reply("Message sent!").setEphemeral(true).queue();
                 } else {
