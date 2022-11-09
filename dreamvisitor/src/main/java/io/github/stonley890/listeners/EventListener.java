@@ -64,7 +64,7 @@ public class EventListener extends ListenerAdapter {
                 }
             } catch (Exception e) {
                 // username does not exist alert
-                event.getChannel().sendMessage("`" + username + "` does not exist!").queue();
+                event.getChannel().sendMessage("`" + username + "` could not be found!").queue();
                 event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
             }
             
@@ -80,7 +80,6 @@ public class EventListener extends ListenerAdapter {
             Bukkit.getServer().getOnlinePlayers().forEach(
                     Player -> Player.sendMessage("\u00A73[Discord] \u00A77<" + event.getAuthor().getName() + "> "
                             + event.getMessage().getContentRaw()));
-
         }
     }
 }

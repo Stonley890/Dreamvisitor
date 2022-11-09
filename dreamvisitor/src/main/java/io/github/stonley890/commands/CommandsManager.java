@@ -33,6 +33,7 @@ public class CommandsManager extends ListenerAdapter {
     private static Role memberRole;
     private static Role step3role;
 
+    // Get channels and roles from config
     public static void initChannelsRoles() {
         FileConfiguration config = App.getPlugin().getConfig();
         gameChatChannel = Bot.getJDA().getTextChannelById(config.getString("chatChannelID"));
@@ -88,7 +89,7 @@ public class CommandsManager extends ListenerAdapter {
             }
         } else if (command.equals("list")) {
             Bukkit.getLogger().info("List command requested");
-            
+            // Compile players to list unless no players online
             if (event.getChannel() == gameChatChannel) {
                 StringBuilder online = new StringBuilder();
                 if (Bukkit.getServer().getOnlinePlayers().size() > 0) {
@@ -130,7 +131,7 @@ public class CommandsManager extends ListenerAdapter {
                         
                     }.runTask(App.getPlugin());
                     
-                    event.reply("**" + member + " was successfully banned for " + hours + " hours.**").queue();
+                    event.reply("**`" + member + "` was successfully banned for " + hours + " hours. Reason:** " + reason).queue();
                 } else {
                     event.reply("**Player is offline!**").setEphemeral(true).queue();
                 }
@@ -184,6 +185,7 @@ public class CommandsManager extends ListenerAdapter {
             return "none";
     }
 
+    // Register commands on ready
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
         List<CommandData> commandData = new ArrayList<>();
@@ -201,7 +203,7 @@ public class CommandsManager extends ListenerAdapter {
         
         commandData.add(Commands.slash("list", "List online players."));
 
-        OptionData tempbanOption1 = new OptionData(OptionType.STRING, "username", "The Minecraft member to tempban.", true);
+        OptionData tempbanOption1 = new OptionData(OptionType.STRING, "username", "The Minecraft user to tempban.", true);
         OptionData tempbanOption2 = new OptionData(OptionType.INTEGER, "hours", "The number of hours to enforce the tempban.", true);
         OptionData tempbanOption3 = new OptionData(OptionType.STRING, "reason", "Reason for tempban.", true);
         commandData.add(Commands.slash("tempban", "Tempban a player from the Minecraft server.").addOptions(tempbanOption1, tempbanOption2, tempbanOption3));

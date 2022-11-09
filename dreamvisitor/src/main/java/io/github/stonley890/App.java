@@ -29,6 +29,7 @@ public class App extends JavaPlugin implements Listener {
 
         plugin = this;
 
+        // Start message & register events
         getLogger()
                 .info("Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
         getServer().getPluginManager().registerEvents(this, this);
@@ -44,17 +45,19 @@ public class App extends JavaPlugin implements Listener {
             Bukkit.getLogger().warning("ERROR: Bot login failed! Get new bot token and add it to the config!");
             e.printStackTrace();
         }
+
         // Wait for bot ready
         try {
             Bot.getJDA().awaitReady();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         // Send server start message in log channel
         Bot.getJDA().getGuilds()
                 .forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been started.").queue());
 
-        // Get channels
+        // Get saved channels and roles
         CommandsManager.initChannelsRoles();
 
         // If chat was previously paused, restore and notify in console
@@ -145,6 +148,7 @@ public class App extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        // Shutdown messages
         getLogger().info("Closing bot instance.");
         Bot.getJDA().getGuilds()
                 .forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been shutdown.").queue());
