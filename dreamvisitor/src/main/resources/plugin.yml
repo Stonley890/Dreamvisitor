@@ -1,12 +1,19 @@
 main: io.github.stonley890.App
 name: Dreamvisitor
-version: 1.0
-api-version: 1.18
+version: 1.1-prerelease
+api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
 
 commands:
   pausechat:
-    description: Pauses chat for non-ops.
+    description: Pauses chat for non-OPs.
     usage: /<command> 
     permission: minecraft.command.op
+  radio:
+    description: Sends a message to all OPs.
+    usage: /<command> <message>
+    permission: minecraft.command.op
+  discord:
+    description: Toggles Discord message visibility.
+    usage: /<command>

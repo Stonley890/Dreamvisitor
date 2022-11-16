@@ -1,11 +1,17 @@
 package io.github.stonley890;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.security.auth.login.LoginException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -13,8 +19,11 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.yaml.snakeyaml.Yaml;
 
 import io.github.stonley890.commands.CommandsManager;
+import io.github.stonley890.data.PlayerMemory;
+import io.github.stonley890.data.PlayerUtility;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -23,6 +32,7 @@ public class App extends JavaPlugin implements Listener {
 
     private static App plugin;
     private static boolean chatPaused;
+    private static boolean botFailed = false;
 
     @Override
     public void onEnable() {
@@ -43,7 +53,7 @@ public class App extends JavaPlugin implements Listener {
             new Bot();
         } catch (LoginException e) {
             Bukkit.getLogger().warning("ERROR: Bot login failed! Get new bot token and add it to the config!");
-            e.printStackTrace();
+            botFailed = true;
         }
 
         // Wait for bot ready
@@ -71,11 +81,14 @@ public class App extends JavaPlugin implements Listener {
         return plugin;
     }
 
+    public static String getPlayerPath(Player player) {
+        return plugin.getDataFolder().getAbsolutePath() + "/player/" + player.getUniqueId() + ".yml";
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // pausechat command
         if (label.equalsIgnoreCase("pausechat")) {
-            //Role memberRole = Bot.getJDA().getRoleById(CommandsManager.getMemberRole());
             TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
             // If chat is paused, unpause. If not, pause
             if (chatPaused == true) {
@@ -95,6 +108,16 @@ public class App extends JavaPlugin implements Listener {
             }
             saveConfig();
 
+        } else if (label.equalsIgnoreCase("radio")) {
+            if (sender instanceof Player) {
+
+            } else if (sender instanceof Console) {
+
+            }
+        } else if (label.equalsIgnoreCase("discord")) {
+            if (sender instanceof Player) {
+
+            }
         }
         return true;
     }
@@ -124,6 +147,11 @@ public class App extends JavaPlugin implements Listener {
         if (channelId != "none") {
             io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
         }
+        // Remind bot login failure
+        if (botFailed && event.getPlayer().isOp()) {
+            event.getPlayer().sendMessage(
+                    "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
+        }
     }
 
     @EventHandler
@@ -134,6 +162,7 @@ public class App extends JavaPlugin implements Listener {
         if (channelId != "none") {
             io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
         }
+        PlayerUtility.setPlayerMemory(event.getPlayer(), null);
     }
 
     @EventHandler
