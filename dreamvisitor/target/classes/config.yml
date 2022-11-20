@@ -1,4 +1,4 @@
-# The bot token. Get from Bog if needed. DO NOT SHARE THIS
+# The bot token. DO NOT SHARE THIS
 bot-token: BOT_TOKEN
 
 # The channel ID of the game chat

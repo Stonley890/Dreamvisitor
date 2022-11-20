@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -111,7 +112,7 @@ public class App extends JavaPlugin implements Listener {
         } else if (label.equalsIgnoreCase("radio")) {
             if (sender instanceof Player) {
 
-            } else if (sender instanceof Console) {
+            } else if (sender instanceof ConsoleCommandSender) {
 
             }
         } else if (label.equalsIgnoreCase("discord")) {

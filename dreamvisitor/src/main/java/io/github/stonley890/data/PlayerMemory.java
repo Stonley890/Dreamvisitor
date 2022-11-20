@@ -7,7 +7,7 @@ public class PlayerMemory {
         discordToggled = state;
     }
 
-    public String isDiscordToggled() {
+    public boolean isDiscordToggled() {
         return discordToggled;
     }
 }
