@@ -26,7 +26,6 @@ import io.github.stonley890.commands.CommandsManager;
 import io.github.stonley890.data.PlayerMemory;
 import io.github.stonley890.data.PlayerUtility;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class App extends JavaPlugin implements Listener {

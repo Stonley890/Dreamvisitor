@@ -20,7 +20,7 @@ public class EventListener extends ListenerAdapter {
 
         User user = event.getAuthor();
         String channelId = event.getChannel().getId();
-        String username = event.getMessage().getContentStripped();
+        String username = event.getMessage().getContentRaw();
         String chatChannel = CommandsManager.getChatChannel();
         String whitelistChannel = CommandsManager.getWhitelistChannel();
         String memberRole = CommandsManager.getMemberRole();
@@ -42,13 +42,14 @@ public class EventListener extends ListenerAdapter {
                 // If player is not whitelisted, add them and change roles
                 if (player.isWhitelisted() == false) {
                     Bukkit.getLogger().info("[Dreamvisitor] Whitelisting " + username + ".");
+                    event.getGuild().getSystemChannel().sendMessage("Whitelisted `" + username + "` from user " + event.getAuthor().getAsMention()).queue();
                     player.setWhitelisted(true);
                     // Change roles if assigned
                     if (memberRole != "none") {
                         try {
                             event.getGuild().addRoleToMember(event.getAuthor(),
                                     event.getGuild().getRoleById(memberRole)).queue();
-                            event.getGuild().addRoleToMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
+                            event.getGuild().removeRoleFromMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
                                     .queue();
                         } catch (HierarchyException exception) {
                             event.getChannel().sendMessage("**An error has occured! Staff have been notified.**").queue();
