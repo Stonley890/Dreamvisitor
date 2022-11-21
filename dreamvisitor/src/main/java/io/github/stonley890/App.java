@@ -1,7 +1,6 @@
 package io.github.stonley890;
 
 import java.io.File;
-import java.io.IOException;
 
 import javax.security.auth.login.LoginException;
 
@@ -20,7 +19,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.yaml.snakeyaml.Yaml;
 
 import io.github.stonley890.commands.CommandsManager;
 import io.github.stonley890.data.PlayerMemory;
@@ -73,7 +71,8 @@ public class App extends JavaPlugin implements Listener {
         // If chat was previously paused, restore and notify in console
         if (getConfig().getBoolean("chatPaused")) {
             chatPaused = true;
-            Bukkit.getServer().getLogger().info("[Dreamvisitor] Chat is currently paused! Use /pausechat to allow users to chat.");
+            Bukkit.getServer().getLogger()
+                    .info("[Dreamvisitor] Chat is currently paused! Use /pausechat to allow users to chat.");
         }
     }
 
@@ -96,7 +95,8 @@ public class App extends JavaPlugin implements Listener {
                 getConfig().set("chatPaused", false);
                 Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been unpaused.");
                 if (chatChannel != null) {
-                    chatChannel.sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft**").queue();
+                    chatChannel.sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft**")
+                            .queue();
                 }
             } else {
                 chatPaused = true;
@@ -108,14 +108,126 @@ public class App extends JavaPlugin implements Listener {
             }
             saveConfig();
 
+        } else if (label.equalsIgnoreCase("aradio")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (args.length > 0) {
+                    String message = "";
+                    for (int i = 0; i != args.length; i++) {
+                        message += args[i] + " ";
+                    }
+                    Bukkit.getLogger().info("[Admin Radio] <" + player.getName() + "> " + message);
+                    for (Player operator : Bukkit.getServer().getOnlinePlayers()) {
+                        if (operator.isOp()) {
+                            operator.sendMessage("\u00a73[Admin] \u00a7e<" + player.getName() + "> \u00a7r" + message);
+                        }
+                    }
+                }
+            } else if (sender instanceof ConsoleCommandSender) {
+                if (args.length > 0) {
+                    String message = "";
+                    for (int i = 0; i != args.length; i++) {
+                        message += args[i] + " ";
+                    }
+                    Bukkit.getLogger().info("[Admin Radio] <Console> " + message);
+                    for (Player operator : Bukkit.getServer().getOnlinePlayers()) {
+                        if (operator.isOp()) {
+                            operator.sendMessage("\u00a73[Admin] \u00a7e<\u00a7cConsole\u00a7e> \u00a7r" + message);
+                        }
+                    }
+                }
+            }
         } else if (label.equalsIgnoreCase("radio")) {
             if (sender instanceof Player) {
-
+                Player player = (Player) sender;
+                if (args.length > 0 && player.getScoreboardTags().contains("Staff")) {
+                    String message = "";
+                    for (int i = 0; i != args.length; i++) {
+                        message += args[i] + " ";
+                    }
+                    Bukkit.getLogger().info("[Staff Radio] <" + player.getName() + "> " + message);
+                    for (Player staff : Bukkit.getServer().getOnlinePlayers()) {
+                        if (staff.getScoreboardTags().contains("Staff")) {
+                            staff.sendMessage("\u00a73[Staff] \u00a7e<" + player.getName() + "> \u00a7r" + message);
+                        }
+                    }
+                }
             } else if (sender instanceof ConsoleCommandSender) {
-
+                if (args.length > 0) {
+                    String message = "";
+                    for (int i = 0; i != args.length; i++) {
+                        message += args[i] + " ";
+                    }
+                    Bukkit.getLogger().info("[Staff Radio] <Console> " + message);
+                    for (Player staff : Bukkit.getServer().getOnlinePlayers()) {
+                        if (staff.getScoreboardTags().contains("Staff")) {
+                            staff.sendMessage("\u00a73[Staff] \u00a7e<\u00a7cConsole\u00a7e> \u00a7r" + message);
+                        }
+                    }
+                }
             }
         } else if (label.equalsIgnoreCase("discord")) {
             if (sender instanceof Player) {
+                Player player = (Player) sender;
+                PlayerMemory memory = new PlayerMemory();
+                try {
+                    // Init file config
+                    File file = new File(getPlayerPath(player));
+                    FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                    memory.setDiscordToggled(fileConfig.getBoolean("discordToggled"));
+
+                    // Change data
+                    if (memory.isDiscordToggled()) {
+                        memory.setDiscordToggled(false);
+                    } else {
+                        memory.setDiscordToggled(true);
+                    }
+
+                    // Save data
+                    fileConfig.set("discordToggled", memory.isDiscordToggled());
+                    fileConfig.save(file);
+
+                    player.sendMessage("\u00a79Discord visibility toggled to " + memory.isDiscordToggled() + ".");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        } else if (label.equalsIgnoreCase("zoop")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                PlayerMemory memory = new PlayerMemory();
+                try {
+                    // Init file config
+                    File file = new File(getPlayerPath(player));
+                    FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                    memory.setVanished(fileConfig.getBoolean("vanished"));
+
+                    // Change data
+                    if (memory.isVanished()) {
+                        memory.setVanished(false);
+                        String chatMessage = "**" + player.getName() + " joined the game**";
+                        String channelId = CommandsManager.getChatChannel();
+                        if (channelId != "none") {
+                            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+                        }
+                    } else {
+                        memory.setVanished(true);
+                        String chatMessage = "**" + player.getName() + " left the game**";
+                        String channelId = CommandsManager.getChatChannel();
+                        if (channelId != "none") {
+                            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+                        }
+                    }
+
+                    // Save data
+                    fileConfig.set("vanished", memory.isVanished());
+                    fileConfig.save(file);
+
+                    player.sendMessage("\u00a79Discord vanished toggled to " + memory.isVanished() + ".");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
             }
         }
@@ -125,7 +237,8 @@ public class App extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
         // Send chat messages to Discord
-        // IF chat is not paused AND the player is not an operator OR the player is an operator, send message
+        // IF chat is not paused AND the player is not an operator OR the player is an
+        // operator, send message
         if (chatPaused != true && event.getPlayer().isOp() == false || event.getPlayer().isOp() == true) {
             String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
             String channelId = CommandsManager.getChatChannel();

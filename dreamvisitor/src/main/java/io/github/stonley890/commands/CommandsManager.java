@@ -1,19 +1,27 @@
 package io.github.stonley890.commands;
 
+import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import com.google.common.collect.ImmutableList;
+
 import io.github.stonley890.App;
 import io.github.stonley890.Bot;
+import io.github.stonley890.data.PlayerMemory;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Role;
@@ -88,21 +96,38 @@ public class CommandsManager extends ListenerAdapter {
                 event.reply(noPermissionError).setEphemeral(true).queue();
             }
         } else if (command.equals("list")) {
-            Bukkit.getLogger().info("List command requested");
             // Compile players to list unless no players online
             if (event.getChannel() == gameChatChannel) {
-                StringBuilder online = new StringBuilder();
+                StringBuilder list = new StringBuilder();
                 if (Bukkit.getServer().getOnlinePlayers().size() > 0) {
                     Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
+                    PlayerMemory memory = new PlayerMemory();
+                    List<Player> countedPlayers = new ArrayList<Player>();
+                    
                     for (Player player : players) {
-                        if (online.length() > 0) {
-                            online.append("`, `");
+
+                        File file = new File(App.getPlayerPath(player));
+                        FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                        memory.setVanished(fileConfig.getBoolean("vanished"));
+                        
+                        if (memory.isVanished() == false) {
+                            countedPlayers.add(player);
                         }
-                        online.append(player.getName());
                     }
 
+                    if (countedPlayers.isEmpty()) {
+                        event.reply("**There are no players online.**").queue();
+                    } else {
+                        for (Player player : countedPlayers) {
+                            if (list.length() > 0) {
+                                list.append("`, `");
+                            }
+                            list.append(player.getName());
+                        }
+                        event.reply("**There are " + players.size() + " player(s) online:** `" + list.toString() + "`").queue();
+                    }
 
-                    event.reply("**There are " + players.size() + " player(s) online:** `" + online.toString() + "`").queue();
+                    
                 } else {
                     event.reply("**There are no players online.**").queue();
                 }
@@ -191,26 +216,30 @@ public class CommandsManager extends ListenerAdapter {
         List<CommandData> commandData = new ArrayList<>();
         commandData.add(Commands.slash("setgamechat", "Set the channel that game chat occurs in.")
                 .addOption(OptionType.CHANNEL, "channel", "The channel to set.", true, false));
-        
+
         commandData.add(Commands.slash("setwhitelist", "Set the channel that whitelists players.")
                 .addOption(OptionType.CHANNEL, "channel", "The channel to set.", true, false));
-        
+
         commandData.add(Commands.slash("setmemberrole", "Set the member role.").addOption(OptionType.ROLE, "role",
                 "The role to set.", true, false));
-        
+
         commandData.add(Commands.slash("setstep3role", "Set the Step 3 role.").addOption(OptionType.ROLE, "role",
                 "The role to set.", true, false));
-        
+
         commandData.add(Commands.slash("list", "List online players."));
 
-        OptionData tempbanOption1 = new OptionData(OptionType.STRING, "username", "The Minecraft user to tempban.", true);
-        OptionData tempbanOption2 = new OptionData(OptionType.INTEGER, "hours", "The number of hours to enforce the tempban.", true);
+        OptionData tempbanOption1 = new OptionData(OptionType.STRING, "username", "The Minecraft user to tempban.",
+                true);
+        OptionData tempbanOption2 = new OptionData(OptionType.INTEGER, "hours",
+                "The number of hours to enforce the tempban.", true);
         OptionData tempbanOption3 = new OptionData(OptionType.STRING, "reason", "Reason for tempban.", true);
-        commandData.add(Commands.slash("tempban", "Tempban a player from the Minecraft server.").addOptions(tempbanOption1, tempbanOption2, tempbanOption3));
+        commandData.add(Commands.slash("tempban", "Tempban a player from the Minecraft server.")
+                .addOptions(tempbanOption1, tempbanOption2, tempbanOption3));
 
         OptionData msgOption1 = new OptionData(OptionType.STRING, "username", "The user you want to message.", true);
         OptionData msgOption2 = new OptionData(OptionType.STRING, "message", "The message to send.", true);
-        commandData.add(Commands.slash("msg", "Message a player on the Minecraft server.").addOptions(msgOption1, msgOption2));
+        commandData.add(
+                Commands.slash("msg", "Message a player on the Minecraft server.").addOptions(msgOption1, msgOption2));
 
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }

@@ -21,12 +21,11 @@ A plugin created by Bog for WoF:TNW to add various features.
 ### Minecraft Commands
 #### Admin Commands
 - `/pausechat` - Pauses chat for non-OPs
-- `/adminmsg <player> <message>` - Message a player with the label 'Admin' as the sender.
-- `/setrole <player> <role>` - Set the royalty rank of a player.
-- `/getrole <player>` - Get the royalty rank of a player.
 - `/initchallenge <player|nearest>` - Initiate a royalty challenge.
 - `/radio` - Send a message to only OPs.
+- `/zoop` - Vanish from Discord
 #### User Commands
 - `/discord` - Toggle Discord message visibility.
+- `/radio` - Same as above but with all staff. Only works if sender has tag "Staff"
 ##
 This plugin is developed specifically for WoF:TNW. No builds will be provided as releases.

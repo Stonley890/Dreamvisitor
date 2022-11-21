@@ -1,13 +1,18 @@
 package io.github.stonley890.listeners;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.shanerx.mojang.Mojang;
 
 import io.github.stonley890.App;
 import io.github.stonley890.commands.CommandsManager;
+import io.github.stonley890.data.PlayerMemory;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -78,9 +83,22 @@ public class EventListener extends ListenerAdapter {
 
         // If in chat channel and chat is not paused, send to Minecraft
         if (channelId.equals(chatChannel) && user.isBot() == false && App.getPlugin().getConfig().getBoolean("chatPaused") == false) {
-            Bukkit.getServer().getOnlinePlayers().forEach(
-                    Player -> Player.sendMessage("\u00A73[Discord] \u00A77<" + event.getAuthor().getName() + "> "
-                            + event.getMessage().getContentRaw()));
+            for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+                PlayerMemory memory = new PlayerMemory();
+                try {
+                    //Init file config
+                    File file = new File(App.getPlayerPath(player));
+                    FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                    memory.setDiscordToggled(fileConfig.getBoolean("discordToggled"));
+
+                    if (memory.isDiscordToggled()) {
+                        player.sendMessage("\u00A79[Discord] \u00A77<" + event.getAuthor().getName() + "> " + event.getMessage().getContentRaw());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
 }
