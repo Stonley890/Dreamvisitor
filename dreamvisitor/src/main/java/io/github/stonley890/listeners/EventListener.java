@@ -63,10 +63,20 @@ public class EventListener extends ListenerAdapter {
                     }
                     // Reply with success
                     event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
+                    event.getChannel().sendMessage("`" + username + "` has been whitelisted!").queue();
                 } else if (player.isWhitelisted() == true) {
                     // If user is already whitelisted, send error.
                     event.getMessage().addReaction(Emoji.fromFormatted("❗")).queue();
                     event.getChannel().sendMessage("`" + username + "` is already whitelisted!").queue();
+                    try {
+                        event.getGuild().addRoleToMember(event.getAuthor(),
+                                event.getGuild().getRoleById(memberRole)).queue();
+                        event.getGuild().removeRoleFromMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
+                                .queue();
+                    } catch (HierarchyException exception) {
+                        event.getChannel().sendMessage("**An error has occured! Staff have been notified.**").queue();
+                        event.getGuild().getSystemChannel().sendMessage("There was an error: " + exception).queue();
+                    }
                 }
             } catch (Exception e) {
                 // username does not exist alert
