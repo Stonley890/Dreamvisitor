@@ -80,7 +80,7 @@ public class EventListener extends ListenerAdapter {
                 }
             } catch (Exception e) {
                 // username does not exist alert
-                event.getChannel().sendMessage("`" + username + "` could not be found!").queue();
+                event.getChannel().sendMessage("`" + username + "` could not be found!\nDon't have a Minecraft: Java Edition account? Check pins to get the member role.").queue();
                 event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
             }
             

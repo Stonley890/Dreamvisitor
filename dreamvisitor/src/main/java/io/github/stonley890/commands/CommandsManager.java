@@ -1,14 +1,10 @@
 package io.github.stonley890.commands;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.function.IntFunction;
-import java.util.function.Predicate;
-
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -16,8 +12,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-
-import com.google.common.collect.ImmutableList;
 
 import io.github.stonley890.App;
 import io.github.stonley890.Bot;
@@ -103,13 +97,13 @@ public class CommandsManager extends ListenerAdapter {
                     Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
                     PlayerMemory memory = new PlayerMemory();
                     List<Player> countedPlayers = new ArrayList<Player>();
-                    
+
                     for (Player player : players) {
 
                         File file = new File(App.getPlayerPath(player));
                         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
                         memory.setVanished(fileConfig.getBoolean("vanished"));
-                        
+
                         if (memory.isVanished() == false) {
                             countedPlayers.add(player);
                         }
@@ -124,16 +118,17 @@ public class CommandsManager extends ListenerAdapter {
                             }
                             list.append(player.getName());
                         }
-                        event.reply("**There are " + players.size() + " player(s) online:** `" + list.toString() + "`").queue();
+                        event.reply("**There are " + players.size() + " player(s) online:** `" + list.toString() + "`")
+                                .queue();
                     }
 
-                    
                 } else {
                     event.reply("**There are no players online.**").queue();
                 }
-                
+
             } else {
-                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true).queue();
+                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true)
+                        .queue();
             }
         } else if (command.equals("tempban")) {
             // Chech for ADMIN permission
@@ -144,24 +139,26 @@ public class CommandsManager extends ListenerAdapter {
                 String reason = event.getOption("reason", OptionMapping::getAsString);
                 // Add ban if player is online
                 if (Bukkit.getServer().getPlayer(member) != null) {
-                    Date date = new Date(System.currentTimeMillis() + 60*60*1000*hours);
+                    Date date = new Date(System.currentTimeMillis() + 60 * 60 * 1000 * hours);
                     Bukkit.getServer().getBanList(BanList.Type.NAME).addBan(member, reason, date, null);
                     new BukkitRunnable() {
 
                         @Override
                         public void run() {
                             Bukkit.getServer().getPlayer(member).kickPlayer(reason);
-                            
+
                         }
-                        
+
                     }.runTask(App.getPlugin());
-                    
-                    event.reply("**`" + member + "` was successfully banned for " + hours + " hours. Reason:** " + reason).queue();
+
+                    event.reply(
+                            "**`" + member + "` was successfully banned for " + hours + " hours. Reason:** " + reason)
+                            .queue();
                 } else {
                     event.reply("**Player is offline!**").setEphemeral(true).queue();
                 }
             }
-        // msg command 
+            // msg command
         } else if (command.equals("msg")) {
             String username = event.getOption("username", OptionMapping::getAsString);
             String msg = event.getOption("message", OptionMapping::getAsString);
@@ -169,14 +166,19 @@ public class CommandsManager extends ListenerAdapter {
             if (event.getChannel() == gameChatChannel) {
                 // Check for player online
                 if (Bukkit.getServer().getPlayer(username) != null) {
-                    Bukkit.getServer().getPlayer(username).sendMessage("\u00A77[\u00A73" + event.getUser().getName() + "\u00A77 -> \u00A73me\u00A77] \u00A7r" + msg);
-                    event.getGuild().getSystemChannel().sendMessage("Message from " + event.getUser().getAsMention() + " to `" + username + "`: " + msg).queue();
+                    Bukkit.getServer().getPlayer(username).sendMessage("\u00A77[\u00A73" + event.getUser().getName()
+                            + "\u00A77 -> \u00A73me\u00A77] \u00A7r" + msg);
+                    event.getGuild().getSystemChannel()
+                            .sendMessage(
+                                    "Message from " + event.getUser().getAsMention() + " to `" + username + "`: " + msg)
+                            .queue();
                     event.reply("Message sent!").setEphemeral(true).queue();
                 } else {
                     event.reply("`" + username + "` is not online!").setEphemeral(true).queue();
                 }
             } else {
-                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true).queue();
+                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true)
+                        .queue();
             }
         }
         App.getPlugin().saveConfig();
