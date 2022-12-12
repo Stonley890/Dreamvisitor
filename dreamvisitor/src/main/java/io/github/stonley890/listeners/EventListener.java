@@ -102,7 +102,15 @@ public class EventListener extends ListenerAdapter {
                     memory.setDiscordToggled(fileConfig.getBoolean("discordToggled"));
 
                     if (memory.isDiscordToggled()) {
-                        player.sendMessage("\u00A79[Discord] \u00A77<" + event.getAuthor().getName() + "> " + event.getMessage().getContentRaw());
+                        String discName = event.getAuthor().getName();
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < discName.length(); i++) {
+                            char c = discName.charAt(i);
+                            if (c == '_')
+                                sb.append("\\");
+                            sb.append(c);
+                        }
+                        player.sendMessage("\u00A79[Discord] \u00A77<" + sb.toString() + "> " + event.getMessage().getContentRaw());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

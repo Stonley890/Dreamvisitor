@@ -22,6 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -89,6 +90,23 @@ public class App extends JavaPlugin implements Listener {
 
     public static String getPlayerPath(Player player) {
         return plugin.getDataFolder().getAbsolutePath() + "/player/" + player.getUniqueId() + ".yml";
+    }
+
+    @EventHandler
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        String cmd = event.getMessage();
+        Player ply = event.getPlayer();
+        if (event.getMessage().startsWith("/me"))
+        {
+            if (chatPaused && ply.isOp() == false) {
+                event.setCancelled(true);
+                ply.sendMessage(ChatColor.RED + "Chat is currently paused.");
+            } else {
+                TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
+                String action = cmd.replaceFirst("/me ", "");
+                chatChannel.sendMessage("**[" + ChatColor.stripColor(ply.getDisplayName()) + " **(" + ply.getName() + ")**]** " + action).queue();
+            }
+        }
     }
 
     @Override
