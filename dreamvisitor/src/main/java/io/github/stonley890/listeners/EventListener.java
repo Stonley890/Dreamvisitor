@@ -80,14 +80,14 @@ public class EventListener extends ListenerAdapter {
                 }
             } catch (Exception e) {
                 // username does not exist alert
-                event.getChannel().sendMessage("`" + username + "` could not be found!\nDon't have a Minecraft: Java Edition account? Check pins to get the member role.").queue();
+                event.getChannel().sendMessage("`" + username + "` could not be found!\n*Don't have a Minecraft: Java Edition account? Check pins to get the member role.*").queue();
                 event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
             }
             
 
         } else if (channelId.equals(whitelistChannel) && user.isBot() == false) {
             // illegal username
-            event.getChannel().sendMessage("`" + username + "` contains illegal characters!").queue();
+            event.getChannel().sendMessage("`" + username + "` contains illegal characters!\n*Don't have a Minecraft: Java Edition account? Check pins to get the member role.*").queue();
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
         }
 
@@ -110,7 +110,7 @@ public class EventListener extends ListenerAdapter {
                                 sb.append("\\");
                             sb.append(c);
                         }
-                        player.sendMessage("\u00A79[Discord] \u00A77<" + sb.toString() + "> " + event.getMessage().getContentRaw());
+                        player.sendMessage(ChatColor.INDIGO + "[Discord] " + ChatColor.GRAY + "<" + sb.toString() + "> " + event.getMessage().getContentRaw());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

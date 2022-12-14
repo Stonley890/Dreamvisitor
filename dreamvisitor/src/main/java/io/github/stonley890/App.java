@@ -66,6 +66,7 @@ public class App extends JavaPlugin implements Listener {
         try {
             Bot.getJDA().awaitReady();
         } catch (InterruptedException e) {
+            Bukkit.getLogger().warning("ERROR: Unable to await bot ready.")
             e.printStackTrace();
         }
 
@@ -80,7 +81,7 @@ public class App extends JavaPlugin implements Listener {
         if (getConfig().getBoolean("chatPaused")) {
             chatPaused = true;
             Bukkit.getServer().getLogger()
-                    .info("[Dreamvisitor] Chat is currently paused! Use /pausechat to allow users to chat.");
+                    .info("[Dreamvisitor] Chat is currently paused from last session! Use /pausechat to allow users to chat.");
         }
     }
 
@@ -96,15 +97,14 @@ public class App extends JavaPlugin implements Listener {
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         String cmd = event.getMessage();
         Player ply = event.getPlayer();
-        if (event.getMessage().startsWith("/me"))
-        {
+        if (event.getMessage().startsWith("/me")) {
             if (chatPaused && ply.isOp() == false) {
                 event.setCancelled(true);
                 ply.sendMessage(ChatColor.RED + "Chat is currently paused.");
             } else {
                 TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
                 String action = cmd.replaceFirst("/me ", "");
-                chatChannel.sendMessage("**[" + ChatColor.stripColor(ply.getDisplayName()) + " **(" + ply.getName() + ")**]** " + action).queue();
+                chatChannel.sendMessage("**[" + ChatColor.stripColor(ply.getDisplayName()) + " **(" + ply.getName() + ")**]** " + ChatColor.stripColor(action)).queue();
             }
         }
     }
@@ -141,10 +141,10 @@ public class App extends JavaPlugin implements Listener {
                     for (int i = 0; i != args.length; i++) {
                         message += args[i] + " ";
                     }
-                    Bukkit.getLogger().info("[Admin Radio] <" + player.getName() + "> " + message);
+                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Admin Radio] " + ChatColor.YELLOW + "<" + player.getName() + "> " + ChatColor.WHITE  + message);
                     for (Player operator : Bukkit.getServer().getOnlinePlayers()) {
                         if (operator.isOp()) {
-                            operator.sendMessage("\u00a73[Admin] \u00a7e<" + player.getName() + "> \u00a7r" + message);
+                            operator.sendMessage(ChatColor.DARK_AQUA + "[Admin] " + ChatColor.YELLOW + "<" + player.getName() + "> " + ChatColor.WHITE + message);
                         }
                     }
                 }
@@ -154,10 +154,10 @@ public class App extends JavaPlugin implements Listener {
                     for (int i = 0; i != args.length; i++) {
                         message += args[i] + " ";
                     }
-                    Bukkit.getLogger().info("[Admin Radio] <Console> " + message);
+                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Admin Radio] " + ChatColor.YELLOW + "<"  + ChatColor.RED + "Console" + ChatColor.YELLOW + "> " + ChatColor.WHITE + message);
                     for (Player operator : Bukkit.getServer().getOnlinePlayers()) {
                         if (operator.isOp()) {
-                            operator.sendMessage("\u00a73[Admin] \u00a7e<\u00a7cConsole\u00a7e> \u00a7r" + message);
+                            operator.sendMessage(ChatColor.DARK_AQUA + "[Admin] " + ChatColor.YELLOW + "<" + ChatColor.RED + "Console" + ChatColor.YELLOW + ">" + ChatColor.WHITE + message);
                         }
                     }
                 }
@@ -170,10 +170,10 @@ public class App extends JavaPlugin implements Listener {
                     for (int i = 0; i != args.length; i++) {
                         message += args[i] + " ";
                     }
-                    Bukkit.getLogger().info("[Staff Radio] <" + player.getName() + "> " + message);
+                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Staff Radio] " + ChatColor.YELLOW + "<" + player.getName() + "> " + ChatColor.WHITE + message);
                     for (Player staff : Bukkit.getServer().getOnlinePlayers()) {
                         if (staff.getScoreboardTags().contains("Staff")) {
-                            staff.sendMessage("\u00a73[Staff] \u00a7e<" + player.getName() + "> \u00a7r" + message);
+                            staff.sendMessage(ChatColor.DARK_AQUA + "[Staff] " + ChatColor.YELLOW + "<" + player.getName() + "> " + ChatColor.WHITE + message);
                         }
                     }
                 }
@@ -183,10 +183,10 @@ public class App extends JavaPlugin implements Listener {
                     for (int i = 0; i != args.length; i++) {
                         message += args[i] + " ";
                     }
-                    Bukkit.getLogger().info("[Staff Radio] <Console> " + message);
+                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Staff Radio] " + ChatColor.YELLOW + "<" + ChatColor.YELLOW + "Console> " + message);
                     for (Player staff : Bukkit.getServer().getOnlinePlayers()) {
                         if (staff.getScoreboardTags().contains("Staff")) {
-                            staff.sendMessage("\u00a73[Staff] \u00a7e<\u00a7cConsole\u00a7e> \u00a7r" + message);
+                            staff.sendMessage(ChatColor.DARK_AQUA + "[Staff] " + ChatColor.YELLOW + "<" + ChatColor.RED + "Console" + ChatColor.YELLOW + "> " + ChatColor.WHITE + message);
                         }
                     }
                 }
@@ -212,8 +212,10 @@ public class App extends JavaPlugin implements Listener {
                     fileConfig.set("discordToggled", memory.isDiscordToggled());
                     fileConfig.save(file);
 
-                    player.sendMessage("\u00a79Discord visibility toggled to " + memory.isDiscordToggled() + ".");
+                    player.sendMessage(ChatColor.DARK_AQUA + "Discord visibility toggled to " + memory.isDiscordToggled() + ".");
                 } catch (Exception e) {
+                    Bukkit.getLogger().warning("ERROR: Unable to access player memory!");
+                    player.sendMessage(ChatColor.RED + "There was a problem accessing player memory. Check logs for stacktrace.");
                     e.printStackTrace();
                 }
 
@@ -259,11 +261,14 @@ public class App extends JavaPlugin implements Listener {
             }
         } else if (label.equalsIgnoreCase("softwhitelist")) {
 
+            // Load softWhitelist.yml
             File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
 
+            //Init saved players
             List<String> whitelistedPlayers = new ArrayList<>(100);
 
+            // If file does not exist, create one
             if (file.exists() == false) {
                 try {
                     file.createNewFile();
@@ -273,6 +278,7 @@ public class App extends JavaPlugin implements Listener {
                 }
             }
 
+            // If file is empty, add a player to initialize
             if (fileConfig.get("players") == null) {
                 Mojang mojang = new Mojang();
                 mojang.connect();
@@ -351,10 +357,12 @@ public class App extends JavaPlugin implements Listener {
                     sender.sendMessage(ChatColor.GOLD + "Players soft-whitelisted: " + list.toString());
 
                 } else if (args[0].equalsIgnoreCase("on")) {
+                    // Set config
                     getConfig().set("softwhitelist", true);
                     saveConfig();
                     sender.sendMessage(ChatColor.GOLD + "Soft whitelist enabled.");
                 } else if (args[0].equalsIgnoreCase("off")) {
+                    // Set config
                     getConfig().set("softwhitelist", false);
                     saveConfig();
                     sender.sendMessage(ChatColor.GOLD + "Soft whitelist disabled.");
@@ -400,6 +408,7 @@ public class App extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
+        // Check if soft whitelist is enabled
         if (getConfig().getBoolean("softwhitelist")) {
             File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
@@ -413,6 +422,7 @@ public class App extends JavaPlugin implements Listener {
 
             whitelistedPlayers = (List<String>) fileConfig.get("players");
 
+            // If player is on soft whitelist or is op, allow. If not, kick player.
             if (whitelistedPlayers.contains(event.getPlayer().getUniqueId().toString()) || event.getPlayer().isOp()) {
                 // Send player joins to Discord
                 String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
@@ -420,7 +430,7 @@ public class App extends JavaPlugin implements Listener {
                 if (channelId != "none") {
                     io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
                 }
-                // Remind bot login failure
+                // Remind bot login failure to ops
                 if (botFailed && event.getPlayer().isOp()) {
                     event.getPlayer().sendMessage(
                             "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
