@@ -12,6 +12,6 @@ memberRoleID: 848788549079793684
 
 # Don't change unless you know what you're doing!
 chatPaused: false
-
-# Soft whitelist
-softWhitelistedPlayers: null
+softwhitelist: false
+playerlimit: -1
+disablepvp: false

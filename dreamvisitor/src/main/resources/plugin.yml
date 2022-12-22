@@ -1,6 +1,6 @@
 main: io.github.stonley890.App
 name: Dreamvisitor
-version: 1.3
+version: 1.4
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -27,4 +27,16 @@ commands:
   softwhitelist:
     description: Add or remove a player to/from the soft whitelist.
     usage: /<command> <add|remove|list|on|off> <player>
+    permission: minecraft.command.op
+  playerlimit:
+    description: Override server player limit.
+    usage: /<command> <number of players (set -1 to disable)>
+    permission: minecraft.command.op
+  togglepvp:
+    description: Globally disable PvP.
+    usage: /<command>
+    permission: minecraft.command.op
+  pausebypass:
+    description: Let player bypass pause.
+    usage: /command
     permission: minecraft.command.op

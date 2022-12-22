@@ -110,7 +110,7 @@ public class EventListener extends ListenerAdapter {
                                 sb.append("\\");
                             sb.append(c);
                         }
-                        player.sendMessage(ChatColor.INDIGO + "[Discord] " + ChatColor.GRAY + "<" + sb.toString() + "> " + event.getMessage().getContentRaw());
+                        player.sendMessage(org.bukkit.ChatColor.BLUE + "[Discord] " + org.bukkit.ChatColor.GRAY + "<" + sb.toString() + "> " + event.getMessage().getContentRaw());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

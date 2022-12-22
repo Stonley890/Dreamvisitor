@@ -166,8 +166,8 @@ public class CommandsManager extends ListenerAdapter {
             if (event.getChannel() == gameChatChannel) {
                 // Check for player online
                 if (Bukkit.getServer().getPlayer(username) != null) {
-                    Bukkit.getServer().getPlayer(username).sendMessage(ChatColor.GRAY + "[" + ChatColor.DARK_AQUA + event.getUser().getName()
-                            + ChatColor.GRAY + " -> " + ChatColor.DARK_AQUA + "me" + ChatColor.GRAY + "] " + ChatColor.WHITE + msg);
+                    Bukkit.getServer().getPlayer(username).sendMessage(org.bukkit.ChatColor.GRAY + "[" + org.bukkit.ChatColor.DARK_AQUA + event.getUser().getName()
+                            + org.bukkit.ChatColor.GRAY + " -> " + org.bukkit.ChatColor.DARK_AQUA + "me" + org.bukkit.ChatColor.GRAY + "] " + org.bukkit.ChatColor.WHITE + msg);
                     event.getGuild().getSystemChannel()
                             .sendMessage(
                                     "**Message from " + event.getUser().getAsMention() + " to **`" + username + "`**:** " + msg)

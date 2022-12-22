@@ -17,14 +17,17 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.shanerx.mojang.Mojang;
 
@@ -39,6 +42,7 @@ public class App extends JavaPlugin implements Listener {
     private static App plugin;
     private static boolean chatPaused;
     private static boolean botFailed = false;
+    private static int playerlimit;
 
     @Override
     public void onEnable() {
@@ -66,7 +70,7 @@ public class App extends JavaPlugin implements Listener {
         try {
             Bot.getJDA().awaitReady();
         } catch (InterruptedException e) {
-            Bukkit.getLogger().warning("ERROR: Unable to await bot ready.")
+            Bukkit.getLogger().warning("ERROR: Unable to await bot ready.");
             e.printStackTrace();
         }
 
@@ -83,6 +87,9 @@ public class App extends JavaPlugin implements Listener {
             Bukkit.getServer().getLogger()
                     .info("[Dreamvisitor] Chat is currently paused from last session! Use /pausechat to allow users to chat.");
         }
+
+        // Restore player limit override
+        playerlimit = getConfig().getInt("playerlimit");
     }
 
     public static App getPlugin() {
@@ -98,13 +105,30 @@ public class App extends JavaPlugin implements Listener {
         String cmd = event.getMessage();
         Player ply = event.getPlayer();
         if (event.getMessage().startsWith("/me")) {
-            if (chatPaused && ply.isOp() == false) {
-                event.setCancelled(true);
-                ply.sendMessage(ChatColor.RED + "Chat is currently paused.");
-            } else {
-                TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
-                String action = cmd.replaceFirst("/me ", "");
-                chatChannel.sendMessage("**[" + ChatColor.stripColor(ply.getDisplayName()) + " **(" + ply.getName() + ")**]** " + ChatColor.stripColor(action)).queue();
+
+            if (chatPaused) {
+                File file = new File(getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
+                FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                List<String> bypassedPlayers = new ArrayList<>(100);
+
+                try {
+                    fileConfig.load(file);
+                } catch (IOException | InvalidConfigurationException e1) {
+                    e1.printStackTrace();
+                }
+
+                bypassedPlayers = (List<String>) fileConfig.get("players");
+
+                if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
+                        || event.getPlayer().isOp()) {
+                    TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
+                    String action = cmd.replaceFirst("/me ", "");
+                    chatChannel.sendMessage("**[" + ChatColor.stripColor(ply.getDisplayName()) + " **(" + ply.getName()
+                            + ")**]** " + ChatColor.stripColor(action)).queue();
+                } else {
+                    event.setCancelled(true);
+                    event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
+                }
             }
         }
     }
@@ -141,10 +165,12 @@ public class App extends JavaPlugin implements Listener {
                     for (int i = 0; i != args.length; i++) {
                         message += args[i] + " ";
                     }
-                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Admin Radio] " + ChatColor.YELLOW + "<" + player.getName() + "> " + ChatColor.WHITE  + message);
+                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Admin Radio] " + ChatColor.YELLOW + "<"
+                            + player.getName() + "> " + ChatColor.WHITE + message);
                     for (Player operator : Bukkit.getServer().getOnlinePlayers()) {
                         if (operator.isOp()) {
-                            operator.sendMessage(ChatColor.DARK_AQUA + "[Admin] " + ChatColor.YELLOW + "<" + player.getName() + "> " + ChatColor.WHITE + message);
+                            operator.sendMessage(ChatColor.DARK_AQUA + "[Admin] " + ChatColor.YELLOW + "<"
+                                    + player.getName() + "> " + ChatColor.WHITE + message);
                         }
                     }
                 }
@@ -154,10 +180,12 @@ public class App extends JavaPlugin implements Listener {
                     for (int i = 0; i != args.length; i++) {
                         message += args[i] + " ";
                     }
-                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Admin Radio] " + ChatColor.YELLOW + "<"  + ChatColor.RED + "Console" + ChatColor.YELLOW + "> " + ChatColor.WHITE + message);
+                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Admin Radio] " + ChatColor.YELLOW + "<"
+                            + ChatColor.RED + "Console" + ChatColor.YELLOW + "> " + ChatColor.WHITE + message);
                     for (Player operator : Bukkit.getServer().getOnlinePlayers()) {
                         if (operator.isOp()) {
-                            operator.sendMessage(ChatColor.DARK_AQUA + "[Admin] " + ChatColor.YELLOW + "<" + ChatColor.RED + "Console" + ChatColor.YELLOW + ">" + ChatColor.WHITE + message);
+                            operator.sendMessage(ChatColor.DARK_AQUA + "[Admin] " + ChatColor.YELLOW + "<"
+                                    + ChatColor.RED + "Console" + ChatColor.YELLOW + ">" + ChatColor.WHITE + message);
                         }
                     }
                 }
@@ -170,10 +198,12 @@ public class App extends JavaPlugin implements Listener {
                     for (int i = 0; i != args.length; i++) {
                         message += args[i] + " ";
                     }
-                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Staff Radio] " + ChatColor.YELLOW + "<" + player.getName() + "> " + ChatColor.WHITE + message);
+                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Staff Radio] " + ChatColor.YELLOW + "<"
+                            + player.getName() + "> " + ChatColor.WHITE + message);
                     for (Player staff : Bukkit.getServer().getOnlinePlayers()) {
                         if (staff.getScoreboardTags().contains("Staff")) {
-                            staff.sendMessage(ChatColor.DARK_AQUA + "[Staff] " + ChatColor.YELLOW + "<" + player.getName() + "> " + ChatColor.WHITE + message);
+                            staff.sendMessage(ChatColor.DARK_AQUA + "[Staff] " + ChatColor.YELLOW + "<"
+                                    + player.getName() + "> " + ChatColor.WHITE + message);
                         }
                     }
                 }
@@ -183,10 +213,12 @@ public class App extends JavaPlugin implements Listener {
                     for (int i = 0; i != args.length; i++) {
                         message += args[i] + " ";
                     }
-                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Staff Radio] " + ChatColor.YELLOW + "<" + ChatColor.YELLOW + "Console> " + message);
+                    Bukkit.getLogger().info(ChatColor.DARK_AQUA + "[Staff Radio] " + ChatColor.YELLOW + "<"
+                            + ChatColor.YELLOW + "Console> " + message);
                     for (Player staff : Bukkit.getServer().getOnlinePlayers()) {
                         if (staff.getScoreboardTags().contains("Staff")) {
-                            staff.sendMessage(ChatColor.DARK_AQUA + "[Staff] " + ChatColor.YELLOW + "<" + ChatColor.RED + "Console" + ChatColor.YELLOW + "> " + ChatColor.WHITE + message);
+                            staff.sendMessage(ChatColor.DARK_AQUA + "[Staff] " + ChatColor.YELLOW + "<" + ChatColor.RED
+                                    + "Console" + ChatColor.YELLOW + "> " + ChatColor.WHITE + message);
                         }
                     }
                 }
@@ -212,10 +244,12 @@ public class App extends JavaPlugin implements Listener {
                     fileConfig.set("discordToggled", memory.isDiscordToggled());
                     fileConfig.save(file);
 
-                    player.sendMessage(ChatColor.DARK_AQUA + "Discord visibility toggled to " + memory.isDiscordToggled() + ".");
+                    player.sendMessage(
+                            ChatColor.DARK_AQUA + "Discord visibility toggled to " + memory.isDiscordToggled() + ".");
                 } catch (Exception e) {
                     Bukkit.getLogger().warning("ERROR: Unable to access player memory!");
-                    player.sendMessage(ChatColor.RED + "There was a problem accessing player memory. Check logs for stacktrace.");
+                    player.sendMessage(
+                            ChatColor.RED + "There was a problem accessing player memory. Check logs for stacktrace.");
                     e.printStackTrace();
                 }
 
@@ -265,7 +299,7 @@ public class App extends JavaPlugin implements Listener {
             File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
 
-            //Init saved players
+            // Init saved players
             List<String> whitelistedPlayers = new ArrayList<>(100);
 
             // If file does not exist, create one
@@ -384,6 +418,156 @@ public class App extends JavaPlugin implements Listener {
                 sender.sendMessage(
                         ChatColor.RED + "Missing arguments! /softwhitelist <add|remove|list|on|off> <player>");
             }
+        } else if (label.equalsIgnoreCase("playerlimit")) {
+            try {
+                int result = Integer.parseInt(args[0]);
+                getConfig().set("playerlimit", result);
+                saveConfig();
+                if (args[0].equals("-1")) {
+                    for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                        if (player.isOp()) {
+                            player.sendMessage(ChatColor.GOLD + "Player limit override disabled");
+                        }
+                    }
+                } else if (result > -1) {
+                    for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                        if (player.isOp()) {
+                            player.sendMessage(ChatColor.GOLD + "Player limit override set to " + args[0]);
+                        }
+                    }
+                } else {
+                    sender.sendMessage(
+                            ChatColor.RED + "Missing arguments! /playerlimit <number of players (set -1 to disable)>");
+                }
+
+            } catch (NumberFormatException e) {
+                sender.sendMessage(
+                        ChatColor.RED + "Missing arguments! /playerlimit <number of players (set -1 to disable)>");
+            }
+        } else if (label.equalsIgnoreCase("togglepvp")) {
+            if (getConfig().getBoolean("disablepvp")) {
+                getConfig().set("disablepvp", false);
+                Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "PvP globally enabled.");
+            } else {
+                getConfig().set("disablepvp", true);
+                Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "PvP globally disabled.");
+            }
+            saveConfig();
+        } else if (label.equalsIgnoreCase("pausebypass")) {
+
+            // Load pauseBypass.yml
+            File file = new File(getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
+            FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+
+            // Init saved players
+            List<String> bypassedPlayers = new ArrayList<>(100);
+
+            // If file does not exist, create one
+            if (file.exists() == false) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    sender.sendMessage(ChatColor.RED + "There was a problem accessing the file. Check logs for error.");
+                    e.printStackTrace();
+                }
+            }
+
+            // If file is empty, add a player to initialize
+            if (fileConfig.get("players") == null) {
+                Mojang mojang = new Mojang();
+                mojang.connect();
+
+                bypassedPlayers.add(mojang.getUUIDOfUsername("BogTheMudWing").replaceFirst(
+                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                        "$1-$2-$3-$4-$5"));
+                fileConfig.set("players", bypassedPlayers);
+                try {
+                    fileConfig.save(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Load the file
+            try {
+                fileConfig.load(file);
+            } catch (IOException | InvalidConfigurationException e1) {
+                sender.sendMessage(ChatColor.RED + "There was a problem accessing the file. Check logs for error.");
+                e1.printStackTrace();
+            }
+            // Get soft-whitelisted players
+            bypassedPlayers = (List<String>) fileConfig.get("players");
+
+            try {
+                if (args[0].equalsIgnoreCase("add")) {
+                    // Get player from UUID
+                    Mojang mojang = new Mojang();
+                    mojang.connect();
+
+                    OfflinePlayer player = Bukkit
+                            .getOfflinePlayer(UUID.fromString(mojang.getUUIDOfUsername(args[1]).replaceFirst(
+                                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                                    "$1-$2-$3-$4-$5")));
+                    // Add
+                    if (bypassedPlayers.contains(player.getUniqueId().toString())) {
+                        sender.sendMessage(ChatColor.RED + "That player is already allowed.");
+                    } else {
+                        bypassedPlayers.add(player.getUniqueId().toString());
+                        sender.sendMessage(ChatColor.GOLD
+                                + mojang.getPlayerProfile(player.getUniqueId().toString()).getUsername()
+                                + " is now bypassing.");
+                    }
+                } else if (args[0].equalsIgnoreCase("remove")) {
+                    // Get player from UUID
+                    Mojang mojang = new Mojang();
+                    mojang.connect();
+
+                    OfflinePlayer player = Bukkit
+                            .getOfflinePlayer(UUID.fromString(mojang.getUUIDOfUsername(args[1]).replaceFirst(
+                                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                                    "$1-$2-$3-$4-$5")));
+                    // Remove
+                    if (bypassedPlayers.contains(player.getUniqueId().toString())) {
+                        bypassedPlayers.remove(player.getUniqueId().toString());
+                        sender.sendMessage(ChatColor.GOLD
+                                + mojang.getPlayerProfile(player.getUniqueId().toString()).getUsername()
+                                + " is no longer bypassing.");
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "That player is not allowed.");
+                    }
+                } else if (args[0].equalsIgnoreCase("list")) {
+                    Mojang mojang = new Mojang();
+                    mojang.connect();
+
+                    // Build list
+                    StringBuilder list = new StringBuilder();
+                    ;
+                    for (String players : bypassedPlayers) {
+                        if (list.length() > 0) {
+                            list.append(", ");
+                        }
+                        list.append(mojang.getPlayerProfile(players).getUsername());
+                    }
+                    sender.sendMessage(ChatColor.GOLD + "Players bypassing: " + list.toString());
+
+                } else {
+                    sender.sendMessage(
+                            ChatColor.RED + "Incorrect arguements! /pausebypass <add|remove|list> <player>");
+
+                }
+
+                // Save changes
+                fileConfig.set("players", bypassedPlayers);
+                try {
+                    fileConfig.save(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                sender.sendMessage(
+                        ChatColor.RED + "Missing arguments! /pausebypass <add|remove|list> <player>");
+            }
         }
         return true;
     }
@@ -393,26 +577,10 @@ public class App extends JavaPlugin implements Listener {
         // Send chat messages to Discord
         // IF chat is not paused AND the player is not an operator OR the player is an
         // operator, send message
-        if (chatPaused != true && event.getPlayer().isOp() == false || event.getPlayer().isOp() == true) {
-            String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
-            String channelId = CommandsManager.getChatChannel();
-            if (channelId != "none") {
-                io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
-            }
-        } else {
-            event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
-        }
-
-    }
-
-    @EventHandler
-    public void onPlayerJoinEvent(PlayerJoinEvent event) {
-        // Check if soft whitelist is enabled
-        if (getConfig().getBoolean("softwhitelist")) {
-            File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
+        if (chatPaused == true) {
+            File file = new File(getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-            List<String> whitelistedPlayers = new ArrayList<>(100);
+            List<String> bypassedPlayers = new ArrayList<>(100);
 
             try {
                 fileConfig.load(file);
@@ -420,25 +588,103 @@ public class App extends JavaPlugin implements Listener {
                 e1.printStackTrace();
             }
 
-            whitelistedPlayers = (List<String>) fileConfig.get("players");
+            bypassedPlayers = (List<String>) fileConfig.get("players");
 
             // If player is on soft whitelist or is op, allow. If not, kick player.
-            if (whitelistedPlayers.contains(event.getPlayer().getUniqueId().toString()) || event.getPlayer().isOp()) {
-                // Send player joins to Discord
-                String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
+            if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
+                    || event.getPlayer().isOp()) {
+                String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
                 String channelId = CommandsManager.getChatChannel();
                 if (channelId != "none") {
                     io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
                 }
-                // Remind bot login failure to ops
-                if (botFailed && event.getPlayer().isOp()) {
-                    event.getPlayer().sendMessage(
-                            "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
-                }
             } else {
-                event.getPlayer().kickPlayer("You are not allowed at this time.");
+                event.setCancelled(true);
+                event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
             }
+        }
+    }
 
+    @EventHandler
+    public void onPlayerLoginEvent(PlayerLoginEvent event) {
+        if (getConfig().getInt("playerlimit") != -1) {
+            if (Bukkit.getOnlinePlayers().size() >= getConfig().getInt("playerlimit")) {
+                event.disallow(Result.KICK_FULL, "Server full!");
+            } else {
+                if (getConfig().getBoolean("softwhitelist")) {
+                    File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
+                    FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                    List<String> whitelistedPlayers = new ArrayList<>(100);
+
+                    try {
+                        fileConfig.load(file);
+                    } catch (IOException | InvalidConfigurationException e1) {
+                        e1.printStackTrace();
+                    }
+
+                    whitelistedPlayers = (List<String>) fileConfig.get("players");
+
+                    // If player is on soft whitelist or is op, allow. If not, kick player.
+                    if (whitelistedPlayers.contains(event.getPlayer().getUniqueId().toString())
+                            || event.getPlayer().isOp()) {
+                        if (event.getResult() == PlayerLoginEvent.Result.KICK_FULL) {
+                            event.allow();
+                        }
+                        // Send player joins to Discord
+                        String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
+                        String channelId = CommandsManager.getChatChannel();
+                        if (channelId != "none") {
+                            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage)
+                                    .queue();
+                        }
+                        // Remind bot login failure to ops
+                        if (botFailed && event.getPlayer().isOp()) {
+                            event.getPlayer().sendMessage(
+                                    "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
+                        }
+                    } else {
+                        event.disallow(Result.KICK_OTHER, "You are not allowed at this time.");
+                    }
+
+                } else {
+                    event.allow();
+                }
+
+            }
+        } else {
+            if (getConfig().getBoolean("softwhitelist")) {
+                File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
+                FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                List<String> whitelistedPlayers = new ArrayList<>(100);
+
+                try {
+                    fileConfig.load(file);
+                } catch (IOException | InvalidConfigurationException e1) {
+                    e1.printStackTrace();
+                }
+
+                whitelistedPlayers = (List<String>) fileConfig.get("players");
+
+                // If player is on soft whitelist or is op, allow. If not, kick player.
+                if (whitelistedPlayers.contains(event.getPlayer().getUniqueId().toString())
+                        || event.getPlayer().isOp()) {
+                    // Send player joins to Discord
+                    String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
+                    String channelId = CommandsManager.getChatChannel();
+                    if (channelId != "none") {
+                        io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage)
+                                .queue();
+                    }
+                    // Remind bot login failure to ops
+                    if (botFailed && event.getPlayer().isOp()) {
+                        event.getPlayer().sendMessage(
+                                "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
+                    }
+                } else {
+                    event.disallow(Result.KICK_FULL, "You are not allowed at this time.");
+                }
+
+            }
         }
 
     }
@@ -461,6 +707,15 @@ public class App extends JavaPlugin implements Listener {
         String channelId = CommandsManager.getChatChannel();
         if (channelId != "none") {
             io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+        }
+    }
+
+    @EventHandler
+    public void onEntityDamageEvent(EntityDamageByEntityEvent event) {
+        if (getConfig().getBoolean("disablepvp")) {
+            if (event.getDamager().getType() == EntityType.PLAYER && event.getEntity().getType() == EntityType.PLAYER) {
+                event.setCancelled(true);
+            }
         }
     }
 
