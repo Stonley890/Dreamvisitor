@@ -1,6 +1,6 @@
 main: io.github.stonley890.App
 name: Dreamvisitor
-version: 1.4
+version: 1.5
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -17,6 +17,10 @@ commands:
   radio:
     description: Sends a message to all staff.
     usage: /<command> <message>
+  tagradio:
+    description: Sends a messages to all players with specified tag.
+    usage: /<command> <tag> <message>
+    permission: minecraft.command.op
   discord:
     description: Toggles Discord message visibility.
     usage: /<command>

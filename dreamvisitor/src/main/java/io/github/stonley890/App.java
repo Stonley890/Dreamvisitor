@@ -25,6 +25,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
@@ -421,6 +422,7 @@ public class App extends JavaPlugin implements Listener {
         } else if (label.equalsIgnoreCase("playerlimit")) {
             try {
                 int result = Integer.parseInt(args[0]);
+                playerlimit = result;
                 getConfig().set("playerlimit", result);
                 saveConfig();
                 if (args[0].equals("-1")) {
@@ -568,6 +570,49 @@ public class App extends JavaPlugin implements Listener {
                 sender.sendMessage(
                         ChatColor.RED + "Missing arguments! /pausebypass <add|remove|list> <player>");
             }
+        } else if (label.equalsIgnoreCase("tagradio")) {
+            if (args[0] != null) {
+                if (sender instanceof Player) {
+                    Player playerSender = (Player) sender;
+                    String message = "";
+                    for (int i = 1; i != args.length; i++) {
+                        message += args[i] + " ";
+                    }
+                    Bukkit.getLogger().info(ChatColor.RED + "[Radio] " + ChatColor.YELLOW + "<"
+                            + playerSender.getName() + "> " + ChatColor.WHITE + message);
+                    for (Player players : Bukkit.getServer().getOnlinePlayers()) {
+                        if (players.getScoreboardTags().contains(args[0])) {
+                            players.sendMessage(ChatColor.RED + "[Radio] " + ChatColor.YELLOW + "<"
+                                    + playerSender.getName() + "> " + ChatColor.WHITE + message);
+                        }
+                        if (players.isOp()) {
+                            players.sendMessage(ChatColor.RED + "[Radio]" + ChatColor.GRAY + " (" + args[0] + ") " + ChatColor.YELLOW + "<"
+                            + players.getName() + "> " + ChatColor.WHITE + message);
+                        }
+                    }
+                } else if (sender instanceof ConsoleCommandSender) {
+                    if (args.length > 0) {
+                        String message = "";
+                        for (int i = 1; i != args.length; i++) {
+                            message += args[i] + " ";
+                        }
+                        Bukkit.getLogger().info(ChatColor.RED + "[Radio] " + ChatColor.YELLOW + "<Console> " + message);
+                        for (Player players : Bukkit.getServer().getOnlinePlayers()) {
+                            if (players.getScoreboardTags().contains(args[0])) {
+                                players.sendMessage(
+                                        ChatColor.RED + "[Radio] " + ChatColor.YELLOW + "<" + ChatColor.RED
+                                                + "Console" + ChatColor.YELLOW + "> " + ChatColor.WHITE + message);
+                            }
+                            if (players.isOp()) {
+                                players.sendMessage(ChatColor.RED + "[Radio]" + ChatColor.GRAY + " (" + args[0] + ") " + ChatColor.YELLOW + "<Console> " + ChatColor.WHITE + message);
+                            }
+                        }
+                    }
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "Missing arguments! /tagradio <tag> <message>");
+            }
+
         }
         return true;
     }
@@ -630,13 +675,7 @@ public class App extends JavaPlugin implements Listener {
                         if (event.getResult() == PlayerLoginEvent.Result.KICK_FULL) {
                             event.allow();
                         }
-                        // Send player joins to Discord
-                        String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
-                        String channelId = CommandsManager.getChatChannel();
-                        if (channelId != "none") {
-                            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage)
-                                    .queue();
-                        }
+
                         // Remind bot login failure to ops
                         if (botFailed && event.getPlayer().isOp()) {
                             event.getPlayer().sendMessage(
@@ -665,28 +704,24 @@ public class App extends JavaPlugin implements Listener {
 
                 whitelistedPlayers = (List<String>) fileConfig.get("players");
 
-                // If player is on soft whitelist or is op, allow. If not, kick player.
-                if (whitelistedPlayers.contains(event.getPlayer().getUniqueId().toString())
-                        || event.getPlayer().isOp()) {
-                    // Send player joins to Discord
-                    String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
-                    String channelId = CommandsManager.getChatChannel();
-                    if (channelId != "none") {
-                        io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage)
-                                .queue();
-                    }
-                    // Remind bot login failure to ops
-                    if (botFailed && event.getPlayer().isOp()) {
-                        event.getPlayer().sendMessage(
-                                "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
-                    }
-                } else {
-                    event.disallow(Result.KICK_FULL, "You are not allowed at this time.");
+                // Remind bot login failure to ops
+                if (botFailed && event.getPlayer().isOp()) {
+                    event.getPlayer().sendMessage(
+                            "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
                 }
-
+            } else {
+                event.disallow(Result.KICK_FULL, "You are not allowed at this time.");
             }
         }
+    }
 
+    @EventHandler
+    public void onPlayerJoinEvent(PlayerJoinEvent event) {
+        String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
+        String channelId = CommandsManager.getChatChannel();
+        if (channelId != "none") {
+            io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+        }
     }
 
     @EventHandler

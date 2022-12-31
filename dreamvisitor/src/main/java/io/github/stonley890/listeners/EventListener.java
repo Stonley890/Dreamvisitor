@@ -3,6 +3,7 @@ package io.github.stonley890.listeners;
 import java.io.File;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -15,13 +16,15 @@ import io.github.stonley890.commands.CommandsManager;
 import io.github.stonley890.data.PlayerMemory;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 public class EventListener extends ListenerAdapter {
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 
         User user = event.getAuthor();
         String channelId = event.getChannel().getId();
@@ -47,17 +50,21 @@ public class EventListener extends ListenerAdapter {
                 // If player is not whitelisted, add them and change roles
                 if (player.isWhitelisted() == false) {
                     Bukkit.getLogger().info("[Dreamvisitor] Whitelisting " + username + ".");
-                    event.getGuild().getSystemChannel().sendMessage("Whitelisted `" + username + "` from user " + event.getAuthor().getAsMention()).queue();
+                    event.getGuild().getSystemChannel()
+                            .sendMessage("Whitelisted `" + username + "` from user " + event.getAuthor().getAsMention())
+                            .queue();
                     player.setWhitelisted(true);
                     // Change roles if assigned
                     if (memberRole != "none") {
                         try {
                             event.getGuild().addRoleToMember(event.getAuthor(),
                                     event.getGuild().getRoleById(memberRole)).queue();
-                            event.getGuild().removeRoleFromMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
+                            event.getGuild()
+                                    .removeRoleFromMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
                                     .queue();
                         } catch (HierarchyException exception) {
-                            event.getChannel().sendMessage("**An error has occured! Staff have been notified.**").queue();
+                            event.getChannel().sendMessage("**An error has occured! Staff have been notified.**")
+                                    .queue();
                             event.getGuild().getSystemChannel().sendMessage("There was an error: " + exception).queue();
                         }
                     }
@@ -71,7 +78,8 @@ public class EventListener extends ListenerAdapter {
                     try {
                         event.getGuild().addRoleToMember(event.getAuthor(),
                                 event.getGuild().getRoleById(memberRole)).queue();
-                        event.getGuild().removeRoleFromMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
+                        event.getGuild()
+                                .removeRoleFromMember(event.getAuthor(), event.getGuild().getRoleById(step3Role))
                                 .queue();
                     } catch (HierarchyException exception) {
                         event.getChannel().sendMessage("**An error has occured! Staff have been notified.**").queue();
@@ -80,23 +88,27 @@ public class EventListener extends ListenerAdapter {
                 }
             } catch (Exception e) {
                 // username does not exist alert
-                event.getChannel().sendMessage("`" + username + "` could not be found!\n*Don't have a Minecraft: Java Edition account? Check pins to get the member role.*").queue();
+                event.getChannel().sendMessage("`" + username
+                        + "` **could not be found!**\n*Don't have a Minecraft: Java Edition account? Press the button to get the member role.*")
+                        .setActionRow(Button.primary("memberSkip", "Continue Anyways")).queue();
                 event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
             }
-            
 
         } else if (channelId.equals(whitelistChannel) && user.isBot() == false) {
             // illegal username
-            event.getChannel().sendMessage("`" + username + "` contains illegal characters!\n*Don't have a Minecraft: Java Edition account? Check pins to get the member role.*").queue();
+            event.getChannel().sendMessage("`" + username
+                    + "` **contains illegal characters!**\n*Don't have a Minecraft: Java Edition account? Press the button to get the member role.*")
+                    .setActionRow(Button.primary("memberSkip", "Continue Anyways")).queue();
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
         }
 
         // If in chat channel and chat is not paused, send to Minecraft
-        if (channelId.equals(chatChannel) && user.isBot() == false && App.getPlugin().getConfig().getBoolean("chatPaused") == false) {
-            for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+        if (channelId.equals(chatChannel) && user.isBot() == false
+                && App.getPlugin().getConfig().getBoolean("chatPaused") == false) {
+            for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 PlayerMemory memory = new PlayerMemory();
                 try {
-                    //Init file config
+                    // Init file config
                     File file = new File(App.getPlayerPath(player));
                     FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
                     memory.setDiscordToggled(fileConfig.getBoolean("discordToggled"));
@@ -110,13 +122,36 @@ public class EventListener extends ListenerAdapter {
                                 sb.append("\\");
                             sb.append(c);
                         }
-                        player.sendMessage(org.bukkit.ChatColor.BLUE + "[Discord] " + org.bukkit.ChatColor.GRAY + "<" + sb.toString() + "> " + event.getMessage().getContentRaw());
+                        player.sendMessage(org.bukkit.ChatColor.BLUE + "[Discord] " + org.bukkit.ChatColor.GRAY + "<"
+                                + sb.toString() + "> " + event.getMessage().getContentRaw());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
 
+        }
+    }
+
+    @Override
+    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+        String memberRole = CommandsManager.getMemberRole();
+        String step3Role = CommandsManager.getStep3Role();
+        
+        if (event.getButton().getId().equals("memberSkip")) {
+            if (memberRole != "none") {
+                try {
+                    event.getGuild().addRoleToMember(event.getUser(),
+                            event.getGuild().getRoleById(memberRole)).queue();
+                    event.getGuild().removeRoleFromMember(event.getUser(), event.getGuild().getRoleById(step3Role))
+                            .queue();
+                } catch (HierarchyException exception) {
+                    event.getChannel().sendMessage("**An error has occured! Staff have been notified.**").queue();
+                    event.getGuild().getSystemChannel().sendMessage("There was an error: " + exception).queue();
+                }
+            }
+            event.reply("You now have access to the rest of the server!").setEphemeral(true).queue();
+            event.editButton(event.getButton().withDisabled(true)).queue();
         }
     }
 }
