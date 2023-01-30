@@ -105,15 +105,24 @@ public class EventListener extends ListenerAdapter {
         // If in chat channel and chat is not paused, send to Minecraft
         if (channelId.equals(chatChannel) && user.isBot() == false
                 && App.getPlugin().getConfig().getBoolean("chatPaused") == false) {
+
+            Bukkit.getLogger().info("Message");
+            
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 PlayerMemory memory = new PlayerMemory();
+
+                Bukkit.getLogger().info("Getting file for " + player.getName());
+
                 try {
                     // Init file config
                     File file = new File(App.getPlayerPath(player));
                     FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-                    memory.setDiscordToggled(fileConfig.getBoolean("discordToggled"));
+                    memory.setDiscordToggled(fileConfig.getBoolean("discordToggled", true));
 
-                    if (memory.isDiscordToggled()) {
+                    Bukkit.getLogger().info("Memory fetched: " + memory.isDiscordToggled());
+                    
+                    if (memory.isDiscordToggled() != false) {
+                        Bukkit.getLogger().info("Requirement met");
                         String discName = event.getAuthor().getName();
                         StringBuilder sb = new StringBuilder();
                         for (int i = 0; i < discName.length(); i++) {
@@ -124,6 +133,9 @@ public class EventListener extends ListenerAdapter {
                         }
                         player.sendMessage(org.bukkit.ChatColor.BLUE + "[Discord] " + org.bukkit.ChatColor.GRAY + "<"
                                 + sb.toString() + "> " + event.getMessage().getContentRaw());
+                        Bukkit.getLogger().info("Message sent.");
+                    } else {
+                        Bukkit.getLogger().info("Requirements not met.");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

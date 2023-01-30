@@ -77,7 +77,8 @@ public class App extends JavaPlugin implements Listener {
 
         // Send server start message in log channel
         Bot.getJDA().getGuilds()
-                .forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been started.").queue());
+                .forEach((Guild guild) -> guild.getSystemChannel()
+                        .sendMessage("Server has been started.\n*Dreamvisitor 1.7.1*").queue());
 
         // Get saved data
         CommandsManager.initChannelsRoles();
@@ -105,21 +106,26 @@ public class App extends JavaPlugin implements Listener {
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         String cmd = event.getMessage();
         Player ply = event.getPlayer();
-        if (event.getMessage().startsWith("/me")) {
+        // me passthrough
+        if (event.getMessage().startsWith("/me ")) {
 
             if (chatPaused) {
+                // Init bypassed players file
                 File file = new File(getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
                 FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
                 List<String> bypassedPlayers = new ArrayList<>(100);
 
+                // Load file
                 try {
                     fileConfig.load(file);
                 } catch (IOException | InvalidConfigurationException e1) {
                     e1.printStackTrace();
                 }
 
+                // Remember bypassed players
                 bypassedPlayers = (List<String>) fileConfig.get("players");
 
+                // If list contains player, allow
                 if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
                         || event.getPlayer().isOp()) {
                     TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
@@ -130,6 +136,11 @@ public class App extends JavaPlugin implements Listener {
                     event.setCancelled(true);
                     event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
                 }
+            } else {
+                TextChannel chatChannel = Bot.getJDA().getTextChannelById(CommandsManager.getChatChannel());
+                String action = cmd.replaceFirst("/me ", "");
+                chatChannel.sendMessage("**[" + ChatColor.stripColor(ply.getDisplayName()) + " **(" + ply.getName()
+                        + ")**]** " + ChatColor.stripColor(action)).queue();
             }
         }
     }
@@ -586,8 +597,9 @@ public class App extends JavaPlugin implements Listener {
                                     + playerSender.getName() + "> " + ChatColor.WHITE + message);
                         }
                         if (players.isOp()) {
-                            players.sendMessage(ChatColor.RED + "[Radio]" + ChatColor.GRAY + " (" + args[0] + ") " + ChatColor.YELLOW + "<"
-                            + players.getName() + "> " + ChatColor.WHITE + message);
+                            players.sendMessage(ChatColor.RED + "[Radio]" + ChatColor.GRAY + " (" + args[0] + ") "
+                                    + ChatColor.YELLOW + "<"
+                                    + players.getName() + "> " + ChatColor.WHITE + message);
                         }
                     }
                 } else if (sender instanceof ConsoleCommandSender) {
@@ -604,7 +616,8 @@ public class App extends JavaPlugin implements Listener {
                                                 + "Console" + ChatColor.YELLOW + "> " + ChatColor.WHITE + message);
                             }
                             if (players.isOp()) {
-                                players.sendMessage(ChatColor.RED + "[Radio]" + ChatColor.GRAY + " (" + args[0] + ") " + ChatColor.YELLOW + "<Console> " + ChatColor.WHITE + message);
+                                players.sendMessage(ChatColor.RED + "[Radio]" + ChatColor.GRAY + " (" + args[0] + ") "
+                                        + ChatColor.YELLOW + "<Console> " + ChatColor.WHITE + message);
                             }
                         }
                     }
@@ -647,6 +660,12 @@ public class App extends JavaPlugin implements Listener {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
             }
+        } else {
+            String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
+            String channelId = CommandsManager.getChatChannel();
+            if (channelId != "none") {
+                io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
+            }
         }
     }
 
@@ -654,7 +673,7 @@ public class App extends JavaPlugin implements Listener {
     public void onPlayerLoginEvent(PlayerLoginEvent event) {
         if (getConfig().getInt("playerlimit") != -1) {
             if (Bukkit.getOnlinePlayers().size() >= getConfig().getInt("playerlimit")) {
-                event.disallow(Result.KICK_FULL, "Server full!");
+                event.disallow(Result.KICK_FULL, null);
             } else {
                 if (getConfig().getBoolean("softwhitelist")) {
                     File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
@@ -686,7 +705,11 @@ public class App extends JavaPlugin implements Listener {
                     }
 
                 } else {
-                    event.allow();
+                    if (event.getPlayer().isBanned()) {
+                        event.disallow(Result.KICK_BANNED, "You are banned! Go away.");
+                    } else {
+                        event.allow();
+                    }
                 }
 
             }
@@ -710,7 +733,7 @@ public class App extends JavaPlugin implements Listener {
                             "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
                 }
             } else {
-                event.disallow(Result.KICK_FULL, "You are not allowed at this time.");
+                event.allow();
             }
         }
     }
