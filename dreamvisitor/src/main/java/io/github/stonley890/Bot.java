@@ -7,7 +7,7 @@ import io.github.stonley890.listeners.EventListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.entities.Activity;
+// import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
@@ -21,7 +21,7 @@ public class Bot {
                 GatewayIntent.GUILD_MEMBERS);
         builder.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER);
         builder.setStatus(OnlineStatus.ONLINE);
-        builder.setActivity(Activity.watching("Wings of Fire: The New World"));
+        // builder.setActivity(Activity.watching("Wings of Fire: The New World"));
 
         jda = builder.build();
 

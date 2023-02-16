@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.security.auth.login.LoginException;
+// import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,6 +15,9 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+// import org.bukkit.command.TabCompleter;
+// import org.bukkit.command.TabCompleter;
+// import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -31,6 +35,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.shanerx.mojang.Mojang;
+// import org.yaml.snakeyaml.Yaml;
 
 import io.github.stonley890.commands.CommandsManager;
 import io.github.stonley890.data.PlayerMemory;
@@ -431,32 +436,37 @@ public class App extends JavaPlugin implements Listener {
                         ChatColor.RED + "Missing arguments! /softwhitelist <add|remove|list|on|off> <player>");
             }
         } else if (label.equalsIgnoreCase("playerlimit")) {
-            try {
-                int result = Integer.parseInt(args[0]);
-                playerlimit = result;
-                getConfig().set("playerlimit", result);
-                saveConfig();
-                if (args[0].equals("-1")) {
-                    for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                        if (player.isOp()) {
-                            player.sendMessage(ChatColor.GOLD + "Player limit override disabled");
+            if (args[0] != null) {
+                try {
+                    int result = Integer.parseInt(args[0]);
+                    playerlimit = result;
+                    getConfig().set("playerlimit", result);
+                    saveConfig();
+                    if (args[0].equals("-1")) {
+                        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                            if (player.isOp()) {
+                                player.sendMessage(ChatColor.GOLD + "Player limit override disabled");
+                            }
                         }
-                    }
-                } else if (result > -1) {
-                    for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                        if (player.isOp()) {
-                            player.sendMessage(ChatColor.GOLD + "Player limit override set to " + args[0]);
+                    } else if (result > -1) {
+                        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                            if (player.isOp()) {
+                                player.sendMessage(ChatColor.GOLD + "Player limit override set to " + args[0]);
+                            }
                         }
+                    } else {
+                        sender.sendMessage(
+                                ChatColor.RED + "Missing arguments! /playerlimit <number of players (set -1 to disable)");
                     }
-                } else {
+    
+                } catch (NumberFormatException e) {
                     sender.sendMessage(
-                            ChatColor.RED + "Missing arguments! /playerlimit <number of players (set -1 to disable)>");
+                            ChatColor.RED + "Missing arguments! /playerlimit <number of players (set -1 to disable)");
                 }
-
-            } catch (NumberFormatException e) {
-                sender.sendMessage(
-                        ChatColor.RED + "Missing arguments! /playerlimit <number of players (set -1 to disable)>");
+            } else {
+                sender.sendMessage(ChatColor.RED + "Missing arguments! /playerlimit <number of players (set -1 to disable)");
             }
+			
         } else if (label.equalsIgnoreCase("togglepvp")) {
             if (getConfig().getBoolean("disablepvp")) {
                 getConfig().set("disablepvp", false);

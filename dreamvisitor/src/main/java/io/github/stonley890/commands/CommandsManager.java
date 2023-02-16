@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+// import org.apache.http.util.Args;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -16,8 +18,11 @@ import org.jetbrains.annotations.NotNull;
 import io.github.stonley890.App;
 import io.github.stonley890.Bot;
 import io.github.stonley890.data.PlayerMemory;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -26,7 +31,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+// import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 public class CommandsManager extends ListenerAdapter {
 
@@ -51,32 +56,28 @@ public class CommandsManager extends ListenerAdapter {
 
         if (command.equals("setgamechat")) {
 
+            gameChatChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
+            event.reply("Game chat channel set to " + gameChatChannel.getAsMention()).queue();
+            App.getPlugin().getConfig().set("chatChannelID", gameChatChannel.getId());
 
-                gameChatChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
-                event.reply("Game chat channel set to " + gameChatChannel.getAsMention()).queue();
-                App.getPlugin().getConfig().set("chatChannelID", gameChatChannel.getId());
-            
         } else if (command.equals("setwhitelist")) {
 
+            whitelistChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
+            event.reply("Whitelist channel set to " + whitelistChannel.getAsMention()).queue();
+            App.getPlugin().getConfig().set("whitelistChannelID", whitelistChannel.getId());
 
-                whitelistChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
-                event.reply("Whitelist channel set to " + whitelistChannel.getAsMention()).queue();
-                App.getPlugin().getConfig().set("whitelistChannelID", whitelistChannel.getId());
-            
         } else if (command.equals("setmemberrole")) {
 
+            memberRole = event.getOption("role", OptionMapping::getAsRole);
+            event.reply("Member role set to **" + memberRole.getName() + "**").queue();
+            App.getPlugin().getConfig().set("memberRoleID", memberRole.getId());
 
-                memberRole = event.getOption("role", OptionMapping::getAsRole);
-                event.reply("Member role set to **" + memberRole.getName() + "**").queue();
-                App.getPlugin().getConfig().set("memberRoleID", memberRole.getId());
-            
         } else if (command.equals("setstep3role")) {
 
+            step3role = event.getOption("role", OptionMapping::getAsRole);
+            event.reply("Step 3 role set to **" + step3role.getName() + "**").queue();
+            App.getPlugin().getConfig().set("step3RoleID", step3role.getId());
 
-                step3role = event.getOption("role", OptionMapping::getAsRole);
-                event.reply("Step 3 role set to **" + step3role.getName() + "**").queue();
-                App.getPlugin().getConfig().set("step3RoleID", step3role.getId());
-            
         } else if (command.equals("list")) {
             // Compile players to list unless no players online
             if (event.getChannel() == gameChatChannel) {
@@ -119,30 +120,30 @@ public class CommandsManager extends ListenerAdapter {
                         .queue();
             }
         } else if (command.equals("tempban")) {
-                // Get args
-                String member = event.getOption("username", OptionMapping::getAsString);
-                int hours = event.getOption("hours", OptionMapping::getAsInt);
-                String reason = event.getOption("reason", OptionMapping::getAsString);
-                // Add ban if player is online
-                if (Bukkit.getServer().getPlayer(member) != null) {
-                    Date date = new Date(System.currentTimeMillis() + 60 * 60 * 1000 * hours);
-                    Bukkit.getServer().getBanList(BanList.Type.NAME).addBan(member, reason, date, null);
-                    new BukkitRunnable() {
+            // Get args
+            String member = event.getOption("username", OptionMapping::getAsString);
+            int hours = event.getOption("hours", OptionMapping::getAsInt);
+            String reason = event.getOption("reason", OptionMapping::getAsString);
+            // Add ban if player is online
+            if (Bukkit.getServer().getPlayer(member) != null) {
+                Date date = new Date(System.currentTimeMillis() + 60 * 60 * 1000 * hours);
+                Bukkit.getServer().getBanList(BanList.Type.NAME).addBan(member, reason, date, null);
+                new BukkitRunnable() {
 
-                        @Override
-                        public void run() {
-                            Bukkit.getServer().getPlayer(member).kickPlayer(reason);
+                    @Override
+                    public void run() {
+                        Bukkit.getServer().getPlayer(member).kickPlayer(reason);
 
-                        }
+                    }
 
-                    }.runTask(App.getPlugin());
+                }.runTask(App.getPlugin());
 
-                    event.reply(
-                            "**`" + member + "` was successfully banned for " + hours + " hours. Reason:** " + reason)
-                            .queue();
-                } else {
-                    event.reply("**Player is offline!**").setEphemeral(true).queue();
-                }
+                event.reply(
+                        "**`" + member + "` was successfully banned for " + hours + " hours. Reason:** " + reason)
+                        .queue();
+            } else {
+                event.reply("**Player is offline!**").setEphemeral(true).queue();
+            }
             // msg command
         } else if (command.equals("msg")) {
             String username = event.getOption("username", OptionMapping::getAsString);
@@ -169,6 +170,13 @@ public class CommandsManager extends ListenerAdapter {
                 event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true)
                         .queue();
             }
+        } else if (command.equals("activity")) {
+            // Get args
+            String activity = event.getOption("activity", OptionMapping::getAsString);
+
+            // Set activity
+            Bot.getJDA().getPresence().setPresence(OnlineStatus.ONLINE,
+                    Activity.of(ActivityType.CUSTOM_STATUS, activity));
         }
         App.getPlugin().saveConfig();
     }
@@ -221,20 +229,28 @@ public class CommandsManager extends ListenerAdapter {
 
         commandData.add(Commands.slash("list", "List online players."));
 
-        OptionData tempbanOption1 = new OptionData(OptionType.STRING, "username", "The Minecraft user to tempban.",
-                true);
-        OptionData tempbanOption2 = new OptionData(OptionType.INTEGER, "hours",
-                "The number of hours to enforce the tempban.", true);
-        OptionData tempbanOption3 = new OptionData(OptionType.STRING, "reason", "Reason for tempban.", true);
+        // OptionData tempbanOption1 = new OptionData(OptionType.STRING, "username", "The Minecraft user to tempban.", true);
+        // OptionData tempbanOption2 = new OptionData(OptionType.INTEGER, "hours", "The number of hours to enforce the tempban.", true);
+        // OptionData tempbanOption3 = new OptionData(OptionType.STRING, "reason", "Reason for tempban.", true);
         commandData.add(Commands.slash("tempban", "Tempban a player from the Minecraft server.")
-                .addOptions(tempbanOption1, tempbanOption2, tempbanOption3)
+                .addOption(OptionType.STRING, "username", "The Minecraft user to tempban.",true)
+                .addOption(OptionType.INTEGER, "hours","The number of hours to enforce the tempban.", true)
+                .addOption(OptionType.STRING, "reason", "Reason for tempban.", true)
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
-        OptionData msgOption1 = new OptionData(OptionType.STRING, "username", "The user you want to message.", true);
-        OptionData msgOption2 = new OptionData(OptionType.STRING, "message", "The message to send.", true);
+        // OptionData msgOption1 = new OptionData(OptionType.STRING, "username", "The user you want to message.", true);
+        // OptionData msgOption2 = new OptionData(OptionType.STRING, "message", "The message to send.", true);
         commandData.add(
-                Commands.slash("msg", "Message a player on the Minecraft server.").addOptions(msgOption1, msgOption2));
+                Commands.slash("msg", "Message a player on the Minecraft server.")
+                        .addOption(OptionType.STRING, "username", "The user you want to message.", true)
+                        .addOption(OptionType.STRING, "message", "The message to send.", true));
+
+        commandData.add(Commands.slash("activity", "Set the bot activity.")
+                .addOption(OptionType.STRING, "activity", "The status to display on the bot.")
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
         event.getGuild().updateCommands().addCommands(commandData).queue();
+		commandData = null;
+
     }
 }
