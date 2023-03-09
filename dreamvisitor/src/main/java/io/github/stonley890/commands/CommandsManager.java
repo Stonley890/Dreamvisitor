@@ -235,6 +235,8 @@ public class CommandsManager extends ListenerAdapter {
         commandData.add(
                 Commands.slash("msg", "Message a player on the Minecraft server.").addOptions(msgOption1, msgOption2));
 
+        commandData.add(Commands.slash("presense", "Change the bot activity.").addOption(OptionType.STRING, "status", "The bot status.").setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
         event.getGuild().updateCommands().addCommands(commandData).queue();
     }
 }
