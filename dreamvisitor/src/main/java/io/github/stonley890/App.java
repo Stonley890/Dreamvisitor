@@ -2,24 +2,22 @@ package io.github.stonley890;
 
 import java.io.File;
 import java.io.IOException;
-// import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import javax.security.auth.login.LoginException;
-// import javax.swing.filechooser.FileNameExtensionFilter;
 
-// import org.apache.http.util.VersionInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-// import org.bukkit.command.TabCompleter;
-// import org.bukkit.command.TabCompleter;
-// import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -35,13 +33,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
-// import org.bukkit.plugin.Plugin;
-// import org.bukkit.plugin.PluginBase;
-// import org.bukkit.plugin.PluginDescriptionFile;
-// import org.bukkit.plugin.PluginManager;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.shanerx.mojang.Mojang;
-// import org.yaml.snakeyaml.Yaml;
 
 import io.github.stonley890.commands.CommandsManager;
 import io.github.stonley890.data.PlayerMemory;
@@ -54,6 +48,7 @@ public class App extends JavaPlugin implements Listener {
     public static App plugin;
     public static boolean chatPaused;
     public static int playerlimit;
+    public Location hubLocation;
 
     private static boolean botFailed = false;
 
@@ -94,7 +89,7 @@ public class App extends JavaPlugin implements Listener {
         }
 
         // Send server start message in log channel
-        Bot.getJDA().getGuilds().forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been started.\n*Dreamvisitor 1.7.1*").queue());
+        Bot.getJDA().getGuilds().forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been started.\n*Dreamvisitor " + version + "*").queue());
 
         // Get saved data
         CommandsManager.initChannelsRoles();
@@ -127,7 +122,7 @@ public class App extends JavaPlugin implements Listener {
         String cmd = event.getMessage();
         Player player = event.getPlayer();
 
-        if (event.getMessage().startsWith("/me "))
+        if (event.getMessage().startsWith("/me ") && !event.isCancelled())
         // '/me' passthrough
         {
             if (chatPaused)
@@ -831,6 +826,41 @@ public class App extends JavaPlugin implements Listener {
                 sender.sendMessage(ChatColor.RED + "Missing arguments! /tagradio <tag> <message>");
             }
 
+        } else if (label.equalsIgnoreCase("sethub"))
+        {
+            if (sender instanceof Player)
+            {
+                Player player = (Player) sender;
+                hubLocation = player.getLocation().getBlock().getLocation().add(new Location(player.getLocation().getWorld(), 0.5,0,0.5));
+                getConfig().set("hubLocation", hubLocation);
+                saveConfig();
+                player.sendMessage(ChatColor.GOLD + "Hub location set.");
+            } else
+            {
+                sender.sendMessage(ChatColor.RED + "This command must be executed by a player!");
+            }
+        } else if (label.equalsIgnoreCase("hub"))
+        {
+            if (sender instanceof Player)
+            {
+                hubLocation = getConfig().getLocation("hubLocation");
+                Player player = (Player) sender;
+                player.teleport(hubLocation, TeleportCause.COMMAND);
+                player.spawnParticle(Particle.FIREWORKS_SPARK, hubLocation, 100);
+                player.playSound(hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f, 1f);
+            }
+        } else if (label.equalsIgnoreCase("panic"))
+        {
+            for (Player player : getServer().getOnlinePlayers()) {
+                if (!player.isOp())
+                {
+                    player.kickPlayer("Panic!");
+                }                
+            }
+            playerlimit = 0;
+            getConfig().set("playerlimit", 0);
+            saveConfig();
+            getServer().broadcastMessage(ChatColor.RED + "Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.");
         }
         return true;
     }
@@ -843,7 +873,7 @@ public class App extends JavaPlugin implements Listener {
         IF chat is not paused AND the player is not an operator OR the player is an
         operator, send message
         **/
-        if (chatPaused == true)
+        if (chatPaused == true && !event.isCancelled())
 		{
             File file = new File(getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
@@ -871,8 +901,9 @@ public class App extends JavaPlugin implements Listener {
             } else {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
-            }
-        } else {
+            }  
+        } else if (!event.isCancelled())
+        {
             String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
             String channelId = CommandsManager.getChatChannel();
             if (channelId != "none") {
@@ -882,119 +913,154 @@ public class App extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPlayerLoginEvent(PlayerLoginEvent event) {
-        if (getConfig().getInt("playerlimit") != -1) {
-            if (Bukkit.getOnlinePlayers().size() >= getConfig().getInt("playerlimit")) {
-                event.disallow(Result.KICK_FULL, null);
-            } else {
-                if (getConfig().getBoolean("softwhitelist")) {
+    public void onPlayerLoginEvent(PlayerLoginEvent event)
+    {
+        Player player = event.getPlayer();
+
+        // If player limit has been overridden
+        if (getConfig().getInt("playerlimit") != -1)
+        {
+            // If server is full & player is not opped
+            if (Bukkit.getOnlinePlayers().size() >= getConfig().getInt("playerlimit") && !player.isOp())
+            {
+                // Kick for server full
+                event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + getConfig().getInt("playerlimit"));
+            } else
+            {
+                // If soft whitelist is on
+                if (getConfig().getBoolean("softwhitelist"))
+                {
+                    // Initialize file
                     File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
                     FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
                     List<String> whitelistedPlayers = new ArrayList<>(100);
 
-                    try {
+                    // Load file
+                    try
+                    {
                         fileConfig.load(file);
                     } catch (IOException | InvalidConfigurationException e1) {
                         e1.printStackTrace();
                     }
 
+                    // Fetch soft-whitelisted players
                     whitelistedPlayers = (List<String>) fileConfig.get("players");
 
-                    // If player is on soft whitelist or is op, allow. If not, kick player.
-                    if (whitelistedPlayers.contains(event.getPlayer().getUniqueId().toString())
-                            || event.getPlayer().isOp()) {
-                        if (event.getResult() == PlayerLoginEvent.Result.KICK_FULL) {
+                    // If player is on soft whitelist or is op but is not banned, allow. If not, kick player.
+                    if ((player.isOp() || whitelistedPlayers.contains(player.getUniqueId().toString())) && !player.isBanned())
+                    {
+                        if (event.getResult() == PlayerLoginEvent.Result.KICK_FULL)
+                        {
                             event.allow();
                         }
 
                         // Remind bot login failure to ops
-                        if (botFailed && event.getPlayer().isOp()) {
-                            event.getPlayer().sendMessage(
+                        if (botFailed && player.isOp())
+                        {
+                            player.sendMessage(
                                     "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
                         }
-                    } else {
+                    } else
+                    {
                         event.disallow(Result.KICK_OTHER, "You are not allowed at this time.");
                     }
 
-                } else {
-                    if (event.getPlayer().isBanned()) {
-                        event.disallow(Result.KICK_BANNED, "You are banned! Go away.");
-                    } else {
-                        event.allow();
-                    }
+                } else if (player.isOp() || !player.isBanned())
+                {
+                    event.allow();
                 }
-
             }
-        } else {
-            if (getConfig().getBoolean("softwhitelist")) {
+        } else // Player limit is not overridden
+        {
+            // If soft whitelist is on
+            if (getConfig().getBoolean("softwhitelist"))
+            {
+                // Initialize file
                 File file = new File(getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
                 FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
                 List<String> whitelistedPlayers = new ArrayList<>(100);
 
-                try {
+                // Load file
+                try
+                {
                     fileConfig.load(file);
-                } catch (IOException | InvalidConfigurationException e1) {
+                } catch (IOException | InvalidConfigurationException e1)
+                {
                     e1.printStackTrace();
                 }
 
+                // Fetch soft-whitelisted players
                 whitelistedPlayers = (List<String>) fileConfig.get("players");
 
-                // Remind bot login failure to ops
-                if (botFailed && event.getPlayer().isOp()) {
-                    event.getPlayer().sendMessage(
-                            "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
+                // If player is not opped or player is banned or player is not on soft whitelist, deny access
+                if (!player.isOp() || player.isBanned() || !whitelistedPlayers.contains(player.getUniqueId().toString()))
+                {
+                    event.disallow(Result.KICK_WHITELIST, "You are not allowed to join at this time!");
                 }
-            } else {
-                event.allow();
+
+                // Remind bot failure to ops
+                if (botFailed && player.isOp())
+                {
+                    player.sendMessage("\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
+                }
             }
         }
     }
 
     @EventHandler
-    public void onPlayerJoinEvent(PlayerJoinEvent event) {
+    public void onPlayerJoinEvent(PlayerJoinEvent event)
+    {
         String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
         String channelId = CommandsManager.getChatChannel();
-        if (channelId != "none") {
+        if (channelId != "none")
+        {
             io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
         }
     }
 
     @EventHandler
-    public void onPlayerQuitEvent(PlayerQuitEvent event) {
+    public void onPlayerQuitEvent(PlayerQuitEvent event)
+    {
         // Send player quits to Discord
         String chatMessage = "**" + event.getPlayer().getName() + " left the game**";
         String channelId = CommandsManager.getChatChannel();
-        if (channelId != "none") {
+        if (channelId != "none")
+        {
             io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
         }
         PlayerUtility.setPlayerMemory(event.getPlayer(), null);
     }
 
     @EventHandler
-    public void onPlayerDeathEvent(PlayerDeathEvent event) {
+    public void onPlayerDeathEvent(PlayerDeathEvent event)
+    {
         // Send death messages
         String chatMessage = "**" + event.getDeathMessage() + "**";
         String channelId = CommandsManager.getChatChannel();
-        if (channelId != "none") {
+        if (channelId != "none")
+        {
             io.github.stonley890.Bot.getJDA().getTextChannelById(channelId).sendMessage(chatMessage).queue();
         }
     }
 
     @EventHandler
-    public void onEntityDamageEvent(EntityDamageByEntityEvent event) {
-        if (getConfig().getBoolean("disablepvp")) {
-            if (event.getDamager().getType() == EntityType.PLAYER && event.getEntity().getType() == EntityType.PLAYER) {
+    public void onEntityDamageEvent(EntityDamageByEntityEvent event)
+    {
+        if (getConfig().getBoolean("disablepvp"))
+        {
+            if (event.getDamager().getType() == EntityType.PLAYER && event.getEntity().getType() == EntityType.PLAYER)
+            {
                 event.setCancelled(true);
             }
         }
     }
 
     @Override
-    public void onDisable() {
+    public void onDisable()
+    {
         // Shutdown messages
         getLogger().info("Closing bot instance.");
-        Bot.getJDA().getGuilds()
-                .forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been shutdown.").queue());
+        Bot.getJDA().getGuilds().forEach((Guild guild) -> guild.getSystemChannel().sendMessage("Server has been shutdown.").queue());
         // Shut down bot
         Bot.getJDA().shutdown();
 

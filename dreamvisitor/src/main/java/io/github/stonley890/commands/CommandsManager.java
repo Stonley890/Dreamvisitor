@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-// import org.apache.http.util.Args;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,6 +21,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -31,9 +31,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-// import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-public class CommandsManager extends ListenerAdapter {
+public class CommandsManager extends ListenerAdapter
+{
 
     private static Channel gameChatChannel;
     private static Channel whitelistChannel;
@@ -41,7 +41,8 @@ public class CommandsManager extends ListenerAdapter {
     private static Role step3role;
 
     // Get channels and roles from config
-    public static void initChannelsRoles() {
+    public static void initChannelsRoles()
+    {
         FileConfiguration config = App.getPlugin().getConfig();
 
         gameChatChannel = Bot.getJDA().getTextChannelById(config.getString("chatChannelID"));
@@ -51,158 +52,173 @@ public class CommandsManager extends ListenerAdapter {
     }
 
     @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event)
+    {
         String command = event.getName();
+        User user = event.getUser();
 
-        if (command.equals("setgamechat")) {
+        if (command.equals("setgamechat"))
+        {
 
             gameChatChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
             event.reply("Game chat channel set to " + gameChatChannel.getAsMention()).queue();
             App.getPlugin().getConfig().set("chatChannelID", gameChatChannel.getId());
 
-        } else if (command.equals("setwhitelist")) {
+        } else if (command.equals("setwhitelist"))
+        {
 
             whitelistChannel = event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
             event.reply("Whitelist channel set to " + whitelistChannel.getAsMention()).queue();
             App.getPlugin().getConfig().set("whitelistChannelID", whitelistChannel.getId());
 
-        } else if (command.equals("setmemberrole")) {
+        } else if (command.equals("setmemberrole"))
+        {
 
             memberRole = event.getOption("role", OptionMapping::getAsRole);
             event.reply("Member role set to **" + memberRole.getName() + "**").queue();
             App.getPlugin().getConfig().set("memberRoleID", memberRole.getId());
 
-        } else if (command.equals("setstep3role")) {
+        } else if (command.equals("setstep3role"))
+        {
 
             step3role = event.getOption("role", OptionMapping::getAsRole);
             event.reply("Step 3 role set to **" + step3role.getName() + "**").queue();
             App.getPlugin().getConfig().set("step3RoleID", step3role.getId());
 
-        } else if (command.equals("list")) {
+        } else if (command.equals("list"))
+        {
             // Compile players to list unless no players online
-            if (event.getChannel() == gameChatChannel) {
+            if (event.getChannel() == gameChatChannel)
+            {
                 StringBuilder list = new StringBuilder();
-                if (Bukkit.getServer().getOnlinePlayers().size() > 0) {
+                if (Bukkit.getServer().getOnlinePlayers().size() > 0)
+                {
                     Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
                     PlayerMemory memory = new PlayerMemory();
                     List<Player> countedPlayers = new ArrayList<Player>();
 
-                    for (Player player : players) {
-
+                    for (Player player : players)
+                    {
                         File file = new File(App.getPlayerPath(player));
                         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
                         memory.setVanished(fileConfig.getBoolean("vanished"));
 
-                        if (memory.isVanished() == false) {
+                        if (memory.isVanished() == false)
+                        {
                             countedPlayers.add(player);
                         }
                     }
 
-                    if (countedPlayers.isEmpty()) {
+                    if (countedPlayers.isEmpty())
+                    {
                         event.reply("**There are no players online.**").queue();
-                    } else {
-                        for (Player player : countedPlayers) {
-                            if (list.length() > 0) {
+                    } else
+                    {
+                        for (Player player : countedPlayers)
+                        {
+                            if (list.length() > 0)
+                            {
                                 list.append("`, `");
                             }
                             list.append(player.getName());
                         }
-                        event.reply("**There are " + players.size() + " player(s) online:** `" + list.toString() + "`")
-                                .queue();
+                        event.reply("**There are " + players.size() + " player(s) online:** `" + list.toString() + "`").queue();
                     }
 
-                } else {
+                } else
+                {
                     event.reply("**There are no players online.**").queue();
                 }
 
-            } else {
-                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true)
-                        .queue();
+            } else
+            {
+                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true).queue();
             }
-        } else if (command.equals("tempban")) {
+        } else if (command.equals("tempban"))
+        {
             // Get args
             String member = event.getOption("username", OptionMapping::getAsString);
             int hours = event.getOption("hours", OptionMapping::getAsInt);
             String reason = event.getOption("reason", OptionMapping::getAsString);
             // Add ban if player is online
-            if (Bukkit.getServer().getPlayer(member) != null) {
+            if (Bukkit.getServer().getPlayer(member) != null)
+            {
                 Date date = new Date(System.currentTimeMillis() + 60 * 60 * 1000 * hours);
                 Bukkit.getServer().getBanList(BanList.Type.NAME).addBan(member, reason, date, null);
-                new BukkitRunnable() {
-
+                new BukkitRunnable()
+                {
                     @Override
                     public void run() {
                         Bukkit.getServer().getPlayer(member).kickPlayer(reason);
 
                     }
-
                 }.runTask(App.getPlugin());
-
-                event.reply(
-                        "**`" + member + "` was successfully banned for " + hours + " hours. Reason:** " + reason)
-                        .queue();
-            } else {
+                event.reply("**`" + member + "` was successfully banned for " + hours + " hours. Reason:** " + reason).queue();
+            } else
+            {
                 event.reply("**Player is offline!**").setEphemeral(true).queue();
             }
             // msg command
-        } else if (command.equals("msg")) {
+        } else if (command.equals("msg"))
+        {
             String username = event.getOption("username", OptionMapping::getAsString);
             String msg = event.getOption("message", OptionMapping::getAsString);
             // Check for correct channel
-            if (event.getChannel() == gameChatChannel) {
+            if (event.getChannel() == gameChatChannel)
+            {
                 // Check for player online
-                if (Bukkit.getServer().getPlayer(username) != null) {
-                    Bukkit.getServer().getPlayer(username)
-                            .sendMessage(org.bukkit.ChatColor.GRAY + "[" + org.bukkit.ChatColor.DARK_AQUA
-                                    + event.getUser().getName()
-                                    + org.bukkit.ChatColor.GRAY + " -> " + org.bukkit.ChatColor.DARK_AQUA + "me"
-                                    + org.bukkit.ChatColor.GRAY + "] " + org.bukkit.ChatColor.WHITE + msg);
-                    event.getGuild().getSystemChannel()
-                            .sendMessage(
-                                    "**Message from " + event.getUser().getAsMention() + " to **`" + username
-                                            + "`**:** " + msg)
-                            .queue();
+                if (Bukkit.getServer().getPlayer(username) != null)
+                {
+                    Bukkit.getServer().getPlayer(username).sendMessage(org.bukkit.ChatColor.GRAY + "[" + org.bukkit.ChatColor.DARK_AQUA+ user.getName()+ org.bukkit.ChatColor.GRAY + " -> " + org.bukkit.ChatColor.DARK_AQUA + "me" + org.bukkit.ChatColor.GRAY + "] " + org.bukkit.ChatColor.WHITE + msg);
+                    event.getGuild().getSystemChannel().sendMessage("**Message from " + user.getAsMention() + " to **`" + username + "`**:** " + msg).queue();
                     event.reply("Message sent!").setEphemeral(true).queue();
-                } else {
+                } else
+                {
                     event.reply("`" + username + "` is not online!").setEphemeral(true).queue();
                 }
-            } else {
-                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true)
-                        .queue();
+            } else
+            {
+                event.reply("This command must be executed in " + gameChatChannel.getAsMention()).setEphemeral(true).queue();
             }
-        } else if (command.equals("activity")) {
+        } else if (command.equals("activity"))
+        {
             // Get args
             String activity = event.getOption("activity", OptionMapping::getAsString);
 
             // Set activity
-            Bot.getJDA().getPresence().setPresence(OnlineStatus.ONLINE,
-                    Activity.of(ActivityType.CUSTOM_STATUS, activity));
+            Bot.getJDA().getPresence().setPresence(OnlineStatus.ONLINE, Activity.of(ActivityType.CUSTOM_STATUS, activity));
         }
         App.getPlugin().saveConfig();
     }
 
-    public static String getChatChannel() {
-        if (gameChatChannel != null) {
+    public static String getChatChannel()
+    {
+        if (gameChatChannel != null)
+        {
             return gameChatChannel.getId();
         } else
             return "none";
     }
 
-    public static String getWhitelistChannel() {
-        if (whitelistChannel != null) {
+    public static String getWhitelistChannel()
+    {
+        if (whitelistChannel != null)
+        {
             return whitelistChannel.getId();
         } else
             return "none";
     }
 
-    public static String getMemberRole() {
+    public static String getMemberRole()
+    {
         if (memberRole != null) {
             return memberRole.getId();
         } else
             return "none";
     }
 
-    public static String getStep3Role() {
+    public static String getStep3Role()
+    {
         if (step3role != null) {
             return step3role.getId();
         } else
@@ -211,7 +227,8 @@ public class CommandsManager extends ListenerAdapter {
 
     // Register commands on ready
     @Override
-    public void onGuildReady(@NotNull GuildReadyEvent event) {
+    public void onGuildReady(@NotNull GuildReadyEvent event)
+    {
         List<CommandData> commandData = new ArrayList<>();
         commandData.add(Commands.slash("setgamechat", "Set the channel that game chat occurs in.")
                 .addOption(OptionType.CHANNEL, "channel", "The channel to set.", true, false)
