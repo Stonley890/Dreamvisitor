@@ -2,6 +2,7 @@ package io.github.stonley890;
 
 import java.io.File;
 import java.io.IOException;
+// import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -9,6 +10,7 @@ import java.util.UUID;
 import javax.security.auth.login.LoginException;
 // import javax.swing.filechooser.FileNameExtensionFilter;
 
+// import org.apache.http.util.VersionInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -33,6 +35,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
+// import org.bukkit.plugin.Plugin;
+// import org.bukkit.plugin.PluginBase;
+// import org.bukkit.plugin.PluginDescriptionFile;
+// import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.shanerx.mojang.Mojang;
 // import org.yaml.snakeyaml.Yaml;
@@ -57,6 +63,7 @@ public class App extends JavaPlugin implements Listener {
     {
 
         plugin = this;
+        String version = getDescription().getVersion();
 
         // Start message & register events
         getLogger().info("Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
@@ -831,12 +838,13 @@ public class App extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerChatEvent(AsyncPlayerChatEvent event)
 	{
-        // Send chat messages to Discord
-        // IF chat is not paused AND the player is not an operator OR the player is an
-        // operator, send message
+        /**
+        Send chat messages to Discord
+        IF chat is not paused AND the player is not an operator OR the player is an
+        operator, send message
+        **/
         if (chatPaused == true)
 		{
-			// Initialize file
             File file = new File(getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
             List<String> bypassedPlayers = new ArrayList<>(100);
