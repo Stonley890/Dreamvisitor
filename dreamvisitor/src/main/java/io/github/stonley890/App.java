@@ -137,7 +137,7 @@ public class App extends JavaPlugin implements Listener {
                     fileConfig.load(file);
                 } catch (IOException | InvalidConfigurationException e1)
                 {
-                    getLogger().warning("Could not load 'pauseBypass.yml' file! Restart to reinitialize.")
+                    getLogger().warning("Could not load 'pauseBypass.yml' file! Restart to reinitialize.");
                     e1.printStackTrace();
                 }
 
@@ -829,21 +829,27 @@ public class App extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
+    public void onPlayerChatEvent(AsyncPlayerChatEvent event)
+	{
         // Send chat messages to Discord
         // IF chat is not paused AND the player is not an operator OR the player is an
         // operator, send message
-        if (chatPaused == true) {
+        if (chatPaused == true)
+		{
+			// Initialize file
             File file = new File(getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
             List<String> bypassedPlayers = new ArrayList<>(100);
 
-            try {
+			// Load file
+            try
+			{
                 fileConfig.load(file);
             } catch (IOException | InvalidConfigurationException e1) {
                 e1.printStackTrace();
             }
 
+			// Fetch bypassed players
             bypassedPlayers = (List<String>) fileConfig.get("players");
 
             // If player is on soft whitelist or is op, allow. If not, kick player.
