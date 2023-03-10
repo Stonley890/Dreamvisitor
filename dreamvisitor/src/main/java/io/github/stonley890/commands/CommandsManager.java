@@ -249,6 +249,8 @@ public class CommandsManager extends ListenerAdapter {
                 .addOption(OptionType.STRING, "activity", "The status to display on the bot.")
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
+        commandData.add(Commands.slash("presense", "Change the bot activity.").addOption(OptionType.STRING, "status", "The bot status.").setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
         event.getGuild().updateCommands().addCommands(commandData).queue();
 		commandData = null;
 
