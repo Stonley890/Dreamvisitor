@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import javax.security.auth.login.LoginException;
@@ -35,6 +36,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.junit.internal.runners.statements.InvokeMethod;
 import org.shanerx.mojang.Mojang;
 
 import io.github.stonley890.commands.CommandsManager;
@@ -51,6 +53,7 @@ public class App extends JavaPlugin implements Listener {
     public Location hubLocation;
 
     private static boolean botFailed = false;
+    private boolean panicAsked = false;
 
     @Override
     public void onEnable()
@@ -582,7 +585,7 @@ public class App extends JavaPlugin implements Listener {
 		*/
 		else if (label.equalsIgnoreCase("playerlimit"))
 		{
-            if (args[0] != null) {
+            if (args.length > 0) {
                 try
 			    {
 				    // Change config
@@ -618,7 +621,7 @@ public class App extends JavaPlugin implements Listener {
             	}
 			} else
 			{
-                sender.sendMessage(ChatColor.RED + "Missing arguments! /playerlimit <number of players (set -1 to disable)");
+                sender.sendMessage(ChatColor.GOLD + "Player limit override is currently set to " + playerlimit + ".");
             }
         }
 		/*
@@ -851,16 +854,30 @@ public class App extends JavaPlugin implements Listener {
             }
         } else if (label.equalsIgnoreCase("panic"))
         {
-            for (Player player : getServer().getOnlinePlayers()) {
-                if (!player.isOp())
+            if (!panicAsked)
+            {
+                panicAsked = true;
+                sender.sendMessage(ChatColor.RED + "Are you sure you want to kick all players? Run /panic again to confirm.");
+				new java.util.Timer().schedule(new TimerTask() {
+					@Override
+					public void run()
+					{
+						panicAsked = false;
+					}
+				}, 5000);
+            } else {
+                for (Player player : getServer().getOnlinePlayers())
                 {
-                    player.kickPlayer("Panic!");
-                }                
+                    if (!player.isOp())
+                	{
+                	    player.kickPlayer("Panic!");
+                	}                
+            	}
+            	playerlimit = 0;
+            	getConfig().set("playerlimit", 0);
+            	saveConfig();
+            	getServer().broadcastMessage(ChatColor.RED + "Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.");
             }
-            playerlimit = 0;
-            getConfig().set("playerlimit", 0);
-            saveConfig();
-            getServer().broadcastMessage(ChatColor.RED + "Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.");
         }
         return true;
     }
