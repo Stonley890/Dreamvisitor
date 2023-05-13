@@ -8,6 +8,10 @@ import org.bukkit.entity.Player;
 public class PlayerUtility {
     private static Map<String, PlayerMemory> playerMemory = new HashMap<>();
 
+    private PlayerUtility() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static PlayerMemory getPlayerMemory(Player player) {
         if(playerMemory.containsKey(player.getUniqueId().toString())) {
             PlayerMemory memory = new PlayerMemory();

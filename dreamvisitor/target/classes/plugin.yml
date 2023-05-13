@@ -1,6 +1,6 @@
-main: io.github.stonley890.App
+main: io.github.stonley890.Main
 name: Dreamvisitor
-version: 1.8.0
+version: 1.9.0
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -42,7 +42,7 @@ commands:
     permission: minecraft.command.op
   pausebypass:
     description: Let player bypass pause.
-    usage: /<command>
+    usage: /<command> <add|remove|list>
     permission: minecraft.command.op
   sethub:
     description: Set the hub location.
@@ -53,5 +53,9 @@ commands:
     usage: /<command>
   panic:
     description: Kicks all players and sets the player limit override to 0.
+    usage: /<command>
+    permission: minecraft.command.op
+  reloadbot:
+    description: Restarts the Dreamvisitor Discord bot
     usage: /<command>
     permission: minecraft.command.op
