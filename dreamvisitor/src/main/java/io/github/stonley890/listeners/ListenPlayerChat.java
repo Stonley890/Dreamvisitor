@@ -22,23 +22,20 @@ public class ListenPlayerChat implements Listener {
     
     @EventHandler
     @SuppressWarnings({"unchecked","null"})
-    public void onPlayerChatEvent(AsyncPlayerChatEvent event)
-	{
+    public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
         /**
         Send chat messages to Discord
         IF chat is not paused AND the player is not an operator OR the player is an
         operator, send message
         **/
 
-        if (Main.chatPaused && !event.isCancelled())
-		{
+        if (Main.chatPaused && !event.isCancelled()) {
             File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
             List<String> bypassedPlayers;
 
 			// Load file
-            try
-			{
+            try {
                 fileConfig.load(file);
             } catch (IOException | InvalidConfigurationException e1) {
                 e1.printStackTrace();
@@ -47,14 +44,13 @@ public class ListenPlayerChat implements Listener {
 			// Fetch bypassed players
             bypassedPlayers = ((List<String>)fileConfig.get("players"));
 
-            // If player is on soft whitelist or is op, allow. If not, kick player.
+            // If player is on soft whitelist or is op, allow.
             if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
                     || event.getPlayer().isOp()) {
                 String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
                 String channelId = DiscCommandsManager.getChatChannel();
 
-                if (channelId.equals("none")) {
-                    channelId = "2";
+                if (!channelId.equals("none")) {
                     Bot.getJda().getTextChannelById(channelId).sendMessage(chatMessage).queue();
                 }
                 
@@ -62,8 +58,8 @@ public class ListenPlayerChat implements Listener {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
             }  
-        } else if (!event.isCancelled())
-        {
+        } else if (!event.isCancelled()) {
+
             String chatMessage = "**" + event.getPlayer().getName() + "**: " + event.getMessage();
             String channelId = DiscCommandsManager.getChatChannel();
             if (!channelId.equals("none")) {
