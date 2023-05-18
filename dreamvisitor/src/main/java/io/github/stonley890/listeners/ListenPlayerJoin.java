@@ -11,12 +11,12 @@ public class ListenPlayerJoin implements Listener {
     
     @EventHandler
     @SuppressWarnings({"null"})
-    public void onPlayerJoinEvent(PlayerJoinEvent event)
-    {
+    public void onPlayerJoinEvent(PlayerJoinEvent event) {
+
+        // Send join messages
         String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
         String channelId = DiscCommandsManager.getChatChannel();
-        if (channelId.equals("none"))
-        {
+        if (!channelId.equals("none")) {
             Bot.getJda().getTextChannelById(channelId).sendMessage(chatMessage).queue();
         }
     }

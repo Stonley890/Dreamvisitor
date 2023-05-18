@@ -12,13 +12,12 @@ public class ListenPlayerQuit implements Listener {
     
     @EventHandler
     @SuppressWarnings({"null"})
-    public void onPlayerQuitEvent(PlayerQuitEvent event)
-    {
+    public void onPlayerQuitEvent(PlayerQuitEvent event) {
+
         // Send player quits to Discord
         String chatMessage = "**" + event.getPlayer().getName() + " left the game**";
         String channelId = DiscCommandsManager.getChatChannel();
-        if (!channelId.equals("none"))
-        {
+        if (!channelId.equals("none")) {
             Bot.getJda().getTextChannelById(channelId).sendMessage(chatMessage).queue();
         }
         PlayerUtility.setPlayerMemory(event.getPlayer(), null);

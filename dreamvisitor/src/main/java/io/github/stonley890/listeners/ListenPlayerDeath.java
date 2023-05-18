@@ -11,13 +11,12 @@ public class ListenPlayerDeath implements Listener {
     
     @EventHandler
     @SuppressWarnings({"null"})
-    public void onPlayerDeathEvent(PlayerDeathEvent event)
-    {
+    public void onPlayerDeathEvent(PlayerDeathEvent event) {
+
         // Send death messages
         String chatMessage = "**" + event.getDeathMessage() + "**";
         String channelId = DiscCommandsManager.getChatChannel();
-        if (channelId.equals("none"))
-        {
+        if (!channelId.equals("none")) {
             Bot.getJda().getTextChannelById(channelId).sendMessage(chatMessage).queue();
         }
     }
