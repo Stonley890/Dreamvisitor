@@ -52,11 +52,12 @@ public class DiscCommandsManager extends ListenerAdapter {
     public static void initChannelsRoles() {
         FileConfiguration config = Dreamvisitor.getPlugin().getConfig();
 
-        gameChatChannel = jda.getTextChannelById(config.getString("chatChannelID"));
-        gameLogChannel = jda.getTextChannelById(config.getString("logChannelID"));
-        whitelistChannel = jda.getTextChannelById(config.getString("whitelistChannelID"));
-        memberRole = jda.getRoleById(config.getString("memberRoleID"));
-        step3role = jda.getRoleById(config.getString("step3RoleID"));
+        if (config.getString("chatChannelID") != null) {gameChatChannel = jda.getTextChannelById(config.getString("chatChannelID"));}
+        if (config.getString("logChannelID") != null) {gameLogChannel = jda.getTextChannelById(config.getString("logChannelID"));}
+        if (config.getString("whitelistChannelID") != null) {whitelistChannel = jda.getTextChannelById(config.getString("whitelistChannelID"));}
+        if (config.getString("memberRoleID") != null) {memberRole = jda.getRoleById(config.getString("memberRoleID"));}
+        if (config.getString("step3RoleID") != null) {step3role = jda.getRoleById(config.getString("step3RoleID"));}
+
     }
 
     @Override

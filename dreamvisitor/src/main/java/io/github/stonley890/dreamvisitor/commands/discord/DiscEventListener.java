@@ -14,23 +14,30 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.shanerx.mojang.Mojang;
 
+import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 public class DiscEventListener extends ListenerAdapter {
-    
+
     String memberButtonID = "memberSkip";
+
+    TextChannel gameChatChannel = DiscCommandsManager.gameChatChannel;
+    TextChannel gameLogChannel = DiscCommandsManager.gameLogChannel;
+    TextChannel whitelistChannel = DiscCommandsManager.whitelistChannel;
+    Role memberRole = DiscCommandsManager.memberRole;
+    Role step3Role = DiscCommandsManager.step3role;
 
     @Override
     @SuppressWarnings({ "null" })
@@ -41,11 +48,6 @@ public class DiscEventListener extends ListenerAdapter {
         String username = event.getMessage().getContentRaw();
 
         Guild guild = event.getGuild();
-
-        Channel chatChannel = guild.getGuildChannelById(DiscCommandsManager.getChatChannel());
-        Channel whitelistChannel = guild.getGuildChannelById(DiscCommandsManager.getWhitelistChannel());
-        Role memberRole = guild.getRoleById(DiscCommandsManager.getMemberRole());
-        Role step3Role = guild.getRoleById(DiscCommandsManager.getStep3Role());
 
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
@@ -66,9 +68,7 @@ public class DiscEventListener extends ListenerAdapter {
                 // If player is not whitelisted, add them and change roles
                 if (!player.isWhitelisted()) {
                     Bukkit.getLogger().log(Level.INFO, "[Dreamvisitor] Whitelisting {0}.", username);
-                    guild.getSystemChannel()
-                            .sendMessage("Whitelisted `" + username + "` from user " + user.getAsMention())
-                            .queue();
+                    Bot.sendMessage(gameLogChannel, "Whitelisted `" + username + "` from user " + user.getAsMention());
                     player.setWhitelisted(true);
 
                     // Change roles if assigned
@@ -104,9 +104,9 @@ public class DiscEventListener extends ListenerAdapter {
         }
 
         // If in chat channel and chat is not paused, send to Minecraft
-        if (channel.equals(chatChannel) && !user.isBot()
+        if (channel.equals(gameChatChannel) && !user.isBot()
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
-            
+
             // Build message
             String discName = user.getName();
             StringBuilder sb = new StringBuilder();
@@ -121,16 +121,16 @@ public class DiscEventListener extends ListenerAdapter {
             if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                     PlayerMemory memory = new PlayerMemory();
-    
+
                     try {
                         // Init file config
                         File file = new File(Dreamvisitor.getPlayerPath(player));
                         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
                         memory.setDiscordToggled(fileConfig.getBoolean("discordToggled", true));
-    
+
                         // If player has discord on, build and send message
                         if (memory.isDiscordToggled()) {
-    
+
                             player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<"
                                     + sb.toString() + "> " + event.getMessage().getContentRaw());
                         }
@@ -150,16 +150,13 @@ public class DiscEventListener extends ListenerAdapter {
 
         User user = event.getUser();
 
-        Role memberRole = guild.getRoleById(DiscCommandsManager.getMemberRole());
-        Role step3Role = guild.getRoleById(DiscCommandsManager.getStep3Role());
-
         if (event.getButton().getId().equals(memberButtonID)) {
             if (memberRole != null) {
                 try {
                     event.getGuild().addRoleToMember(user, memberRole).queue();
                     event.getGuild().removeRoleFromMember(user, step3Role).queue();
-                } catch (HierarchyException exception) {
-                    reportError(event.getChannel(), guild, exception);
+                } catch (Exception exception) {
+                    reportError(event.getChannel(), exception);
                 }
             }
             event.reply("You now have access to the rest of the server!").setEphemeral(true).queue();
@@ -167,19 +164,19 @@ public class DiscEventListener extends ListenerAdapter {
         }
     }
 
-    @SuppressWarnings({"null"})
+    @SuppressWarnings({ "null" })
     void addMemberRole(MessageChannel channel, User user, Guild guild, Role memberRole, Role step3Role) {
         try {
             guild.addRoleToMember(user, memberRole).queue();
             guild.removeRoleFromMember(user, step3Role).queue();
-        } catch (HierarchyException exception) {
-            reportError(channel, guild, exception);
+        } catch (Exception exception) {
+            reportError(channel, exception);
         }
     }
 
     @SuppressWarnings({ "null" })
-    void reportError(MessageChannel channel, Guild guild, Exception exception) {
+    void reportError(MessageChannel channel, Exception exception) {
         channel.sendMessage("**An error has occured! Staff have been notified.**").queue();
-        guild.getSystemChannel().sendMessage("There was an error: " + exception).queue();
+        Bot.sendMessage(gameLogChannel, "There was an error: " + exception);
     }
 }
