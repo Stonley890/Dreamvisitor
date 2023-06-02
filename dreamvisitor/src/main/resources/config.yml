@@ -2,17 +2,25 @@
 bot-token: BOT_TOKEN
 
 # The channel ID of the game chat
-chatChannelID: 880269118975119410
+chatChannelID: none
+# The channel ID of the log chat
+chatChannelID: none
 # The channel ID of the whitelist chat
-whitelistChannelID: 858461513991323688
+whitelistChannelID: none
 # The role ID of step 3
-step3RoleID: 848779796200161342
+step3RoleID: none
 # The role ID of member
-memberRoleID: 848788549079793684
+memberRoleID: none
 
 # Don't change unless you know what you're doing!
+
+# Whether chat is paused or not
 chatPaused: false
+# Whether the soft whitelist is enabled or not
 softwhitelist: false
+# Player limit override (-1 for default)
 playerlimit: -1
+# Whether to globally disable pvp or not
 disablepvp: false
-hubLocation:
+# The location of the recorded hub
+hubLocation: none
