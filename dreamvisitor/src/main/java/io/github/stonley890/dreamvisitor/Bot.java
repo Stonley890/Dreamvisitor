@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 public class Bot {
 
-    private static JDA jda;
+    static JDA jda;
 
     private Bot() {
         throw new IllegalStateException("Utility class.");
@@ -42,6 +42,7 @@ public class Bot {
             // Wait for bot ready
             try {
                 jda.awaitReady();
+                
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();

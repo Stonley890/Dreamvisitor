@@ -9,6 +9,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.stonley890.dreamvisitor.commands.*;
 import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabPauseBypass;
+import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabSoftWhitelist;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -55,12 +57,16 @@ public class Dreamvisitor extends JavaPlugin {
         getCommand("pausechat").setExecutor(new CmdPausechat());
         getCommand("playerlimit").setExecutor(new CmdPlayerlimit());
         getCommand("radio").setExecutor(new CmdRadio());
-        getCommand("reloadbot").setExecutor(new CmdReloadbot());
+        // getCommand("reloadbot").setExecutor(new CmdReloadbot());
         getCommand("sethub").setExecutor(new CmdSethub());
         getCommand("softwhitelist").setExecutor(new CmdSoftwhitelist());
         getCommand("tagradio").setExecutor(new CmdTagRadio());
         getCommand("togglepvp").setExecutor(new CmdTogglepvp());
         getCommand("zoop").setExecutor(new CmdZoop());
+
+        // Initialize command tab completers
+        getCommand("pausebypass").setTabCompleter(new TabPauseBypass());
+        getCommand("softwhitelist").setTabCompleter(new TabSoftWhitelist());
 
         // Create config if needed
         getDataFolder().mkdir();
@@ -74,11 +80,11 @@ public class Dreamvisitor extends JavaPlugin {
         jda = Bot.getJda();
 
         if (!botFailed) {
-            // Send server start message
-            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been started.\n*Dreamvisitor " + version + "*");
-
             // Get saved data
             DiscCommandsManager.initChannelsRoles();
+
+            // Send server start message
+            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been started.\n*Dreamvisitor " + version + "*");
         }
 
         // If chat was previously paused, restore and notify in console
@@ -107,11 +113,7 @@ public class Dreamvisitor extends JavaPlugin {
         if (!botFailed) {
             // Shutdown messages
             getLogger().info("Closing bot instance.");
-            jda.getGuilds()
-                    .forEach(
-                            (Guild guild) -> guild.getSystemChannel().sendMessage("Server has been shutdown.").queue());
-            // Shut down bot
-            jda.shutdown();
+            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been shut down.");
         }
     }
 

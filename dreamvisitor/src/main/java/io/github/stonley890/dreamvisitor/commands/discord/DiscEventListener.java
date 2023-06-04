@@ -16,7 +16,6 @@ import org.shanerx.mojang.Mojang;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -42,6 +41,8 @@ public class DiscEventListener extends ListenerAdapter {
     @Override
     @SuppressWarnings({ "null" })
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+
+        Bukkit.getLogger().info("Message received.");
 
         User user = event.getAuthor();
         Channel channel = event.getChannel();
@@ -104,6 +105,11 @@ public class DiscEventListener extends ListenerAdapter {
         }
 
         // If in chat channel and chat is not paused, send to Minecraft
+        Bukkit.getLogger().info(gameChatChannel.getName());
+        Bukkit.getLogger().info("User bot? " + user.isBot());
+        Bukkit.getLogger().info("Chat paused? " + Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused"));
+
+
         if (channel.equals(gameChatChannel) && !user.isBot()
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
@@ -117,19 +123,19 @@ public class DiscEventListener extends ListenerAdapter {
                 sb.append(c);
             }
 
+            Bukkit.getLogger().log(Level.INFO, "[Discord] <{0}> {1}", event.getMessage().getContentRaw());
+
             // Check for each player
             if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                    PlayerMemory memory = new PlayerMemory();
 
                     try {
                         // Init file config
                         File file = new File(Dreamvisitor.getPlayerPath(player));
                         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-                        memory.setDiscordToggled(fileConfig.getBoolean("discordToggled", true));
 
                         // If player has discord on, build and send message
-                        if (memory.isDiscordToggled()) {
+                        if (fileConfig.getBoolean("discordToggled", true)) {
 
                             player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<"
                                     + sb.toString() + "> " + event.getMessage().getContentRaw());
@@ -145,8 +151,6 @@ public class DiscEventListener extends ListenerAdapter {
     @Override
     @SuppressWarnings({ "null" })
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
-
-        Guild guild = event.getGuild();
 
         User user = event.getUser();
 

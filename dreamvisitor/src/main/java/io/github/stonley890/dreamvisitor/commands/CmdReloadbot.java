@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,12 +18,20 @@ public class CmdReloadbot implements CommandExecutor {
         sender.sendMessage("Shutting down the bot instance...");
 
         if (!Dreamvisitor.botFailed) {
-            Bot.getJda().shutdown();
+            Bot.getJda().shutdownNow();
         }
 
         sender.sendMessage("Starting a new bot instance...");
         Dreamvisitor.botFailed = false;
-        Bot.startBot();
+        Bukkit.getScheduler().runTask(Dreamvisitor.plugin, new Runnable() {
+
+            @Override
+            public void run() {
+                Bot.startBot();
+            }
+            
+        });
+        
 
         if (Dreamvisitor.botFailed) {
             sender.sendMessage(ChatColor.RED + "The bot was unable to start due to an invalid login token.");
