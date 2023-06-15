@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.shanerx.mojang.Mojang;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
@@ -27,7 +28,7 @@ public class CmdPauseBypass implements CommandExecutor {
 
     @Override
     @SuppressWarnings({ "unchecked" })
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         // Load pauseBypass.yml
         File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");

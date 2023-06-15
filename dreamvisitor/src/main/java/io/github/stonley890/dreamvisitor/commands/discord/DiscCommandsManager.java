@@ -41,6 +41,8 @@ public class DiscCommandsManager extends ListenerAdapter {
     public static Role memberRole;
     public static Role step3role;
 
+    public 
+
     String channelOption = "channel";
     String usernameOption = "username";
     String activityOption = "activity";
@@ -255,34 +257,6 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         // Save configuration
         Dreamvisitor.getPlugin().saveConfig();
-    }
-
-    public static String getChatChannel() {
-        if (gameChatChannel != null) {
-            return gameChatChannel.getId();
-        } else
-            return "none";
-    }
-
-    public static String getWhitelistChannel() {
-        if (whitelistChannel != null) {
-            return whitelistChannel.getId();
-        } else
-            return "none";
-    }
-
-    public static String getMemberRole() {
-        if (memberRole != null) {
-            return memberRole.getId();
-        } else
-            return "none";
-    }
-
-    public static String getStep3Role() {
-        if (step3role != null) {
-            return step3role.getId();
-        } else
-            return "none";
     }
 
     // Register commands on ready

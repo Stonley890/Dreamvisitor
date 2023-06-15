@@ -42,7 +42,6 @@ public class DiscEventListener extends ListenerAdapter {
     @SuppressWarnings({ "null" })
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 
-        Bukkit.getLogger().info("Message received.");
 
         User user = event.getAuthor();
         Channel channel = event.getChannel();
@@ -105,12 +104,7 @@ public class DiscEventListener extends ListenerAdapter {
         }
 
         // If in chat channel and chat is not paused, send to Minecraft
-        Bukkit.getLogger().info(gameChatChannel.getName());
-        Bukkit.getLogger().info("User bot? " + user.isBot());
-        Bukkit.getLogger().info("Chat paused? " + Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused"));
-
-
-        if (channel.equals(gameChatChannel) && !user.isBot()
+        if (channel.equals(DiscCommandsManager.gameChatChannel) && !user.isBot()
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             // Build message

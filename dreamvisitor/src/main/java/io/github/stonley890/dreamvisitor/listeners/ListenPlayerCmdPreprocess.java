@@ -84,7 +84,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
             }
 
             if (isMsg) {
-                String message = "**" + player.getName() + "** sent command: " + cmd;
+                String message = "**" + player.getName() + "** sent command: `" + cmd + "`";
                 Bot.sendMessage(DiscCommandsManager.gameLogChannel, message);
             }
         }

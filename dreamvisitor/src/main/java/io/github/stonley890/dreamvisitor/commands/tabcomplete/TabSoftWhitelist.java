@@ -1,7 +1,9 @@
 package io.github.stonley890.dreamvisitor.commands.tabcomplete;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -10,28 +12,21 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.shanerx.mojang.Mojang;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import kotlin.collections.builders.ListBuilder;
 
 public class TabSoftWhitelist implements TabCompleter {
-
-    List<String> suggestions = new ListBuilder<>();
 
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
-        // Clear previous suggestions or create a new ListBuilder
-        if (suggestions != null) {
-            suggestions.clear();
-        } else {
-            suggestions = new ListBuilder<>();
-        }
+        ArrayList<String> suggestions = new ArrayList<>();
 
-        if (args.length == 0) {
+        if (args.length == 1) {
 
             // pausebypass <add|remove|list>
             suggestions.add("add");
@@ -40,7 +35,7 @@ public class TabSoftWhitelist implements TabCompleter {
             suggestions.add("on");
             suggestions.add("off");
 
-        } else if (args.length == 1) {
+        } else if (args.length == 2) {
 
             if (args[0].equals("add")) {
 
@@ -63,7 +58,7 @@ public class TabSoftWhitelist implements TabCompleter {
                 if (file.exists() && fileConfig.get("players") != null) {
 
                     // Get names and add them to tab suggestions
-                    for (String player : ((List<String>) fileConfig.get("players"))) {
+                    for (String player : ((List<String>) Objects.requireNonNull(fileConfig.get("players")))) {
                         suggestions.add(mojang.getPlayerProfile(player).getUsername());
                     }
 

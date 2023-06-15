@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor;
 
+import java.util.Objects;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -48,21 +49,23 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenPlayerLogin(), this);
         getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
 
+
+
         // Initialize command executors
-        getCommand("aradio").setExecutor(new CmdAradio());
-        getCommand("discord").setExecutor(new CmdDiscord());
-        getCommand("hub").setExecutor(new CmdHub());
-        getCommand("panic").setExecutor(new CmdPanic());
-        getCommand("pausebypass").setExecutor(new CmdPauseBypass());
-        getCommand("pausechat").setExecutor(new CmdPausechat());
-        getCommand("playerlimit").setExecutor(new CmdPlayerlimit());
-        getCommand("radio").setExecutor(new CmdRadio());
+        Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdAradio());
+        Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
+        Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
+        Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
+        Objects.requireNonNull(getCommand("pausebypass")).setExecutor(new CmdPauseBypass());
+        Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
+        Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
+        Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
         // getCommand("reloadbot").setExecutor(new CmdReloadbot());
-        getCommand("sethub").setExecutor(new CmdSethub());
-        getCommand("softwhitelist").setExecutor(new CmdSoftwhitelist());
-        getCommand("tagradio").setExecutor(new CmdTagRadio());
-        getCommand("togglepvp").setExecutor(new CmdTogglepvp());
-        getCommand("zoop").setExecutor(new CmdZoop());
+        Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
+        Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
+        Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdTagRadio());
+        Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
+        Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
 
         // Initialize command tab completers
         getCommand("pausebypass").setTabCompleter(new TabPauseBypass());

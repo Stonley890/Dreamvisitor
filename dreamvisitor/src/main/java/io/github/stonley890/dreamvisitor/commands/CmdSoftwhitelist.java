@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.shanerx.mojang.Mojang;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
@@ -26,7 +27,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         
         if (args.length == 0) {
             return false;
@@ -40,7 +41,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
         List<String> whitelistedPlayers = new ArrayList<>(100);
 
         // If file does not exist, create one
-        if (file.exists() == false) {
+        if (!file.exists()) {
             try {
                 file.createNewFile();
             } catch (IOException e) {
@@ -85,6 +86,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
                 OfflinePlayer player = Bukkit
                         .getOfflinePlayer(UUID.fromString(getCleanUUID(args[1])));
                 // Add
+                assert whitelistedPlayers != null;
                 if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
                     sender.sendMessage(ChatColor.RED + "That player is already on the whitelist.");
                 } else {
@@ -101,6 +103,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
                 OfflinePlayer player = Bukkit
                         .getOfflinePlayer(UUID.fromString(getCleanUUID(args[1])));
                 // Remove
+                assert whitelistedPlayers != null;
                 if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
                     whitelistedPlayers.remove(player.getUniqueId().toString());
                     sender.sendMessage(ChatColor.GOLD + "Removed "
@@ -116,6 +119,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
                 // Build list
                 StringBuilder list = new StringBuilder();
 
+                assert whitelistedPlayers != null;
                 for (String players : whitelistedPlayers) {
                     if (list.length() > 0) {
                         list.append(", ");
