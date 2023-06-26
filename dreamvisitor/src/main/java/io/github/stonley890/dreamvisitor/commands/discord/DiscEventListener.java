@@ -1,17 +1,27 @@
 package io.github.stonley890.dreamvisitor.commands.discord;
 
-import java.io.File;
-import java.util.UUID;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
+
+import com.google.common.collect.BiMap;
+import io.github.stonley890.dreamvisitor.data.AccountLink;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.shanerx.mojang.Mojang;
 
 import io.github.stonley890.dreamvisitor.Bot;
@@ -32,14 +42,8 @@ public class DiscEventListener extends ListenerAdapter {
 
     String memberButtonID = "memberSkip";
 
-    TextChannel gameChatChannel = DiscCommandsManager.gameChatChannel;
-    TextChannel gameLogChannel = DiscCommandsManager.gameLogChannel;
-    TextChannel whitelistChannel = DiscCommandsManager.whitelistChannel;
-    Role memberRole = DiscCommandsManager.memberRole;
-    Role step3Role = DiscCommandsManager.step3role;
-
     @Override
-    @SuppressWarnings({ "null" })
+    @SuppressWarnings({"null"})
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 
 
@@ -47,58 +51,105 @@ public class DiscEventListener extends ListenerAdapter {
         Channel channel = event.getChannel();
         String username = event.getMessage().getContentRaw();
 
+        Dreamvisitor plugin = Dreamvisitor.getPlugin();
+
         Guild guild = event.getGuild();
 
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
         // If in whitelist channel and username is "legal"
-        if (channel.equals(whitelistChannel) && !user.isBot() && !p.matcher(username).find()) {
+        if (channel.equals(DiscCommandsManager.whitelistChannel) && !user.isBot() && !p.matcher(username).find()) {
 
             // Connect to Mojang services
             Mojang mojang = new Mojang().connect();
 
             // Check for valid UUID
-            try {
+            if (mojang.getUUIDOfUsername(username) == null) {
+                // username does not exist alert
+                event.getChannel().sendMessage("`" + username
+                                + "` **could not be found!**\n*Don't have a Minecraft: Java Edition account? Press the button to get the member role.*")
+                        .setActionRow(Button.primary(memberButtonID, "Continue Anyways")).queue();
+                event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+            } else {
+
                 UUID uuid = UUID.fromString(mojang.getUUIDOfUsername(username).replaceFirst(
                         "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
                         "$1-$2-$3-$4-$5"));
-                // Get OfflinePlayer from username
-                OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 
-                // If player is not whitelisted, add them and change roles
-                if (!player.isWhitelisted()) {
-                    Bukkit.getLogger().log(Level.INFO, "[Dreamvisitor] Whitelisting {0}.", username);
-                    Bot.sendMessage(gameLogChannel, "Whitelisted `" + username + "` from user " + user.getAsMention());
-                    player.setWhitelisted(true);
+                // Link accounts
+                AccountLink.linkAccounts(uuid.toString(), user.getId());
 
-                    // Change roles if assigned
-                    addMemberRole(event.getChannel(), user, guild, memberRole, step3Role);
-
-                    // Reply with success
-                    event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
-                    event.getChannel().sendMessage("`" + username + "` has been whitelisted!").queue();
-
-                } else if (player.isWhitelisted()) {
-
-                    // If user is already whitelisted, send error.
-                    event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
-                    event.getChannel().sendMessage("`" + username + "` is already whitelisted.").queue();
-                    addMemberRole(event.getChannel(), user, guild, memberRole, step3Role);
+                // Access whitelist.json file
+                String whitelistPath = Bukkit.getServer().getWorldContainer().getPath() + "/whitelist.json";
+                // Parse whitelist.json to string list
+                List<String> lines = null;
+                try {
+                    lines = Files.readAllLines(new File(whitelistPath).toPath());
+                } catch (IOException e) {
+                    Bot.sendMessage((TextChannel) channel, "There was a problem accessing the whitelist file. Staff have been notified of the issue.");
+                    Bot.sendMessage(DiscCommandsManager.gameLogChannel, "There was a problem accessing the whitelist file. Check console for stacktrace.");
+                    Bukkit.getLogger().warning("There was a problem accessing the whitelist file.");
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
 
-                // username does not exist alert
-                event.getChannel().sendMessage("`" + username
-                        + "` **could not be found!**\n*Don't have a Minecraft: Java Edition account? Press the button to get the member role.*")
-                        .setActionRow(Button.primary(memberButtonID, "Continue Anyways")).queue();
-                event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+                // Format string list to StringBuilder
+                StringBuilder fileString = new StringBuilder();
+                if (lines != null) {
+                    for (String line : lines) {
+                        fileString.append(line);
+                    }
+                }
+
+                // Format string to JSONArray
+                JSONArray whitelist = new JSONArray(fileString.toString());
+
+                // Check if already whitelisted
+                boolean whitelisted = false;
+                for (Object entry : whitelist) {
+                    JSONObject object = (JSONObject) entry;
+                    if (object.get("uuid").equals(uuid.toString())) {
+                        whitelisted = true;
+                    }
+                }
+
+                if (whitelisted) {
+                    event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
+                    Bot.sendMessage((TextChannel) channel, "`" + username + "` is already whitelisted!");
+                } else {
+                    Bukkit.getLogger().info("Player is not whitelisted.");
+
+                    // Create entry
+                    JSONObject whitelistEntry = new JSONObject();
+                    whitelistEntry.put("uuid", uuid.toString());
+                    whitelistEntry.put("name", username);
+
+                    // Add to whitelist.json
+                    whitelist.put(whitelistEntry);
+
+                    // Write to whitelist.json file
+                    try {
+                        Files.write(new File(whitelistPath).toPath(), whitelist.toString(4).getBytes(StandardCharsets.UTF_8));
+                    } catch (IOException e) {
+                        Bot.sendMessage((TextChannel) channel, "There was a problem writing to the whitelist file. Staff have been notified of the issue.");
+                        Bot.sendMessage(DiscCommandsManager.gameLogChannel, "There was a problem writing to the whitelist file. Check console for stacktrace.");
+                        Bukkit.getLogger().warning("There was a problem writing to the whitelist file.");
+                        e.printStackTrace();
+                    }
+
+                    // reload whitelist
+                    Bukkit.reloadWhitelist();
+
+                    // success message
+                    event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
+                    Bot.sendMessage((TextChannel) channel, "`" + username + "` has been whitelisted!");
+                }
             }
 
-        } else if (channel.equals(whitelistChannel) && !user.isBot()) {
+        } else if (channel.equals(DiscCommandsManager.whitelistChannel) && !user.isBot()) {
 
             // illegal username
             event.getChannel().sendMessage("`" + username
-                    + "` **contains illegal characters!**\n*Don't have a Minecraft: Java Edition account? Press the button to get the member role.*")
+                            + "` **contains illegal characters!**\n*Don't have a Minecraft: Java Edition account? Press the button to get the member role.*")
                     .setActionRow(Button.primary(memberButtonID, "Continue Anyways")).queue();
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
         }
@@ -132,7 +183,7 @@ public class DiscEventListener extends ListenerAdapter {
                         if (fileConfig.getBoolean("discordToggled", true)) {
 
                             player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<"
-                                    + sb.toString() + "> " + event.getMessage().getContentRaw());
+                                    + sb + "> " + event.getMessage().getContentRaw());
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -143,16 +194,16 @@ public class DiscEventListener extends ListenerAdapter {
     }
 
     @Override
-    @SuppressWarnings({ "null" })
+    @SuppressWarnings({"null"})
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
 
         User user = event.getUser();
 
         if (event.getButton().getId().equals(memberButtonID)) {
-            if (memberRole != null) {
+            if (DiscCommandsManager.memberRole != null) {
                 try {
-                    event.getGuild().addRoleToMember(user, memberRole).queue();
-                    event.getGuild().removeRoleFromMember(user, step3Role).queue();
+                    event.getGuild().addRoleToMember(user, DiscCommandsManager.memberRole).queue();
+                    event.getGuild().removeRoleFromMember(user, DiscCommandsManager.step3role).queue();
                 } catch (Exception exception) {
                     reportError(event.getChannel(), exception);
                 }
@@ -162,19 +213,19 @@ public class DiscEventListener extends ListenerAdapter {
         }
     }
 
-    @SuppressWarnings({ "null" })
-    void addMemberRole(MessageChannel channel, User user, Guild guild, Role memberRole, Role step3Role) {
+    @SuppressWarnings({"null"})
+    void addMemberRole(MessageChannel channel, User user, Guild guild) {
         try {
-            guild.addRoleToMember(user, memberRole).queue();
-            guild.removeRoleFromMember(user, step3Role).queue();
+            guild.addRoleToMember(user, DiscCommandsManager.memberRole).queue();
+            guild.removeRoleFromMember(user, DiscCommandsManager.step3role).queue();
         } catch (Exception exception) {
             reportError(channel, exception);
         }
     }
 
-    @SuppressWarnings({ "null" })
+    @SuppressWarnings({"null"})
     void reportError(MessageChannel channel, Exception exception) {
         channel.sendMessage("**An error has occured! Staff have been notified.**").queue();
-        Bot.sendMessage(gameLogChannel, "There was an error: " + exception);
+        Bot.sendMessage(DiscCommandsManager.gameLogChannel, "There was an error: " + exception);
     }
 }

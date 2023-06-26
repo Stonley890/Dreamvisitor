@@ -45,7 +45,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                sender.sendMessage(
+                sender.sendMessage(Dreamvisitor.prefix +
                         ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
                 e.printStackTrace();
             }
@@ -61,7 +61,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
             try {
                 fileConfig.save(file);
             } catch (IOException e) {
-                sender.sendMessage(
+                sender.sendMessage(Dreamvisitor.prefix +
                         ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
                 e.printStackTrace();
             }
@@ -71,7 +71,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
         try {
             fileConfig.load(file);
         } catch (IOException | InvalidConfigurationException e1) {
-            sender.sendMessage(ChatColor.RED + "There was a problem accessing the file. Check logs for error.");
+            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "There was a problem accessing the file. Check logs for error.");
             e1.printStackTrace();
         }
 
@@ -88,10 +88,10 @@ public class CmdSoftwhitelist implements CommandExecutor {
                 // Add
                 assert whitelistedPlayers != null;
                 if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
-                    sender.sendMessage(ChatColor.RED + "That player is already on the whitelist.");
+                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "That player is already on the whitelist.");
                 } else {
                     whitelistedPlayers.add(player.getUniqueId().toString());
-                    sender.sendMessage(ChatColor.GOLD + "Added "
+                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Added "
                             + mojang.getPlayerProfile(player.getUniqueId().toString()).getUsername()
                             + " to the whitelist.");
                 }
@@ -106,11 +106,11 @@ public class CmdSoftwhitelist implements CommandExecutor {
                 assert whitelistedPlayers != null;
                 if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
                     whitelistedPlayers.remove(player.getUniqueId().toString());
-                    sender.sendMessage(ChatColor.GOLD + "Removed "
+                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Removed "
                             + mojang.getPlayerProfile(player.getUniqueId().toString()).getUsername()
                             + " from the whitelist.");
                 } else {
-                    sender.sendMessage(ChatColor.RED + "That player is not on the whitelist.");
+                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "That player is not on the whitelist.");
                 }
             } else if (args[0].equalsIgnoreCase("list")) {
                 Mojang mojang = new Mojang();
@@ -126,26 +126,26 @@ public class CmdSoftwhitelist implements CommandExecutor {
                     }
                     list.append(mojang.getPlayerProfile(players).getUsername());
                 }
-                sender.sendMessage(ChatColor.GOLD + "Players soft-whitelisted: " + list.toString());
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Players soft-whitelisted: " + list);
 
             } else if (args[0].equalsIgnoreCase("on")) {
                 // Set config
                 plugin.getConfig().set("softwhitelist", true);
                 plugin.saveConfig();
-                sender.sendMessage(ChatColor.GOLD + "Soft whitelist enabled.");
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Soft whitelist enabled.");
             } else if (args[0].equalsIgnoreCase("off")) {
                 // Set config
                 plugin.getConfig().set("softwhitelist", false);
                 plugin.saveConfig();
-                sender.sendMessage(ChatColor.GOLD + "Soft whitelist disabled.");
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Soft whitelist disabled.");
             } else {
-                sender.sendMessage(
+                sender.sendMessage(Dreamvisitor.prefix +
                         ChatColor.RED + "Incorrect arguements! /softwhitelist <add|remove|list|on|off> <player>");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            sender.sendMessage(
+            sender.sendMessage(Dreamvisitor.prefix +
                     ChatColor.RED + "Missing arguments! /softwhitelist <add|remove|list|on|off> <player>");
         }
 

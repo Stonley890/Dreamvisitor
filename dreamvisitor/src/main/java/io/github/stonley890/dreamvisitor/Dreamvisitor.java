@@ -1,11 +1,21 @@
 package io.github.stonley890.dreamvisitor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.logging.Level;
 
+import io.github.stonley890.dreamvisitor.data.AccountLink;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.stonley890.dreamvisitor.commands.*;
@@ -24,6 +34,7 @@ import net.dv8tion.jda.api.entities.Guild;
 public class Dreamvisitor extends JavaPlugin {
 
     public final String version = getDescription().getVersion();
+    public static final String prefix = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
 
     public static Dreamvisitor plugin;
     public static boolean chatPaused;
@@ -48,8 +59,7 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenPlayerJoin(), this);
         getServer().getPluginManager().registerEvents(new ListenPlayerLogin(), this);
         getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
-
-
+        getServer().getPluginManager().registerEvents(new ListenInventoryClose(), this);
 
         // Initialize command executors
         Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdAradio());
@@ -66,14 +76,19 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdTagRadio());
         Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
         Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
+        Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
+        Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
 
         // Initialize command tab completers
-        getCommand("pausebypass").setTabCompleter(new TabPauseBypass());
-        getCommand("softwhitelist").setTabCompleter(new TabSoftWhitelist());
+        Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
+        Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
 
         // Create config if needed
         getDataFolder().mkdir();
         saveDefaultConfig();
+
+
+        AccountLink.init();
 
         // Start message
         getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
@@ -101,6 +116,14 @@ public class Dreamvisitor extends JavaPlugin {
         playerlimit = getConfig().getInt("playerlimit");
         Bukkit.getServer().getLogger().info(
                 "[Dreamvisitor] Player limit override is currently set to " + playerlimit);
+
+        if (plugin.getConfig().get("itemBlacklist") != null ) {
+            ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) plugin.getConfig().get("itemBlacklist");
+            if (itemList != null) {
+                CmdItemBlacklist.badItems = itemList.toArray(new ItemStack[0]);
+            }
+
+        }
     }
 
     public static Dreamvisitor getPlugin() {
@@ -117,6 +140,7 @@ public class Dreamvisitor extends JavaPlugin {
             // Shutdown messages
             getLogger().info("Closing bot instance.");
             Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been shut down.");
+            Bot.getJda().shutdown();
         }
     }
 

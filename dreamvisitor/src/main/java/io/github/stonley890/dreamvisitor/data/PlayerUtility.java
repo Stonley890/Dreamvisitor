@@ -6,7 +6,7 @@ import java.util.Map;
 import org.bukkit.entity.Player;
 
 public class PlayerUtility {
-    private static Map<String, PlayerMemory> playerMemory = new HashMap<>();
+    private static final Map<String, PlayerMemory> playerMemory = new HashMap<>();
 
     private PlayerUtility() {
         throw new IllegalStateException("Utility class");

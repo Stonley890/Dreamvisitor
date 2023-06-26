@@ -11,29 +11,32 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import org.jetbrains.annotations.NotNull;
 
 public class CmdHub implements CommandExecutor {
 
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         if (sender instanceof Player) {
             if (plugin.getConfig().getLocation("hubLocation") == null) {
-                sender.sendMessage(ChatColor.RED + "No hub is currently set!");
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "No hub is currently set!");
             } else {
-                plugin.hubLocation = plugin.getConfig().getLocation("hubLocation");
+                Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
                 Player player = (Player) sender;
-                player.teleport(plugin.hubLocation, TeleportCause.COMMAND);
-                player.spawnParticle(Particle.FIREWORKS_SPARK, plugin.hubLocation, 100);
-                player.playSound(plugin.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
+                assert Dreamvisitor.hubLocation != null;
+                player.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
+                player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                         1f);
             }
+            return true;
         } else {
-            sender.sendMessage("This command must be run by a player!");
+            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "This command must be run by a player.");
+            return false;
         }
-        return true;
     }
 
 }

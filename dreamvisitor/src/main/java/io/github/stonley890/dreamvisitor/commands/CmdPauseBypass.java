@@ -38,13 +38,15 @@ public class CmdPauseBypass implements CommandExecutor {
         if (!file.exists()) {
             try {
                 if (!file.createNewFile()) {
-                    sender.sendMessage(ChatColor.RED + "There was a problem accessing the file.");
+                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "There was a problem accessing the file.");
+                    return false;
                 }
 
             } catch (IOException e) {
-                sender.sendMessage(
+                sender.sendMessage(Dreamvisitor.prefix +
                         ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
                 e.printStackTrace();
+                return false;
             }
         }
 
@@ -60,28 +62,40 @@ public class CmdPauseBypass implements CommandExecutor {
         try {
             fileConfig.load(file);
         } catch (IOException | InvalidConfigurationException e1) {
-            sender.sendMessage(
+            sender.sendMessage(Dreamvisitor.prefix +
                     ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
             e1.printStackTrace();
+            return false;
         }
         // Get bypassing players
         bypassedPlayers = (List<String>) fileConfig.get(playerList);
 
         if (args.length == 0) {
+            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "Missing arguments!");
             return false;
         }
 
         // Adding a player
         if (args[0].equalsIgnoreCase("add")) {
 
-            // Attempt to modify
-            modifyList(true, args[1], sender);
+            if (args.length > 1) {
+                // Attempt to modify
+                modifyList(true, args[1], sender);
+            } else {
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "You must include a player!");
+            }
+
 
         } // Removing a player
         else if (args[0].equalsIgnoreCase("remove")) {
-            
-            // Attempt to modify
-            modifyList(false, args[1], sender);
+
+            if (args.length > 1) {
+                // Attempt to modify
+                modifyList(false, args[1], sender);
+            } else {
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "You must include a player!");
+            }
+
 
         } else if (args[0].equalsIgnoreCase("list")) {
 
@@ -96,9 +110,10 @@ public class CmdPauseBypass implements CommandExecutor {
                 }
                 list.append(mojang.getPlayerProfile(players).getUsername());
             }
-            sender.sendMessage(ChatColor.GOLD + "Players bypassing: " + list.toString());
+            sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Players bypassing: " + list);
 
         } else {
+            sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Incorrect arguments!");
             return false;
         }
 
@@ -131,17 +146,17 @@ public class CmdPauseBypass implements CommandExecutor {
 
         if (bypassedPlayers.contains(player.getUniqueId().toString())) {
             if (add) {
-                sender.sendMessage(ChatColor.RED + "That player is already allowed.");
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "That player is already allowed.");
             } else {
                 bypassedPlayers.remove(player.getUniqueId().toString());
-                sender.sendMessage(ChatColor.GOLD + playerName + " is no longer bypassing.");
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + playerName + " is no longer bypassing.");
             }
         } else {
             if (add) {
                 bypassedPlayers.add(player.getUniqueId().toString());
-                sender.sendMessage(ChatColor.GOLD + playerName + " is now bypassing.");
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + playerName + " is now bypassing.");
             } else {
-                sender.sendMessage(ChatColor.RED + "That player is already not allowed.");
+                sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "That player is already not allowed.");
             }
         }
 

@@ -9,7 +9,7 @@ commands:
   pausechat:
     description: Pauses chat for non-OPs.
     usage: /<command> 
-    permission: minecraft.command.op
+    permission: dreamvisitor.pausechat
   aradio:
     description: Sends a message to all OPs.
     usage: /<command> <message>
@@ -20,30 +20,30 @@ commands:
   tagradio:
     description: Sends a messages to all players with specified tag.
     usage: /<command> <tag> <message>
-    permission: minecraft.command.op
+    permission: dreamvisitor.tagradio
   discord:
     description: Toggles Discord message visibility.
     usage: /<command>
   zoop:
     description: Vanish from Discord.
     usage: /<command>
-    permission: minecraft.command.op
+    permission: dreamvisitor.zoop
   softwhitelist:
     description: Add or remove a player to/from the soft whitelist.
     usage: /<command> <add|remove|list|on|off> <player>
-    permission: minecraft.command.op
+    permission: dreamvisitor.softwhitelist
   playerlimit:
     description: Override server player limit.
     usage: /<command> <number of players (set -1 to disable)>
-    permission: minecraft.command.op
+    permission: dreamvisitor.playerlimit
   togglepvp:
     description: Globally disable PvP.
     usage: /<command>
-    permission: minecraft.command.op
+    permission: dreanvisitor.togglepvp
   pausebypass:
     description: Let player bypass pause.
     usage: /<command> <add|remove|list>
-    permission: minecraft.command.op
+    permission: dreamvisitor.pausechat
   sethub:
     description: Set the hub location.
     usage: /<command>
@@ -54,8 +54,42 @@ commands:
   panic:
     description: Kicks all players and sets the player limit override to 0.
     usage: /<command>
-    permission: minecraft.command.op
+    permission: dreamvisitor.panic
   reloadbot:
     description: Restarts the Dreamvisitor Discord bot
     usage: /<command>
     permission: minecraft.command.op
+  itemblacklist:
+    description: Access the item blacklist
+    usage: /<command>
+    permission: dreamvisitor.itemblacklist
+  tribeupdate:
+    description: Update Discord role based on in-game team
+    usage: /<command> [player]
+    permission: minecraft.command.op
+
+permissions:
+  dreamvisitor.pausechat:
+    description: Allows all chat pause commands
+    default: op
+  dreamvisitor.tagradio:
+    description: Allows the tagradio command
+    default: op
+  dreamvisitor.zoop:
+    description: Allows the zoop command
+    default: op
+  dreamvisitor.softwhitelist:
+    description: Allows the softwhitelist command
+    default: op
+  dreamvisitor.playerlimit:
+    description: Allows the playerlimit command
+    default: op
+  dreanvisitor.togglepvp:
+    description: Allows the togglepvp command
+    default: op
+  dreamvisitor.panic:
+    description: Allows the panic command
+    default: op
+  dreamvisitor.itemblacklist:
+    description: Allows the itemblacklist command
+    default: op

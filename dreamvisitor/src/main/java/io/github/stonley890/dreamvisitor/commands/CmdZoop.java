@@ -15,13 +15,14 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
+import org.jetbrains.annotations.NotNull;
 
 public class CmdZoop implements CommandExecutor {
 
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         // If cmd executor is player
         if (sender instanceof Player) {
@@ -55,7 +56,7 @@ public class CmdZoop implements CommandExecutor {
                 fileConfig.set("vanished", memory.isVanished());
                 fileConfig.save(file);
 
-                player.sendMessage("\u00a79Discord vanished toggled to " + memory.isVanished() + ".");
+                player.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Discord vanish toggled to " + String.valueOf(memory.isVanished()) + ".");
 
             } catch (Exception e) {
                 Bukkit.getLogger().warning("ERROR: Unable to access player memory!");

@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -10,33 +11,32 @@ import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
+import org.jetbrains.annotations.NotNull;
 
 public class CmdAradio implements CommandExecutor {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+
+        if (args.length == 0) {
+            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "You must attach a message! /aradio <message>");
+            return false;
+        }
+
         // If sender is a player
         if (sender instanceof Player) {
 
             Player player = (Player) sender;
-            if (args.length > 0) {
-                buildMessage(args, player.getName());
-                return true;
-            } else {
-                return false;
-            }
+            buildMessage(args, player.getName());
+            return true;
 
         } // If sender is the console
         else if (sender instanceof ConsoleCommandSender) {
 
-            if (args.length > 0) {
-                buildMessage(args, "Console");
-                return true;
-            } else {
-                return false;
-            }
+            buildMessage(args, "Console");
+            return true;
         } else {
+            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "This command must be run by a player or the console.");
             return false;
         }
     }
@@ -50,10 +50,10 @@ public class CmdAradio implements CommandExecutor {
         }
 
         // Build message
-        StringBuilder message = new StringBuilder().append(ChatColor.DARK_AQUA + "[Admin Radio] " + nameColor + "<" + name + "> " + ChatColor.WHITE);
+        StringBuilder message = new StringBuilder().append(ChatColor.DARK_AQUA).append("[Admin Radio] ").append(nameColor).append("<").append(name).append("> ").append(ChatColor.WHITE);
         for (int i = 0; i != args.length; i++)
         {
-            message.append(args[i] + " ");
+            message.append(args[i]).append(" ");
         }
 
         String finalMessage = message.toString();

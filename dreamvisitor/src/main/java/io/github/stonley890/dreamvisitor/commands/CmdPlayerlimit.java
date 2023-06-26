@@ -8,13 +8,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import org.jetbrains.annotations.NotNull;
 
 public class CmdPlayerlimit implements CommandExecutor {
 
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (args.length > 0) {
             try {
                 // Change config
@@ -25,27 +26,27 @@ public class CmdPlayerlimit implements CommandExecutor {
                 if (args[0].equals("-1")) {
                     for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                         if (player.isOp()) {
-                            player.sendMessage(ChatColor.GOLD + "Player limit override disabled");
+                            player.sendMessage(ChatColor.BLUE + "Player limit override disabled");
                         }
                     }
                 } else if (result > -1) {
                     for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                         if (player.isOp()) {
-                            player.sendMessage(ChatColor.GOLD + "Player limit override set to " + args[0]);
+                            player.sendMessage(ChatColor.BLUE + "Player limit override set to " + args[0]);
                         }
                     }
                 } else {
-                    sender.sendMessage(ChatColor.RED
+                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED
                             + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
                     return false;
                 }
             } catch (NumberFormatException e) {
-                sender.sendMessage(
+                sender.sendMessage(Dreamvisitor.prefix +
                         ChatColor.RED + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
                 return false;
             }
         } else {
-            sender.sendMessage(ChatColor.GOLD + "Player limit override is currently set to " + Dreamvisitor.playerlimit + ".");
+            sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Player limit override is currently set to " + Dreamvisitor.playerlimit + ".");
         }
         return true;
     }

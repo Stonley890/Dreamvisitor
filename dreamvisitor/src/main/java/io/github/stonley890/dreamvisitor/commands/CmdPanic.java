@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
+import org.jetbrains.annotations.NotNull;
 
 public class CmdPanic implements CommandExecutor {
 
@@ -19,10 +20,10 @@ public class CmdPanic implements CommandExecutor {
     boolean panicAsked = false;
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!panicAsked) {
             panicAsked = true;
-            sender.sendMessage(
+            sender.sendMessage(Dreamvisitor.prefix +
                     ChatColor.RED + "Are you sure you want to kick all players? Run /panic again to confirm.");
             new java.util.Timer().schedule(new TimerTask() {
                 @Override

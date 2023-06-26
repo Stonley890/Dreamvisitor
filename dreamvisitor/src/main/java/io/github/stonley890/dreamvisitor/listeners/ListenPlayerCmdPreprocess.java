@@ -80,7 +80,10 @@ public class ListenPlayerCmdPreprocess implements Listener {
         } else {
             boolean isMsg = false;
             for (String string : msgAliases) {
-                if (cmd.startsWith(string)) {isMsg = true;}
+                if (cmd.startsWith(string)) {
+                    isMsg = true;
+                    break;
+                }
             }
 
             if (isMsg) {

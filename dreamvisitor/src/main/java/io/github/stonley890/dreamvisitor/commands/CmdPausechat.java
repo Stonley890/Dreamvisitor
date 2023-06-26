@@ -9,14 +9,14 @@ import org.bukkit.command.CommandSender;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
+import org.jetbrains.annotations.NotNull;
 
 public class CmdPausechat implements CommandExecutor {
 
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    @SuppressWarnings({ "null" })
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         // If chat is paused, unpause. If not, pause
         if (Dreamvisitor.chatPaused) {
@@ -26,7 +26,7 @@ public class CmdPausechat implements CommandExecutor {
             plugin.getConfig().set("chatPaused", Dreamvisitor.chatPaused);
 
             // Broadcast to server
-            Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been unpaused.");
+            Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been unpaused.");
             
             // Broadcast to chat channel
             Bot.sendMessage(DiscCommandsManager.gameChatChannel, "**Chat has been unpaused. Messages will now be sent to Minecraft**");
@@ -38,7 +38,7 @@ public class CmdPausechat implements CommandExecutor {
             plugin.getConfig().set("chatPaused", Dreamvisitor.chatPaused);
 
             // Broadcast to server
-            Bukkit.getServer().broadcastMessage(ChatColor.GOLD + "Chat has been paused.");
+            Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been paused.");
 
             // Broadcast to chat channel
             Bot.sendMessage(DiscCommandsManager.gameChatChannel, "**Chat has been paused. Messages will not be sent to Minecraft**");

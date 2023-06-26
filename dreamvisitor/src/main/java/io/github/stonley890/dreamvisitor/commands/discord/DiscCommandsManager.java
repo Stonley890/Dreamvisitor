@@ -1,11 +1,10 @@
 package io.github.stonley890.dreamvisitor.commands.discord;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -40,8 +39,8 @@ public class DiscCommandsManager extends ListenerAdapter {
     public static TextChannel whitelistChannel;
     public static Role memberRole;
     public static Role step3role;
-
-    public 
+    public static Role[] tribeRole;
+    final String[] tribeNames = {"HiveWing", "IceWing", "LeafWing", "MudWing", "NightWing", "RainWing", "SandWing", "SeaWing", "SilkWing", "SkyWing"};
 
     String channelOption = "channel";
     String usernameOption = "username";
@@ -49,21 +48,38 @@ public class DiscCommandsManager extends ListenerAdapter {
 
     static JDA jda = Bot.getJda();
 
+    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+
     // Get channels and roles from config
-    @SuppressWarnings({ "null" })
+    @SuppressWarnings({"null"})
     public static void initChannelsRoles() {
         FileConfiguration config = Dreamvisitor.getPlugin().getConfig();
 
-        if (config.getString("chatChannelID") != null) {gameChatChannel = jda.getTextChannelById(config.getString("chatChannelID"));}
-        if (config.getString("logChannelID") != null) {gameLogChannel = jda.getTextChannelById(config.getString("logChannelID"));}
-        if (config.getString("whitelistChannelID") != null) {whitelistChannel = jda.getTextChannelById(config.getString("whitelistChannelID"));}
-        if (config.getString("memberRoleID") != null) {memberRole = jda.getRoleById(config.getString("memberRoleID"));}
-        if (config.getString("step3RoleID") != null) {step3role = jda.getRoleById(config.getString("step3RoleID"));}
+        if (config.getString("chatChannelID") != null) {
+            gameChatChannel = jda.getTextChannelById(Objects.requireNonNull(config.getString("chatChannelID")));
+        }
+        if (config.getString("logChannelID") != null) {
+            gameLogChannel = jda.getTextChannelById(Objects.requireNonNull(config.getString("logChannelID")));
+        }
+        if (config.getString("whitelistChannelID") != null) {
+            whitelistChannel = jda.getTextChannelById(Objects.requireNonNull(config.getString("whitelistChannelID")));
+        }
+        if (config.getString("memberRoleID") != null) {
+            memberRole = jda.getRoleById(Objects.requireNonNull(config.getString("memberRoleID")));
+        }
+        if (config.getString("step3RoleID") != null) {
+            step3role = jda.getRoleById(Objects.requireNonNull(config.getString("step3RoleID")));
+        }
+        if (config.getString("tribeRoles") != null) {
+            for (int i = 0; i < tribeRole.length; i++) {
+                tribeRole[i] = jda.getRoleById(config.getStringList("tribeRoles").get(i));
+            }
+        }
 
     }
 
     @Override
-    @SuppressWarnings({ "null" })
+    @SuppressWarnings({"null"})
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         String command = event.getName();
         User user = event.getUser();
@@ -95,23 +111,34 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Update config
             Dreamvisitor.getPlugin().getConfig().set("whitelistChannelID", whitelistChannel.getId());
 
-        } else if (command.equals("setmemberrole")) {
+        } else if (command.equals("setrole")) {
 
-            // Get role from args
-            memberRole = event.getOption("role", OptionMapping::getAsRole);
-            // Reply success
-            event.reply("Member role set to **" + memberRole.getName() + "**").queue();
-            // Update config
-            Dreamvisitor.getPlugin().getConfig().set("memberRoleID", memberRole.getId());
+            // Get role to set
+            String targetRole = Objects.requireNonNull(event.getOption("type")).getAsString();
+            Role role = Objects.requireNonNull(event.getOption("role")).getAsRole();
 
-        } else if (command.equals("setstep3role")) {
+            if (targetRole.equals("Member")) {
 
-            // Get role from args
-            step3role = event.getOption("role", OptionMapping::getAsRole);
-            // Reply success
-            event.reply("Step 3 role set to **" + step3role.getName() + "**").queue();
-            // Update config
-            Dreamvisitor.getPlugin().getConfig().set("step3RoleID", step3role.getId());
+                memberRole = role;
+                plugin.getConfig().set("memberRoleID", memberRole.getId());
+
+            } else if (targetRole.equals("Step 3")) {
+
+                step3role = role;
+                plugin.getConfig().set("step3role", step3role.getId());
+
+            } else if (Arrays.stream(tribeNames).anyMatch(Predicate.isEqual(targetRole))) {
+
+                // If one of the tribe names, find the index, get the list from config, and set the specified item
+                int index = Arrays.binarySearch(tribeNames, targetRole);
+                List<String> tribeRoles = plugin.getConfig().getStringList("tribeRoles");
+                tribeRoles.set(index, role.getId());
+                plugin.getConfig().set("tribeRoles", tribeRoles);
+
+            } else {
+                event.reply("The target role must match a specified name!").setEphemeral(true).queue();
+            }
+            event.reply("**" + targetRole + " set to " + role.getName() + "**").queue();
 
         } else if (command.equals("list")) {
 
@@ -152,7 +179,7 @@ public class DiscCommandsManager extends ListenerAdapter {
                             list.append(player.getName());
                         }
                         // Send list
-                        event.reply("**There are " + players.size() + " player(s) online:** `" + list.toString() + "`")
+                        event.reply("**There are " + players.size() + " player(s) online:** `" + list + "`")
                                 .queue();
                     }
 
@@ -173,17 +200,18 @@ public class DiscCommandsManager extends ListenerAdapter {
             String reason = event.getOption("reason", OptionMapping::getAsString);
 
             // Add ban if player is online
+            assert member != null;
             if (Bukkit.getServer().getPlayer(member) != null) {
 
                 // Create timestamp
-                Date date = new Date(System.currentTimeMillis() + 60 * 60 * 1000 * hours);
+                Date date = new Date(System.currentTimeMillis() + 60L * 60 * 1000 * hours);
                 // Add to banlist
                 Bukkit.getServer().getBanList(BanList.Type.NAME).addBan(member, reason, date, null);
                 // Kick player
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        Bukkit.getServer().getPlayer(member).kickPlayer(reason);
+                        Objects.requireNonNull(Bukkit.getServer().getPlayer(member)).kickPlayer(reason);
 
                     }
                 }.runTask(Dreamvisitor.getPlugin());
@@ -204,17 +232,18 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Check for correct channel
             if (event.getChannel() == gameChatChannel) {
                 // Check for player online
+                assert username != null;
                 if (Bukkit.getServer().getPlayer(username) != null) {
 
                     // Send message
-                    Bukkit.getServer().getPlayer(username).sendMessage(
+                    Objects.requireNonNull(Bukkit.getServer().getPlayer(username)).sendMessage(
                             ChatColor.GRAY + "[" + ChatColor.DARK_AQUA + user.getName() + ChatColor.GRAY + " -> "
                                     + ChatColor.DARK_AQUA + "me" + ChatColor.GRAY + "] " + ChatColor.WHITE + msg);
 
                     // Log message
-                    jda.getTextChannelById(gameLogChannel.getId()).sendMessage(
+                    Objects.requireNonNull(jda.getTextChannelById(gameLogChannel.getId())).sendMessage(
                             "**Message from " + user.getAsMention() + " to **`" + username + "`**:** " + msg).queue();
-                    
+
                     // Reply success
                     event.reply("Message sent!").setEphemeral(true).queue();
 
@@ -235,6 +264,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Set activity
             ActivityType type = ActivityType.CUSTOM_STATUS;
 
+            assert activityType != null;
             if (activityType.equalsIgnoreCase("COMPETING"))
                 type = ActivityType.COMPETING;
             else if (activityType.equalsIgnoreCase("LISTENING"))
@@ -249,9 +279,47 @@ public class DiscCommandsManager extends ListenerAdapter {
 
             // Set presence
             if (type != ActivityType.CUSTOM_STATUS) {
+                assert activity != null;
                 jda.getPresence().setActivity(Activity.of(type, activity));
                 event.reply("Activity set!").setEphemeral(true).queue();
             }
+
+        } else if (command.equals("broadcast")) {
+
+            // Get args
+            String message = event.getOption("message", OptionMapping::getAsString);
+
+            assert message != null;
+            if (message.length() < 351) {
+                // Send message
+                Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET + message);
+                Bot.sendMessage(gameChatChannel, "**[Broadcast]** " + message);
+                Bot.sendMessage(gameLogChannel, "**[Broadcast]** " + message);
+
+                // Reply
+                event.reply("Broadcast sent.").queue();
+            } else {
+                event.reply("Message too long! " + message.length() + " > 350").setEphemeral(true).queue();
+            }
+        } else if (command.equals("panic")) {
+
+            Bukkit.getScheduler().runTask(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                        if (!player.isOp()) {
+                            player.kickPlayer("Panic!");
+                        }
+                    }
+                }
+            });
+            Dreamvisitor.playerlimit = 0;
+            plugin.getConfig().set("playerlimit", 0);
+            plugin.saveConfig();
+            Bukkit.getServer().broadcastMessage(
+                    ChatColor.RED + "Panicked by " + user.getName() + ".\nPlayer limit override set to 0.");
+            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "**Panicked by " + user.getName());
+            event.reply("Panicked!").queue();
 
         }
 
@@ -261,7 +329,7 @@ public class DiscCommandsManager extends ListenerAdapter {
 
     // Register commands on ready
     @Override
-    @SuppressWarnings({ "null" })
+    @SuppressWarnings({"null"})
     public void onGuildReady(@NotNull GuildReadyEvent event) {
         List<CommandData> commandData = new ArrayList<>();
         commandData.add(Commands.slash("setgamechat", "Set the channel that game chat occurs in.")
@@ -276,11 +344,24 @@ public class DiscCommandsManager extends ListenerAdapter {
                 .addOption(OptionType.CHANNEL, channelOption, "The channel to set.", true, false)
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
-        commandData.add(Commands.slash("setmemberrole", "Set the member role.").addOption(OptionType.ROLE, "role",
-                "The role to set.", true, false).setDefaultPermissions(DefaultMemberPermissions.DISABLED));
-
-        commandData.add(Commands.slash("setstep3role", "Set the Step 3 role.").addOption(OptionType.ROLE, "role",
-                "The role to set.", true, false).setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+        commandData.add(Commands.slash("setrole", "Set a role").addOptions(
+                        new OptionData(OptionType.STRING, "type", "The role you want to set.", true)
+                                .setAutoComplete(false)
+                                .addChoice("Step 3", "Step 3")
+                                .addChoice("Member", "Member")
+                                .addChoice("HiveWing", "HiveWing")
+                                .addChoice("IceWing", "IceWing")
+                                .addChoice("LeafWing", "LeafWing")
+                                .addChoice("MudWing", "MudWing")
+                                .addChoice("NightWing", "NightWing")
+                                .addChoice("RainWing", "RainWing")
+                                .addChoice("SandWing", "SandWing")
+                                .addChoice("SeaWing", "SeaWing")
+                                .addChoice("SilkWing", "SilkWing")
+                                .addChoice("SkyWing", "SkyWing")
+                )
+                .addOption(OptionType.ROLE, "role", "The role to associate.", true)
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
         commandData.add(Commands.slash("list", "List online players."));
 
@@ -299,6 +380,13 @@ public class DiscCommandsManager extends ListenerAdapter {
                 .addOption(OptionType.STRING, "type",
                         "The type of activity; COMPETING, LISTENING, PLAYING, WATCHING", true)
                 .addOption(OptionType.STRING, activityOption, "The status to display on the bot.", true)
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
+        commandData.add(Commands.slash("broadcast", "Broadcast a message to the Minecraft server.")
+                .addOption(OptionType.STRING, "message", "The message to broadcast.", true)
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
+        commandData.add(Commands.slash("panic", "Kick all players from the server and set the player limit to 0.")
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
         event.getGuild().updateCommands().addCommands(commandData).queue();
