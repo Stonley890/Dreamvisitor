@@ -45,13 +45,13 @@ public class CmdSoftwhitelist implements CommandExecutor {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                sender.sendMessage(Dreamvisitor.prefix +
+                sender.sendMessage(Dreamvisitor.PREFIX +
                         ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
                 e.printStackTrace();
             }
         }
 
-        // If file is empty, add a player to initialize
+        /*// If file is empty, add a player to initialize
         if (fileConfig.get(playerList) == null) {
             Mojang mojang = new Mojang();
             mojang.connect();
@@ -61,17 +61,17 @@ public class CmdSoftwhitelist implements CommandExecutor {
             try {
                 fileConfig.save(file);
             } catch (IOException e) {
-                sender.sendMessage(Dreamvisitor.prefix +
+                sender.sendMessage(Dreamvisitor.PREFIX +
                         ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
                 e.printStackTrace();
             }
-        }
+        }*/
 
         // Load the file
         try {
             fileConfig.load(file);
         } catch (IOException | InvalidConfigurationException e1) {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "There was a problem accessing the file. Check logs for error.");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "There was a problem accessing the file. Check logs for error.");
             e1.printStackTrace();
         }
 
@@ -83,35 +83,45 @@ public class CmdSoftwhitelist implements CommandExecutor {
                 // Get player from UUID
                 Mojang mojang = new Mojang();
                 mojang.connect();
-                OfflinePlayer player = Bukkit
-                        .getOfflinePlayer(UUID.fromString(getCleanUUID(args[1])));
-                // Add
-                assert whitelistedPlayers != null;
-                if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
-                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "That player is already on the whitelist.");
+                if (mojang.getUUIDOfUsername(args[1]) != null) {
+                    OfflinePlayer player = Bukkit
+                            .getOfflinePlayer(UUID.fromString(getCleanUUID(args[1])));
+                    // Add
+                    assert whitelistedPlayers != null;
+                    if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
+                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That player is already on the whitelist.");
+                    } else {
+                        whitelistedPlayers.add(player.getUniqueId().toString());
+                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Added "
+                                + mojang.getPlayerProfile(player.getUniqueId().toString()).getUsername()
+                                + " to the whitelist.");
+                    }
                 } else {
-                    whitelistedPlayers.add(player.getUniqueId().toString());
-                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Added "
-                            + mojang.getPlayerProfile(player.getUniqueId().toString()).getUsername()
-                            + " to the whitelist.");
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + args[1] + " could not be found!");
                 }
+
             } else if (args[0].equalsIgnoreCase("remove")) {
                 // Get player from UUID
                 Mojang mojang = new Mojang();
                 mojang.connect();
 
-                OfflinePlayer player = Bukkit
-                        .getOfflinePlayer(UUID.fromString(getCleanUUID(args[1])));
-                // Remove
-                assert whitelistedPlayers != null;
-                if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
-                    whitelistedPlayers.remove(player.getUniqueId().toString());
-                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Removed "
-                            + mojang.getPlayerProfile(player.getUniqueId().toString()).getUsername()
-                            + " from the whitelist.");
+                if (mojang.getUUIDOfUsername(args[1]) != null) {
+                    OfflinePlayer player = Bukkit
+                            .getOfflinePlayer(UUID.fromString(getCleanUUID(args[1])));
+                    // Remove
+                    assert whitelistedPlayers != null;
+                    if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
+                        whitelistedPlayers.remove(player.getUniqueId().toString());
+                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Removed "
+                                + mojang.getPlayerProfile(player.getUniqueId().toString()).getUsername()
+                                + " from the whitelist.");
+                    } else {
+                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That player is not on the whitelist.");
+                    }
                 } else {
-                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "That player is not on the whitelist.");
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + args[1] + " could not be found!");
                 }
+
             } else if (args[0].equalsIgnoreCase("list")) {
                 Mojang mojang = new Mojang();
                 mojang.connect();
@@ -126,26 +136,26 @@ public class CmdSoftwhitelist implements CommandExecutor {
                     }
                     list.append(mojang.getPlayerProfile(players).getUsername());
                 }
-                sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Players soft-whitelisted: " + list);
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Players soft-whitelisted: " + list);
 
             } else if (args[0].equalsIgnoreCase("on")) {
                 // Set config
                 plugin.getConfig().set("softwhitelist", true);
                 plugin.saveConfig();
-                sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Soft whitelist enabled.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Soft whitelist enabled.");
             } else if (args[0].equalsIgnoreCase("off")) {
                 // Set config
                 plugin.getConfig().set("softwhitelist", false);
                 plugin.saveConfig();
-                sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Soft whitelist disabled.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Soft whitelist disabled.");
             } else {
-                sender.sendMessage(Dreamvisitor.prefix +
+                sender.sendMessage(Dreamvisitor.PREFIX +
                         ChatColor.RED + "Incorrect arguements! /softwhitelist <add|remove|list|on|off> <player>");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            sender.sendMessage(Dreamvisitor.prefix +
+            sender.sendMessage(Dreamvisitor.PREFIX +
                     ChatColor.RED + "Missing arguments! /softwhitelist <add|remove|list|on|off> <player>");
         }
 
@@ -167,9 +177,10 @@ public class CmdSoftwhitelist implements CommandExecutor {
     String getCleanUUID(String playerName) {
 
         Mojang mojang = new Mojang().connect();
+        String uuid = mojang.getUUIDOfUsername(playerName);
         return mojang.getUUIDOfUsername(playerName).replaceFirst(
-                "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                "$1-$2-$3-$4-$5");
+                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                    "$1-$2-$3-$4-$5");
     }
     
 }

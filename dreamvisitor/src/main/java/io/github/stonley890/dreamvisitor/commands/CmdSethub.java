@@ -22,9 +22,9 @@ public class CmdSethub implements CommandExecutor {
                     .add(new Location(player.getLocation().getWorld(), 0.5, 0, 0.5));
                     plugin.getConfig().set("hubLocation", Dreamvisitor.hubLocation);
                     plugin.saveConfig();
-            player.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Hub location set.");
+            player.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Hub location set.");
         } else {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "This command must be executed by a player!");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be executed by a player!");
         }
         return true;
     }

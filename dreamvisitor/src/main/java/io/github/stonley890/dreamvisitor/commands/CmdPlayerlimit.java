@@ -36,17 +36,17 @@ public class CmdPlayerlimit implements CommandExecutor {
                         }
                     }
                 } else {
-                    sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED
                             + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
                     return false;
                 }
             } catch (NumberFormatException e) {
-                sender.sendMessage(Dreamvisitor.prefix +
+                sender.sendMessage(Dreamvisitor.PREFIX +
                         ChatColor.RED + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
                 return false;
             }
         } else {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Player limit override is currently set to " + Dreamvisitor.playerlimit + ".");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Player limit override is currently set to " + Dreamvisitor.playerlimit + ".");
         }
         return true;
     }

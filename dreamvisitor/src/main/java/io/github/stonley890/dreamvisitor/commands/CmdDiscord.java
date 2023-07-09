@@ -36,18 +36,18 @@ public class CmdDiscord implements CommandExecutor {
                 fileConfig.set("discordToggled", memory.isDiscordToggled());
                 fileConfig.save(file);
 
-                player.sendMessage(Dreamvisitor.prefix +
-                        ChatColor.BLUE + "Discord visibility toggled to " + memory.isDiscordToggled() + ".");
+                player.sendMessage(Dreamvisitor.PREFIX +
+                        ChatColor.WHITE + "Discord visibility toggled to " + memory.isDiscordToggled() + ".");
             } catch (Exception e) {
                 Bukkit.getLogger().warning("ERROR: Unable to access player memory!");
-                player.sendMessage(Dreamvisitor.prefix +
+                player.sendMessage(Dreamvisitor.PREFIX +
                         ChatColor.RED + "There was a problem accessing player memory. Check logs for stacktrace.");
                 e.printStackTrace();
             }
             return true;
 
         } else {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "This command must be run by a player.");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be run by a player.");
             return false;
         }
 

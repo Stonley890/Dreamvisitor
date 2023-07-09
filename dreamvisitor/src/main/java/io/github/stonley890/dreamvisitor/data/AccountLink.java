@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.github.stonley890.dreamvisitor.Dreamvisitor.debug;
+
 public class AccountLink {
 
     static Dreamvisitor plugin = Dreamvisitor.getPlugin();
@@ -21,6 +23,7 @@ public class AccountLink {
     public static void init() {
         // If file does not exist, create one
         if (!accountFile.exists()) {
+            debug("accountLink.txt does not exist. Creating one now...");
             try {
                 if (!accountFile.createNewFile()) {
                     Bukkit.getLogger().warning("Unable to create accountLink.txt!");
@@ -34,6 +37,7 @@ public class AccountLink {
     }
 
     private static void loadFromFile() {
+        debug("Loading accountLink.txt");
         try (BufferedReader reader = new BufferedReader(new FileReader(accountFile))) {
             String line;
             while ((line = reader.readLine()) != null) {

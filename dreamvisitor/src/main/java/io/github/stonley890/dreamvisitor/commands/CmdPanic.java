@@ -23,7 +23,7 @@ public class CmdPanic implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!panicAsked) {
             panicAsked = true;
-            sender.sendMessage(Dreamvisitor.prefix +
+            sender.sendMessage(Dreamvisitor.PREFIX +
                     ChatColor.RED + "Are you sure you want to kick all players? Run /panic again to confirm.");
             new java.util.Timer().schedule(new TimerTask() {
                 @Override

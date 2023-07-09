@@ -13,13 +13,17 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import org.jetbrains.annotations.NotNull;
 
+import static io.github.stonley890.dreamvisitor.Dreamvisitor.debug;
+
 public class CmdAradio implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
+        debug("aradio executed.");
+
         if (args.length == 0) {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "You must attach a message! /aradio <message>");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /aradio <message>");
             return false;
         }
 
@@ -36,7 +40,7 @@ public class CmdAradio implements CommandExecutor {
             buildMessage(args, "Console");
             return true;
         } else {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "This command must be run by a player or the console.");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be run by a player or the console.");
             return false;
         }
     }

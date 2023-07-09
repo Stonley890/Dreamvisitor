@@ -22,7 +22,7 @@ public class CmdHub implements CommandExecutor {
 
         if (sender instanceof Player) {
             if (plugin.getConfig().getLocation("hubLocation") == null) {
-                sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "No hub is currently set!");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No hub is currently set!");
             } else {
                 Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
                 Player player = (Player) sender;
@@ -34,7 +34,7 @@ public class CmdHub implements CommandExecutor {
             }
             return true;
         } else {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "This command must be run by a player.");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be run by a player.");
             return false;
         }
     }

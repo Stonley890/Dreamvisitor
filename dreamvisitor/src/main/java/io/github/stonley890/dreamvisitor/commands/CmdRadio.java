@@ -19,18 +19,13 @@ public class CmdRadio implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         if (args.length == 0) {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "You must attach a message! /aradio <message>");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /aradio <message>");
             return false;
         }
 
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            // Check for Staff tag
-            if (player.getScoreboardTags().contains("Staff")) {
-                buildMessage(args, player.getName());
-            } else {
-                sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "You do not have permission to run that command!");
-            }
+            buildMessage(args, player.getName());
             return true;
         } else if (sender instanceof ConsoleCommandSender) {
 
@@ -63,7 +58,7 @@ public class CmdRadio implements CommandExecutor {
         Bukkit.getLogger().info(finalMessage);
         for (Player operator : Bukkit.getServer().getOnlinePlayers())
         {
-            if (operator.isOp())
+            if (operator.isOp() || operator.hasPermission("dreamvisitor.radio"))
             {
                 operator.sendMessage(finalMessage);
             }

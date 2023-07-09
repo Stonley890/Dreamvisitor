@@ -19,7 +19,7 @@ public class CmdTagRadio implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         if (args.length < 2) {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "Missing arguements! /tagradio <tag> <message>");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguements! /tagradio <tag> <message>");
             return false;
         }
 

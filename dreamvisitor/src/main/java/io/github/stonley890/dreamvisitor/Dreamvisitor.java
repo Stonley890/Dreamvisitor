@@ -3,11 +3,17 @@ package io.github.stonley890.dreamvisitor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.google.UserTracker;
+import net.dv8tion.jda.api.entities.User;
+import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -33,10 +39,12 @@ import net.dv8tion.jda.api.entities.Guild;
 @SuppressWarnings({ "null" })
 public class Dreamvisitor extends JavaPlugin {
 
-    public final String version = getDescription().getVersion();
-    public static final String prefix = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
+    public final String VERSION = getDescription().getVersion();
+    public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
 
     public static Dreamvisitor plugin;
+    private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
+    private static ConsoleLogger appender;
     public static boolean chatPaused;
     public static int playerlimit;
     public static Location hubLocation;
@@ -51,6 +59,7 @@ public class Dreamvisitor extends JavaPlugin {
         // Initialize variables
         plugin = this;
 
+        debug("Registering listeners...");
         // Register listeners
         getServer().getPluginManager().registerEvents(new ListenEntityDamage(), this);
         getServer().getPluginManager().registerEvents(new ListenPlayerChat(), this);
@@ -61,6 +70,7 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
         getServer().getPluginManager().registerEvents(new ListenInventoryClose(), this);
 
+        debug("Initializing command executors...");
         // Initialize command executors
         Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdAradio());
         Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
@@ -78,31 +88,36 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
         Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
         Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
+        Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
 
+        debug("Initializing tab completers...");
         // Initialize command tab completers
         Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
         Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
 
+        debug("Creating data folder...");
         // Create config if needed
         getDataFolder().mkdir();
         saveDefaultConfig();
 
-
+        debug("Initializing accountLink.txt");
         AccountLink.init();
 
         // Start message
         getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
 
         // Bot
+        debug("Starting Dreamvisitor bot...");
         Bot.startBot();
         jda = Bot.getJda();
 
         if (!botFailed) {
             // Get saved data
+            debug("Fetching recorded channels and roles from config.");
             DiscCommandsManager.initChannelsRoles();
 
             // Send server start message
-            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been started.\n*Dreamvisitor " + version + "*");
+            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been started.\n*Dreamvisitor " + VERSION + "*");
         }
 
         // If chat was previously paused, restore and notify in console
@@ -117,13 +132,20 @@ public class Dreamvisitor extends JavaPlugin {
         Bukkit.getServer().getLogger().info(
                 "[Dreamvisitor] Player limit override is currently set to " + playerlimit);
 
+        // Create item blacklist if empty
         if (plugin.getConfig().get("itemBlacklist") != null ) {
             ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) plugin.getConfig().get("itemBlacklist");
             if (itemList != null) {
+                debug("Item blacklist is null. Creating an empty blacklist...");
                 CmdItemBlacklist.badItems = itemList.toArray(new ItemStack[0]);
             }
-
         }
+
+        appender = new ConsoleLogger();
+        logger.addAppender(appender);
+
+        debug("Enable finished.");
+
     }
 
     public static Dreamvisitor getPlugin() {
@@ -134,14 +156,23 @@ public class Dreamvisitor extends JavaPlugin {
         return plugin.getDataFolder().getAbsolutePath() + "/player/" + player.getUniqueId() + ".yml";
     }
 
+    public static void debug(String message) {
+        if (plugin.getConfig().getBoolean("debug")){
+            Bukkit.getLogger().info("DEBUG: " + message);
+        }
+    }
+
     @Override
     public void onDisable() {
+
         if (!botFailed) {
             // Shutdown messages
             getLogger().info("Closing bot instance.");
             Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been shut down.");
-            Bot.getJda().shutdown();
+            Bot.getJda().shutdownNow();
         }
+
+        logger.removeAppender(appender);
     }
 
 }

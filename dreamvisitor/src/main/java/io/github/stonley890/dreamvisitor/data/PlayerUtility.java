@@ -13,7 +13,7 @@ public class PlayerUtility {
     }
 
     public static PlayerMemory getPlayerMemory(Player player) {
-        if(playerMemory.containsKey(player.getUniqueId().toString())) {
+        if(!playerMemory.containsKey(player.getUniqueId().toString())) {
             PlayerMemory memory = new PlayerMemory();
             playerMemory.put(player.getUniqueId().toString(), memory);
             return memory;

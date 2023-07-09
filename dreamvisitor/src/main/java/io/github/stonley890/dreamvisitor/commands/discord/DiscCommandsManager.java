@@ -1,9 +1,13 @@
 package io.github.stonley890.dreamvisitor.commands.discord;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.function.Predicate;
 
+import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.google.UserTracker;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -31,6 +35,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.shanerx.mojang.Mojang;
 
 public class DiscCommandsManager extends ListenerAdapter {
 
@@ -39,8 +44,10 @@ public class DiscCommandsManager extends ListenerAdapter {
     public static TextChannel whitelistChannel;
     public static Role memberRole;
     public static Role step3role;
-    public static Role[] tribeRole;
-    final String[] tribeNames = {"HiveWing", "IceWing", "LeafWing", "MudWing", "NightWing", "RainWing", "SandWing", "SeaWing", "SilkWing", "SkyWing"};
+    public static List<Role> tribeRole = new ArrayList<>();
+    public static final String[] TRIBE_NAMES = {"HiveWing", "IceWing", "LeafWing", "MudWing", "NightWing", "RainWing", "SandWing", "SeaWing", "SilkWing", "SkyWing"};
+    public static final String[] TRIBES = {"hive", "ice", "leaf", "mud", "night", "rain", "sand", "sea", "silk", "sky"};
+
 
     String channelOption = "channel";
     String usernameOption = "username";
@@ -71,8 +78,8 @@ public class DiscCommandsManager extends ListenerAdapter {
             step3role = jda.getRoleById(Objects.requireNonNull(config.getString("step3RoleID")));
         }
         if (config.getString("tribeRoles") != null) {
-            for (int i = 0; i < tribeRole.length; i++) {
-                tribeRole[i] = jda.getRoleById(config.getStringList("tribeRoles").get(i));
+            for (int i = 0; i < 10; i++) {
+                tribeRole.add(jda.getRoleById(config.getStringList("tribeRoles").get(i)));
             }
         }
 
@@ -125,13 +132,20 @@ public class DiscCommandsManager extends ListenerAdapter {
             } else if (targetRole.equals("Step 3")) {
 
                 step3role = role;
-                plugin.getConfig().set("step3role", step3role.getId());
+                plugin.getConfig().set("step3roleID", step3role.getId());
 
-            } else if (Arrays.stream(tribeNames).anyMatch(Predicate.isEqual(targetRole))) {
+            } else if (Arrays.stream(TRIBE_NAMES).anyMatch(Predicate.isEqual(targetRole))) {
 
                 // If one of the tribe names, find the index, get the list from config, and set the specified item
-                int index = Arrays.binarySearch(tribeNames, targetRole);
+                int index = Arrays.binarySearch(TRIBE_NAMES, targetRole);
                 List<String> tribeRoles = plugin.getConfig().getStringList("tribeRoles");
+
+                if (tribeRoles.isEmpty()) {
+                    for (int i = 0; i < 10; i++) {
+                        tribeRoles.add("none");
+                    }
+                }
+
                 tribeRoles.set(index, role.getId());
                 plugin.getConfig().set("tribeRoles", tribeRoles);
 
@@ -321,6 +335,113 @@ public class DiscCommandsManager extends ListenerAdapter {
             Bot.sendMessage(DiscCommandsManager.gameLogChannel, "**Panicked by " + user.getName());
             event.reply("Panicked!").queue();
 
+        } else if (command.equals("link")) {
+
+            User targetUser = event.getOption("user").getAsUser();
+            String username = event.getOption("username").getAsString();
+
+            Mojang mojang = new Mojang().connect();
+            String uuid = mojang.getUUIDOfUsername(username);
+
+            if (uuid != null) {
+                AccountLink.linkAccounts(uuid, targetUser.getId());
+                try {
+                    UserTracker.linkAccount(uuid, targetUser);
+                    event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
+                } catch (GeneralSecurityException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                event.reply("`" + username + "` could not be found!").queue();
+                return;
+            }
+
+
+
+        } else if (command.equals("user")) {
+
+            User targetUser = event.getOption("user").getAsUser();
+
+            Dreamvisitor.debug("Target user: " + targetUser.getId());
+
+            try {
+                List<List<Object>> seenIds = UserTracker.getRange("Users!A3:F1000");
+
+                if (seenIds == null || seenIds.isEmpty()) {
+                    // Should not happen
+                    event.reply("No data was found on specified spreadsheet.").queue();
+                } else {
+                    // For each row
+                    for (int i = 0; i < seenIds.size(); i++) {
+
+                        Dreamvisitor.debug("ID: " + seenIds.get(i).get(3));
+
+                        // Check ID column for matching ID
+                        if (targetUser.getId().equals(seenIds.get(i).get(3))) {
+
+                            // Get data
+                            String minecraftUsername = (String) seenIds.get(i).get(0);
+                            String uuid = (String) seenIds.get(i).get(1);
+                            String unbanDate = "N/A";
+                            if (!seenIds.get(i).get(4).equals("")) {
+                                unbanDate = (String) seenIds.get(i).get(4);
+                            }
+                            String royaltyPosition = (String) seenIds.get(i).get(5);
+
+                            // Send data
+                            event.reply("Data for user **" + targetUser.getName() + "**:" +
+                                    "\n**ID:** `" + user.getId() +
+                                    "`\n**Minecraft Username:** `" + minecraftUsername +
+                                    "`\n**UUID:** `" + uuid.replaceFirst(
+                                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                                    "$1-$2-$3-$4-$5") +
+                                    "`\n**Date Unbanned:** " + unbanDate +
+                                    "\n**Royalty Position:** " + royaltyPosition
+                            ).queue();
+
+                            return;
+                        }
+                    }
+
+                    // Not found
+                    // Fall back to local sources
+
+                    Mojang mojang = new Mojang().connect();
+
+                    // UUID from AccountLink.yml
+                    String uuid = AccountLink.getUuid(targetUser.getId());
+                    // Minecraft username from Mojang
+                    String username = "N/A";
+
+                    String unbanDate = "N/A";
+                    if (uuid != null) {
+                        username = mojang.getPlayerProfile(uuid).getUsername();
+                        if (Bukkit.getBannedPlayers().contains(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))) {
+                            if (Bukkit.getBanList(BanList.Type.NAME).getBanEntry(username).getExpiration() != null) {
+                                unbanDate = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(username).getExpiration().toString();
+                            } else {
+                                unbanDate = "Infinite";
+                            }
+                        }
+                    } else {
+                        uuid = "N/A";
+                    }
+
+                    // Send data
+                    event.reply("Local data for user **" + targetUser.getName() + "**:" +
+                            "\n**ID:** `" + user.getId() +
+                            "`\n**Minecraft Username:** `" + username +
+                            "`\n**UUID:** `" + uuid.replaceFirst(
+                            "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                            "$1-$2-$3-$4-$5") +
+                            "`\n**Date Unbanned:** " + unbanDate
+                    ).queue();
+
+                }
+
+            } catch (GeneralSecurityException | IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         // Save configuration
@@ -388,6 +509,16 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         commandData.add(Commands.slash("panic", "Kick all players from the server and set the player limit to 0.")
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
+        commandData.add(Commands.slash("link", "Link a Discord account to a Minecraft account.")
+                .addOption(OptionType.USER, "user", "The Discord user to register.", true)
+                .addOption(OptionType.STRING, "username", "The Minecraft account to connect", true)
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
+        commandData.add(Commands.slash("user", "Get the details of a user.")
+                .addOption(OptionType.USER, "user", "The user to search for.", true)
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
 
         event.getGuild().updateCommands().addCommands(commandData).queue();
         commandData.clear();

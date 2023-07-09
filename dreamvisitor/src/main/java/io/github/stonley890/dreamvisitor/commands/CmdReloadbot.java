@@ -16,13 +16,13 @@ public class CmdReloadbot implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         
-        sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Shutting down the bot instance...");
+        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Shutting down the bot instance...");
 
         if (!Dreamvisitor.botFailed) {
             Bot.getJda().shutdown();
         }
 
-        sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Starting a new bot instance...");
+        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Starting a new bot instance...");
         Dreamvisitor.botFailed = false;
         Bukkit.getScheduler().runTask(Dreamvisitor.plugin, new Runnable() {
 
@@ -35,10 +35,10 @@ public class CmdReloadbot implements CommandExecutor {
         
 
         if (Dreamvisitor.botFailed) {
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.RED + "The bot was unable to start due to an invalid login token.");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "The bot was unable to start due to an invalid login token.");
         } else {
             DiscCommandsManager.initChannelsRoles();
-            sender.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Dreamvisitor bot has been restarted.");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.BLUE + "Dreamvisitor bot has been restarted.");
         }
 
         return true;

@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -13,12 +14,15 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.BiMap;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.google.UserTracker;
+import net.dv8tion.jda.api.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -78,6 +82,12 @@ public class DiscEventListener extends ListenerAdapter {
 
                 // Link accounts
                 AccountLink.linkAccounts(uuid.toString(), user.getId());
+                // Add to spreadsheet
+                try {
+                    UserTracker.initWhitelistPlayer(username, uuid.toString(), user);
+                } catch (GeneralSecurityException | IOException e) {
+                    e.printStackTrace();
+                }
 
                 // Access whitelist.json file
                 String whitelistPath = Bukkit.getServer().getWorldContainer().getPath() + "/whitelist.json";
@@ -114,7 +124,7 @@ public class DiscEventListener extends ListenerAdapter {
 
                 if (whitelisted) {
                     event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
-                    Bot.sendMessage((TextChannel) channel, "`" + username + "` is already whitelisted!");
+                    Bot.sendMessage((TextChannel) channel, "`" + username + "` is already whitelisted!\nCheck <#914620824332435456> for the Server Address.");
                 } else {
                     Bukkit.getLogger().info("Player is not whitelisted.");
 
@@ -141,7 +151,7 @@ public class DiscEventListener extends ListenerAdapter {
 
                     // success message
                     event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
-                    Bot.sendMessage((TextChannel) channel, "`" + username + "` has been whitelisted!");
+                    Bot.sendMessage((TextChannel) channel, "`" + username + "` has been whitelisted!\nCheck <#914620824332435456> for the Server Address.");
                 }
             }
 
@@ -190,6 +200,23 @@ public class DiscEventListener extends ListenerAdapter {
                     }
                 }
             }
+        }
+
+        if (!event.getAuthor().isBot() && event.getChannel().equals(DiscCommandsManager.gameLogChannel) && plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+
+            Dreamvisitor.debug("Sending console command from log channel...");
+
+            String message = event.getMessage().getContentRaw();
+
+            // Running commands from log channel
+            Runnable runCommand = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message);
+                }
+            };
+            Bukkit.getScheduler().runTask(plugin, runCommand);
+
         }
     }
 

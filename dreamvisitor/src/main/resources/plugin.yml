@@ -1,7 +1,7 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.0.1
-api-version: 1.19
+version: 2.1.0
+api-version: 1.20
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
 
@@ -17,6 +17,7 @@ commands:
   radio:
     description: Sends a message to all staff.
     usage: /<command> <message>
+    permission: dreamvisitor.radio
   tagradio:
     description: Sends a messages to all players with specified tag.
     usage: /<command> <tag> <message>
@@ -30,7 +31,7 @@ commands:
     permission: dreamvisitor.zoop
   softwhitelist:
     description: Add or remove a player to/from the soft whitelist.
-    usage: /<command> <add|remove|list|on|off> <player>
+    usage: /<command> <add|remove|list|on|off> [player]
     permission: dreamvisitor.softwhitelist
   playerlimit:
     description: Override server player limit.
@@ -67,6 +68,10 @@ commands:
     description: Update Discord role based on in-game team
     usage: /<command> [player]
     permission: minecraft.command.op
+  user:
+    description: Get the details of a player
+    usage: /<command> <username>
+    permission: dreamvisitor.user
 
 permissions:
   dreamvisitor.pausechat:
@@ -92,4 +97,10 @@ permissions:
     default: op
   dreamvisitor.itemblacklist:
     description: Allows the itemblacklist command
+    default: op
+  dreamvisitor.user:
+    description: Allows the user command
+    default: op
+  dreamvisitor.radio:
+    description: Allows the radio command
     default: op

@@ -56,7 +56,7 @@ public class CmdZoop implements CommandExecutor {
                 fileConfig.set("vanished", memory.isVanished());
                 fileConfig.save(file);
 
-                player.sendMessage(Dreamvisitor.prefix + ChatColor.BLUE + "Discord vanish toggled to " + String.valueOf(memory.isVanished()) + ".");
+                player.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.isVanished() + ".");
 
             } catch (Exception e) {
                 Bukkit.getLogger().warning("ERROR: Unable to access player memory!");
