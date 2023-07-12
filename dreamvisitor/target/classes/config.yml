@@ -4,13 +4,27 @@ bot-token: BOT_TOKEN
 # The channel ID of the game chat
 chatChannelID: none
 # The channel ID of the log chat
-chatChannelID: none
+logChannelID: none
 # The channel ID of the whitelist chat
 whitelistChannelID: none
 # The role ID of step 3
 step3RoleID: none
 # The role ID of member
 memberRoleID: none
+# The role IDs of tribes
+triberoles:
+  - none
+  - none
+  - none
+  - none
+  - none
+  - none
+  - none
+  - none
+  - none
+  - none
+# The ID of the user tracker spreadsheet
+userSpreadsheet: 1Tz3_JRr214ia_mHrgqwT4uANcwAzUyjXgTgNSWxKiqg
 
 # Don't change unless you know what you're doing!
 

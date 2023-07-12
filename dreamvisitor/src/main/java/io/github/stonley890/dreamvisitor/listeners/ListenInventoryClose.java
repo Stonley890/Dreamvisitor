@@ -17,7 +17,7 @@ public class ListenInventoryClose implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
 
-        if (!player.isOp()) {
+        if (!player.isOp() && CmdItemBlacklist.badItems != null) {
 
             for (ItemStack item : CmdItemBlacklist.badItems) {
                 if (item != null && player.getInventory().contains(item.getType())) {

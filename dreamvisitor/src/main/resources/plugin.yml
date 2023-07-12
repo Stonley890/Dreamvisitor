@@ -1,7 +1,7 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
 version: 2.1.0
-api-version: 1.20
+api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
 
@@ -89,7 +89,7 @@ permissions:
   dreamvisitor.playerlimit:
     description: Allows the playerlimit command
     default: op
-  dreanvisitor.togglepvp:
+  dreamvisitor.togglepvp:
     description: Allows the togglepvp command
     default: op
   dreamvisitor.panic:
