@@ -1,9 +1,0 @@
-{
-    "maven.view": "flat",
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.compile.nullAnalysis.mode": "automatic",
-    "githubPullRequests.ignoredPullRequestBranches": [
-        "main",
-        "main"
-    ]
-}
