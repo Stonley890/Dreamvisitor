@@ -31,6 +31,7 @@ import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabSoftWhitelist;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /*
  * The main ticking thread.
@@ -143,6 +144,49 @@ public class Dreamvisitor extends JavaPlugin {
 
         appender = new ConsoleLogger();
         logger.addAppender(appender);
+
+        Runnable pushConsole = new BukkitRunnable() {
+            // Push console log to Discord every 2 seconds
+            @Override
+            public void run() {
+                if (Dreamvisitor.getPlugin().getConfig().getBoolean("log-console")) {
+
+                    // If there are messages in the queue, send them!
+                    if (ConsoleLogger.messageBuilder != null && ConsoleLogger.messageBuilder.length() > 0) {
+
+                        DiscCommandsManager.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder).queue();
+                        ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
+
+                        // If there are overflow messages, build and send those too
+                        if (ConsoleLogger.overFlowMessages != null && !ConsoleLogger.overFlowMessages.isEmpty()) {
+
+                            StringBuilder overFlowMessageBuilder = new StringBuilder();
+                            // First is safe, so add now
+                            overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(0));
+
+                            // For each message in overflow
+                            for (int i = 1; i < ConsoleLogger.overFlowMessages.size(); i++) {
+
+                                // Check that it fits
+                                if (overFlowMessageBuilder.length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length() >= 2000) {
+                                    // if not, queue current message and clear string builder
+                                    DiscCommandsManager.gameLogChannel.sendMessage(overFlowMessageBuilder).queue();
+                                    overFlowMessageBuilder = new StringBuilder();
+
+                                } else {
+                                    overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(i)).append("\n");
+                                }
+                            }
+
+                            ConsoleLogger.overFlowMessages.clear();
+
+                        }
+                    }
+                }
+            }
+        };
+
+        Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
 
         debug("Enable finished.");
 
