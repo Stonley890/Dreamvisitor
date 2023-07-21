@@ -88,7 +88,6 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
         Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
         Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
-        Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
         Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
 
         debug("Initializing tab completers...");

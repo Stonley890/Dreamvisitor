@@ -56,18 +56,14 @@ commands:
     description: Kicks all players and sets the player limit override to 0.
     usage: /<command>
     permission: dreamvisitor.panic
-  reloadbot:
-    description: Restarts the Dreamvisitor Discord bot
-    usage: /<command>
-    permission: minecraft.command.op
+#  reloadbot:
+#    description: Restarts the Dreamvisitor Discord bot
+#    usage: /<command>
+#    permission: minecraft.command.op
   itemblacklist:
     description: Access the item blacklist
     usage: /<command>
     permission: dreamvisitor.itemblacklist
-  tribeupdate:
-    description: Update Discord role based on in-game team
-    usage: /<command> [player]
-    permission: minecraft.command.op
   user:
     description: Get the details of a player
     usage: /<command> <username>

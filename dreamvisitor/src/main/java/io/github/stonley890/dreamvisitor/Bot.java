@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor;
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 
+import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
 
 import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
@@ -12,6 +13,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.jetbrains.annotations.NotNull;
 
 import static io.github.stonley890.dreamvisitor.Dreamvisitor.debug;
 import static io.github.stonley890.dreamvisitor.Dreamvisitor.plugin;
@@ -69,9 +71,11 @@ public class Bot {
             } else if (channel != DiscCommandsManager.gameLogChannel) {
                 channel.sendMessage(message).queue();
             }
-
-
         }
+    }
+
+    public static User getUser(@NotNull String discordId) {
+        return jda.retrieveUserById(discordId).complete();
     }
 
 
