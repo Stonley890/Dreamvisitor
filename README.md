@@ -10,4 +10,4 @@ A plugin created by Bog for WoF:TNW to add various features.
 - Item blacklist
 
 ##
-This plugin is developed specifically for WoF:TNW. No builds will be provided as releases.
+This plugin is developed specifically for WoF:TNW. No artifacts will be provided, but you are free to build it yourself with Maven.
