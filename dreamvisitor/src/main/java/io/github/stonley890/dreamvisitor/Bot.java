@@ -39,7 +39,7 @@ public class Bot {
             debug("Bot created.");
         } catch (LoginException e) {
             Bukkit.getLogger().severe(
-                    "BOT LOGIN FAILED: You need a valid bot token in dreamvisitor/config.yml. Dreamvisitor will not work properly unless there is a valid bot token. Add a token and execute /reloadbot");
+                    "BOT LOGIN FAILED: You need a valid bot token in dreamvisitor/config.yml. Dreamvisitor will not work properly unless there is a valid bot token.");
             Dreamvisitor.botFailed = true;
         }
 

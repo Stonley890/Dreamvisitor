@@ -51,6 +51,7 @@ public class Dreamvisitor extends JavaPlugin {
     public static Location hubLocation;
 
     public static boolean botFailed = false;
+    public static boolean googleFailed = false;
 
     JDA jda;
 
@@ -141,6 +142,15 @@ public class Dreamvisitor extends JavaPlugin {
             }
         }
 
+        try {
+            UserTracker.getSheetsService();
+        } catch (IOException | GeneralSecurityException e) {
+            Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
+            e.printStackTrace();
+            googleFailed = true;
+        }
+
+        // Console logging
         appender = new ConsoleLogger();
         logger.addAppender(appender);
 
@@ -185,7 +195,9 @@ public class Dreamvisitor extends JavaPlugin {
             }
         };
 
-        Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
+        if (!botFailed) {
+            Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
+        }
 
         debug("Enable finished.");
 

@@ -1,6 +1,8 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.google.UserTracker;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -22,11 +24,16 @@ public class ListenPlayerJoin implements Listener {
         Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage);
 
         // Update username
-        try {
-            UserTracker.updateUsername(event.getPlayer().getUniqueId().toString(), event.getPlayer().getName());
-        } catch (GeneralSecurityException | IOException e) {
-            throw new RuntimeException(e);
+        if (!Dreamvisitor.googleFailed) {
+            try {
+                UserTracker.updateUsername(event.getPlayer().getUniqueId().toString(), event.getPlayer().getName());
+            } catch (GeneralSecurityException | IOException e) {
+                Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
+                e.printStackTrace();
+                Dreamvisitor.googleFailed = true;
+            }
         }
+
     }
     
 }

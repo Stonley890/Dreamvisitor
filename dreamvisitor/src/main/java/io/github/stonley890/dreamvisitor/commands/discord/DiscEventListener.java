@@ -83,11 +83,16 @@ public class DiscEventListener extends ListenerAdapter {
                 // Link accounts
                 AccountLink.linkAccounts(uuid.toString(), user.getId());
                 // Add to spreadsheet
-                try {
-                    UserTracker.initWhitelistPlayer(username, uuid.toString(), user);
-                } catch (GeneralSecurityException | IOException e) {
-                    e.printStackTrace();
+                if (!Dreamvisitor.googleFailed) {
+                    try {
+                        UserTracker.initWhitelistPlayer(username, uuid.toString(), user);
+                    } catch (GeneralSecurityException | IOException e) {
+                        Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
+                        e.printStackTrace();
+                        Dreamvisitor.googleFailed = true;
+                    }
                 }
+
 
                 // Access whitelist.json file
                 String whitelistPath = Bukkit.getServer().getWorldContainer().getPath() + "/whitelist.json";

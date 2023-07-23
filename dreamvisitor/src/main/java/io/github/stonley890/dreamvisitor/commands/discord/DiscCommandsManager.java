@@ -345,12 +345,17 @@ public class DiscCommandsManager extends ListenerAdapter {
 
             if (uuid != null) {
                 AccountLink.linkAccounts(uuid, targetUser.getId());
-                try {
-                    UserTracker.linkAccount(uuid, targetUser);
-                    event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
-                } catch (GeneralSecurityException | IOException e) {
-                    throw new RuntimeException(e);
+                if (!Dreamvisitor.googleFailed) {
+                    try {
+                        UserTracker.linkAccount(uuid, targetUser);
+                        event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
+                    } catch (GeneralSecurityException | IOException e) {
+                        Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
+                        e.printStackTrace();
+                        Dreamvisitor.googleFailed = true;
+                    }
                 }
+
             } else {
                 event.reply("`" + username + "` could not be found!").queue();
                 return;
@@ -364,84 +369,89 @@ public class DiscCommandsManager extends ListenerAdapter {
 
             Dreamvisitor.debug("Target user: " + targetUser.getId());
 
-            try {
-                List<List<Object>> seenIds = UserTracker.getRange("Users!A3:F1000");
+            if (!Dreamvisitor.googleFailed) {
+                try {
+                    List<List<Object>> seenIds = UserTracker.getRange("Users!A3:F1000");
 
-                if (seenIds == null || seenIds.isEmpty()) {
-                    // Should not happen
-                    event.reply("No data was found on specified spreadsheet.").queue();
-                } else {
-                    // For each row
-                    for (int i = 0; i < seenIds.size(); i++) {
-
-                        Dreamvisitor.debug("ID: " + seenIds.get(i).get(3));
-
-                        // Check ID column for matching ID
-                        if (targetUser.getId().equals(seenIds.get(i).get(3))) {
-
-                            // Get data
-                            String minecraftUsername = (String) seenIds.get(i).get(0);
-                            String uuid = (String) seenIds.get(i).get(1);
-                            String unbanDate = "N/A";
-                            if (!seenIds.get(i).get(4).equals("")) {
-                                unbanDate = (String) seenIds.get(i).get(4);
-                            }
-                            String royaltyPosition = (String) seenIds.get(i).get(5);
-
-                            // Send data
-                            event.reply("Data for user **" + targetUser.getName() + "**:" +
-                                    "\n**ID:** `" + user.getId() +
-                                    "`\n**Minecraft Username:** `" + minecraftUsername +
-                                    "`\n**UUID:** `" + uuid.replaceFirst(
-                                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                                    "$1-$2-$3-$4-$5") +
-                                    "`\n**Date Unbanned:** " + unbanDate +
-                                    "\n**Royalty Position:** " + royaltyPosition
-                            ).queue();
-
-                            return;
-                        }
-                    }
-
-                    // Not found
-                    // Fall back to local sources
-
-                    Mojang mojang = new Mojang().connect();
-
-                    // UUID from AccountLink.yml
-                    String uuid = AccountLink.getUuid(targetUser.getId());
-                    // Minecraft username from Mojang
-                    String username = "N/A";
-
-                    String unbanDate = "N/A";
-                    if (uuid != null) {
-                        username = mojang.getPlayerProfile(uuid).getUsername();
-                        if (Bukkit.getBannedPlayers().contains(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))) {
-                            if (Bukkit.getBanList(BanList.Type.NAME).getBanEntry(username).getExpiration() != null) {
-                                unbanDate = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(username).getExpiration().toString();
-                            } else {
-                                unbanDate = "Infinite";
-                            }
-                        }
+                    if (seenIds == null || seenIds.isEmpty()) {
+                        // Should not happen
+                        event.reply("No data was found on specified spreadsheet.").queue();
                     } else {
-                        uuid = "N/A";
+                        // For each row
+                        for (int i = 0; i < seenIds.size(); i++) {
+
+                            Dreamvisitor.debug("ID: " + seenIds.get(i).get(3));
+
+                            // Check ID column for matching ID
+                            if (targetUser.getId().equals(seenIds.get(i).get(3))) {
+
+                                // Get data
+                                String minecraftUsername = (String) seenIds.get(i).get(0);
+                                String uuid = (String) seenIds.get(i).get(1);
+                                String unbanDate = "N/A";
+                                if (!seenIds.get(i).get(4).equals("")) {
+                                    unbanDate = (String) seenIds.get(i).get(4);
+                                }
+                                String royaltyPosition = (String) seenIds.get(i).get(5);
+
+                                // Send data
+                                event.reply("Data for user **" + targetUser.getName() + "**:" +
+                                        "\n**ID:** `" + user.getId() +
+                                        "`\n**Minecraft Username:** `" + minecraftUsername +
+                                        "`\n**UUID:** `" + uuid.replaceFirst(
+                                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                                        "$1-$2-$3-$4-$5") +
+                                        "`\n**Date Unbanned:** " + unbanDate +
+                                        "\n**Royalty Position:** " + royaltyPosition
+                                ).queue();
+
+                                return;
+                            }
+                        }
+
+                        // Not found
+                        // Fall back to local sources
+
+                        Mojang mojang = new Mojang().connect();
+
+                        // UUID from AccountLink.yml
+                        String uuid = AccountLink.getUuid(targetUser.getId());
+                        // Minecraft username from Mojang
+                        String username = "N/A";
+
+                        String unbanDate = "N/A";
+                        if (uuid != null) {
+                            username = mojang.getPlayerProfile(uuid).getUsername();
+                            if (Bukkit.getBannedPlayers().contains(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))) {
+                                if (Bukkit.getBanList(BanList.Type.NAME).getBanEntry(username).getExpiration() != null) {
+                                    unbanDate = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(username).getExpiration().toString();
+                                } else {
+                                    unbanDate = "Infinite";
+                                }
+                            }
+                        } else {
+                            uuid = "N/A";
+                        }
+
+                        // Send data
+                        event.reply("Local data for user **" + targetUser.getName() + "**:" +
+                                "\n**ID:** `" + user.getId() +
+                                "`\n**Minecraft Username:** `" + username +
+                                "`\n**UUID:** `" + uuid.replaceFirst(
+                                "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                                "$1-$2-$3-$4-$5") +
+                                "`\n**Date Unbanned:** " + unbanDate
+                        ).queue();
+
                     }
 
-                    // Send data
-                    event.reply("Local data for user **" + targetUser.getName() + "**:" +
-                            "\n**ID:** `" + user.getId() +
-                            "`\n**Minecraft Username:** `" + username +
-                            "`\n**UUID:** `" + uuid.replaceFirst(
-                            "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                            "$1-$2-$3-$4-$5") +
-                            "`\n**Date Unbanned:** " + unbanDate
-                    ).queue();
-
+                } catch (GeneralSecurityException | IOException e) {
+                    Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
+                    e.printStackTrace();
+                    Dreamvisitor.googleFailed = true;
                 }
-
-            } catch (GeneralSecurityException | IOException e) {
-                throw new RuntimeException(e);
             }
+
         }
 
         // Save configuration
