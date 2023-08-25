@@ -20,10 +20,14 @@ public class ListenInventoryClose implements Listener {
         if (!player.isOp() && CmdItemBlacklist.badItems != null) {
 
             for (ItemStack item : CmdItemBlacklist.badItems) {
-                if (item != null && player.getInventory().contains(item.getType())) {
-                    player.getInventory().remove(item.getType());
+                if (item != null) {
+                    for (ItemStack content : player.getInventory().getContents()) {
+                        if (content.isSimilar(item)) {
 
-                    Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
+                            player.getInventory().remove(item);
+                            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
+                        }
+                    }
                 }
             }
         }
