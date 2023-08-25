@@ -11,32 +11,50 @@ bot-token: BOT_TOKEN
 
 # The channel ID of the game chat.
 # This can be set on Discord with /setgamechat
-# Default: none
-chatChannelID: none
+# Default: 880269118975119410
+chatChannelID: 880269118975119410
 
 # The channel ID of the log chat.
 # This can be set on Discord /setlogchat
-# Default: none
-logChannelID: none
+# Default: 1114730320068104262
+logChannelID: 1114730320068104262
 
 # The channel ID of the whitelist chat.
 # This can be set on Discord /setwhitelist
-# Default: none
-whitelistChannelID: none
+# Default: 858461513991323688
+whitelistChannelID: 858461513991323688
 
-# The role IDs of tribes.
+# The role IDs of tribes on the main server.
 # This can be set on Discord with /setrole
 triberoles:
-  - none
-  - none
-  - none
-  - none
-  - none
-  - none
-  - none
-  - none
-  - none
-  - none
+  - 964773117803249694
+  - 660599218439716906
+  - 964773289203490837
+  - 660599477622669312
+  - 660599843093348392
+  - 660599418344439842
+  - 660600003315761172
+  - 660599559654735893
+  - 964773212321882132
+  - 660599708145942581
+
+# The role IDs of tribes on the tribe server.
+sisterTribeRoles:
+  - 1103730791181197332
+  - 1103730830427303946
+  - 1103730855324680224
+  - 1103730876212322354
+  - 1103730892205207602
+  - 1103734734179270729
+  - 1103730908974026822
+  - 1103730925185024074
+  - 1103730937788907570
+  - 1103730953630789774
+
+# The guild ID of the tribe server.
+# This will allow Dreamvistor to sync roles across servers.
+# Default: 1103730296068788358
+tribeGuildID: 1103730296068788358
 
 # The ID of the user tracker spreadsheet.
 # This is the long string of random character in a Google Sheets link.

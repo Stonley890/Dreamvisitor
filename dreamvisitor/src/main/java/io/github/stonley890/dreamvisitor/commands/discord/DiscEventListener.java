@@ -5,11 +5,9 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.google.UserTracker;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Channel;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bukkit.Bukkit;
@@ -29,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -210,6 +209,38 @@ public class DiscEventListener extends ListenerAdapter {
             Bukkit.getScheduler().runTask(plugin, runCommand);
 
         }
+    }
+
+    @Override
+    public void onGuildMemberJoin(GuildMemberJoinEvent event) {
+
+        // Match tribe roles when user joins sister server.
+        Dreamvisitor plugin = Dreamvisitor.getPlugin();
+
+        User user = event.getMember().getUser();
+
+        Member mainMember = DiscCommandsManager.gameLogChannel.getGuild().getMember(user);
+        Member sisterMember = event.getMember();
+
+        if (mainMember != null) {
+            List<Role> mainRoles = mainMember.getRoles();
+
+            if (!mainRoles.isEmpty()) {
+                for (Role role : mainRoles) {
+                    if (DiscCommandsManager.tribeRole.contains(role)) {
+                        int tribeIndex = DiscCommandsManager.tribeRole.indexOf(role);
+
+                        Role targetRole = Bot.getJda().getRoleById((String) Objects.requireNonNull(plugin.getConfig().getList("sisterTribeRoles")).get(tribeIndex));
+
+                        if (targetRole != null) {
+                            sisterMember.getRoles().add(targetRole);
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 
     @SuppressWarnings({"null"})

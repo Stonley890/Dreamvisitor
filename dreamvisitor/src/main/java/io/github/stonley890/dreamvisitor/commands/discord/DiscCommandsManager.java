@@ -518,7 +518,12 @@ public class DiscCommandsManager extends ListenerAdapter {
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
 
-        event.getGuild().updateCommands().addCommands(commandData).queue();
+        // Only register commands if guild is NOT the tribe server.
+        // Don't need any commands in the tribe server.
+        if (!event.getGuild().getId().equals(String.valueOf(plugin.getConfig().getInt("tribeGuildID")))) {
+            event.getGuild().updateCommands().addCommands(commandData).queue();
+        }
+
         commandData.clear();
 
     }

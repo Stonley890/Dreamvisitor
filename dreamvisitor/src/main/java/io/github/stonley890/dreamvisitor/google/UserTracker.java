@@ -219,4 +219,9 @@ public class UserTracker {
             }
         }
     }
+
+    public static void disableGoogle() {
+        Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration will be disabled until restart.");
+        Dreamvisitor.googleFailed = true;
+    }
 }

@@ -28,9 +28,8 @@ public class ListenPlayerJoin implements Listener {
             try {
                 UserTracker.updateUsername(event.getPlayer().getUniqueId().toString(), event.getPlayer().getName());
             } catch (GeneralSecurityException | IOException e) {
-                Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
+                UserTracker.disableGoogle();
                 e.printStackTrace();
-                Dreamvisitor.googleFailed = true;
             }
         }
 
