@@ -1,17 +1,31 @@
-# The bot token. DO NOT SHARE THIS
+# Whether to enable debug messages.
+# This will send additional messages to help debug Dreamvisitor.
+# Default: false
+debug: false
+
+# The Dreamvisitor bot token. DO NOT SHARE THIS.
+# Dreamvisitor will not work properly unless this is a valid bot token.
+# Ask Bog for a bot token if Dreamvisitor reports a login error on startup.
+# Default: BOT_TOKEN
 bot-token: BOT_TOKEN
 
-# The channel ID of the game chat
+# The channel ID of the game chat.
+# This can be set on Discord with /setgamechat
+# Default: none
 chatChannelID: none
-# The channel ID of the log chat
+
+# The channel ID of the log chat.
+# This can be set on Discord /setlogchat
+# Default: none
 logChannelID: none
-# The channel ID of the whitelist chat
+
+# The channel ID of the whitelist chat.
+# This can be set on Discord /setwhitelist
+# Default: none
 whitelistChannelID: none
-# The role ID of step 3
-step3RoleID: none
-# The role ID of member
-memberRoleID: none
-# The role IDs of tribes
+
+# The role IDs of tribes.
+# This can be set on Discord with /setrole
 triberoles:
   - none
   - none
@@ -23,18 +37,44 @@ triberoles:
   - none
   - none
   - none
-# The ID of the user tracker spreadsheet
+
+# The ID of the user tracker spreadsheet.
+# This is the long string of random character in a Google Sheets link.
+# Default: 1Tz3_JRr214ia_mHrgqwT4uANcwAzUyjXgTgNSWxKiqg
 userSpreadsheet: 1Tz3_JRr214ia_mHrgqwT4uANcwAzUyjXgTgNSWxKiqg
 
-# Don't change unless you know what you're doing!
-
-# Whether chat is paused or not
+# Whether chat is paused or not.
+# This can be toggled in Minecraft with /pausechat
+# Default: false
 chatPaused: false
+
 # Whether the soft whitelist is enabled or not
+# This can be set in Minecraft with /softwhitelist [on|off]
+# Default: false
 softwhitelist: false
-# Player limit override (-1 for default)
+
+# Player limit override. This will override the player limit, both over and under.
+# This can be set in Minecraft with /playerlimit <int>
+# Default: -1
 playerlimit: -1
-# Whether to globally disable pvp or not
+
+# Whether to globally disable pvp or not.
+# This can be toggled in Minecraft with /togglepvp
+# Default: false
 disablepvp: false
-# The location of the recorded hub
+
+# The location of the recorded hub.
+# This can be set in Minecraft with /sethub
+# Default: none
 hubLocation: none
+
+# Whether to copy the output of the console to the Discord log channel.
+# This will disable the default Dreamvisitor logging in place of the Minecraft server console.
+# Default: false
+log-console: false
+
+# Whether to pass messages in the log channel as console commands.
+# If log-console is enabled, this will take messages sent by users with the Discord administrator permission and pass
+#   them as console commands.
+# Default: false
+enable-log-console-commands: false

@@ -50,7 +50,7 @@ public class ListenPlayerChat implements Listener {
 
             // If player is on soft whitelist or is op, allow.
             if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
-                    || event.getPlayer().isOp()) {
+                    || event.getPlayer().hasPermission("dreamvisitor.nopause")) {
 
                 Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage);
                 Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage);

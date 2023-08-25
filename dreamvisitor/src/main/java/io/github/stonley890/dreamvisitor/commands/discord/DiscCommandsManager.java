@@ -124,17 +124,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             String targetRole = Objects.requireNonNull(event.getOption("type")).getAsString();
             Role role = Objects.requireNonNull(event.getOption("role")).getAsRole();
 
-            if (targetRole.equals("Member")) {
-
-                memberRole = role;
-                plugin.getConfig().set("memberRoleID", memberRole.getId());
-
-            } else if (targetRole.equals("Step 3")) {
-
-                step3role = role;
-                plugin.getConfig().set("step3roleID", step3role.getId());
-
-            } else if (Arrays.stream(TRIBE_NAMES).anyMatch(Predicate.isEqual(targetRole))) {
+            if (Arrays.stream(TRIBE_NAMES).anyMatch(Predicate.isEqual(targetRole))) {
 
                 // If one of the tribe names, find the index, get the list from config, and set the specified item
                 int index = Arrays.binarySearch(TRIBE_NAMES, targetRole);
@@ -478,8 +468,6 @@ public class DiscCommandsManager extends ListenerAdapter {
         commandData.add(Commands.slash("setrole", "Set a role").addOptions(
                         new OptionData(OptionType.STRING, "type", "The role you want to set.", true)
                                 .setAutoComplete(false)
-                                .addChoice("Step 3", "Step 3")
-                                .addChoice("Member", "Member")
                                 .addChoice("HiveWing", "HiveWing")
                                 .addChoice("IceWing", "IceWing")
                                 .addChoice("LeafWing", "LeafWing")

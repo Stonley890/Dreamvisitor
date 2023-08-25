@@ -1,13 +1,13 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.2.0
+version: 2.3.2
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
 
 commands:
   pausechat:
-    description: Pauses chat for non-OPs.
+    description: Pauses chat for non-OPs. Players will not be able to send messages, use `/me`, use OpenRP, or communicate through the game chat channel.
     usage: /<command> 
     permission: dreamvisitor.pausechat
   aradio:
@@ -15,7 +15,7 @@ commands:
     usage: /<command> <message>
     permission: minecraft.command.op
   radio:
-    description: Sends a message to all staff.
+    description: Sends a message to all players with the dreamvisitor.radio permission.
     usage: /<command> <message>
     permission: dreamvisitor.radio
   tagradio:
@@ -26,11 +26,11 @@ commands:
     description: Toggles Discord message visibility.
     usage: /<command>
   zoop:
-    description: Vanish from Discord.
+    description: Vanish from Discord. Will send a 'Player left the game' message and remove you from Discord /list
     usage: /<command>
     permission: dreamvisitor.zoop
   softwhitelist:
-    description: Add or remove a player to/from the soft whitelist.
+    description: Add or remove a player to/from the soft whitelist. This acts as another whitelist 'layer' so that the main whitelist does not need to be modified.
     usage: /<command> <add|remove|list|on|off> [player]
     permission: dreamvisitor.softwhitelist
   playerlimit:
@@ -42,61 +42,63 @@ commands:
     usage: /<command>
     permission: dreanvisitor.togglepvp
   pausebypass:
-    description: Let player bypass pause.
+    description: Let certain players bypass chat pause.
     usage: /<command> <add|remove|list>
     permission: dreamvisitor.pausechat
   sethub:
-    description: Set the hub location.
+    description: Set the hub location to teleport to with /hub. Must be run by a player.
     usage: /<command>
     permission: minecraft.command.op
   hub:
-    description: Teleport to the hub.
+    description: Teleport to the hub location.
     usage: /<command>
   panic:
-    description: Kicks all players and sets the player limit override to 0.
+    description: Kicks all players and sets the player limit override to 0. You must run the command twice within 3 seconds to initiate the panic.
     usage: /<command>
     permission: dreamvisitor.panic
-#  reloadbot:
-#    description: Restarts the Dreamvisitor Discord bot
-#    usage: /<command>
-#    permission: minecraft.command.op
   itemblacklist:
-    description: Access the item blacklist
+    description: Access the item blacklist GUI. Items added to the blacklist will be removed from player inventories.
     usage: /<command>
     permission: dreamvisitor.itemblacklist
   user:
-    description: Get the details of a player
+    description: Get the details of a player, even if they are offline.
     usage: /<command> <username>
     permission: dreamvisitor.user
 
 permissions:
   dreamvisitor.pausechat:
-    description: Allows all chat pause commands
+    description: Allows all chat pause commands.
+    default: op
+  dreamvisitor.nopause:
+    description: Always allows bypassing chat pause.
     default: op
   dreamvisitor.tagradio:
-    description: Allows the tagradio command
+    description: Allows the tagradio command.
     default: op
   dreamvisitor.zoop:
-    description: Allows the zoop command
+    description: Allows the zoop command.
     default: op
   dreamvisitor.softwhitelist:
-    description: Allows the softwhitelist command
+    description: Allows the softwhitelist command.
+    default: op
+  dreamvisitor.nowhitelist:
+    description: Always allows bypassing soft whitelist.
     default: op
   dreamvisitor.playerlimit:
-    description: Allows the playerlimit command
+    description: Allows the playerlimit command.
     default: op
   dreamvisitor.togglepvp:
-    description: Allows the togglepvp command
+    description: Allows the togglepvp command.
     default: op
   dreamvisitor.panic:
-    description: Allows the panic command
+    description: Allows the panic command.
     default: op
   dreamvisitor.itemblacklist:
-    description: Allows the itemblacklist command
+    description: Allows the itemblacklist command.
     default: op
   dreamvisitor.user:
-    description: Allows the user command
+    description: Allows the user command.
     default: op
   dreamvisitor.radio:
-    description: Allows the radio command
+    description: Allows the radio command.
     default: op

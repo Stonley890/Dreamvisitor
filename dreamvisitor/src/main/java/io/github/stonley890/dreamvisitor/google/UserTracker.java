@@ -82,22 +82,13 @@ public class UserTracker {
 
         return response.getValues();
 
-        /*
-        if (values == null || values.isEmpty()) {
-            Bukkit.getLogger().info("No data found");
-        } else {
-            for (List row : values) {
-                Bukkit.getLogger().info(row.get(0) + " (" + row.get(1) + ") is " + row.get(2) + " (" + row.get(3) + ")");
-            }
-        }
-        */
     }
 
     public static void initWhitelistPlayer(String minecraftUsername, String uuid, User user) throws  GeneralSecurityException, IOException {
         sheetsService = getSheetsService();
 
         Dreamvisitor.debug("Adding entry to the User Tracker...");
-        // Prepare array of values
+        // Prepare an array of values
         ValueRange body = new ValueRange().setValues(Collections.singletonList(
                 Arrays.asList(minecraftUsername, uuid, user.getName(), user.getId(), "", "civilian")
         ));
@@ -180,7 +171,7 @@ public class UserTracker {
     public static void updateUsername(String uuid, String username) throws GeneralSecurityException, IOException {
         sheetsService = getSheetsService();
 
-        // Prepare array of values
+        // Prepare an array of values
         ValueRange body = new ValueRange().setValues(Collections.singletonList(
                 Arrays.asList(username, uuid)
         ));

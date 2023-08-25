@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -24,14 +25,14 @@ public class ListenPlayerLogin implements Listener {
     public void onPlayerLoginEvent(PlayerLoginEvent event) {
         Player player = event.getPlayer();
 
-        if (player.isOp()) {
+        if (player.hasPermission("dreamvisitor.nowhitelist")) {
 
             // Always allow ops
 
             // Remind bot login failure to ops
-            if (Dreamvisitor.botFailed) {
-                player.sendMessage(
-                        "\u00a71[Dreamvisitor] \u00a7aBot login failed on server start! You may need a new login token.");
+            if (Dreamvisitor.botFailed && player.isOp()) {
+                player.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED +
+                        "Bot login failed on server start! You may need a new login token.");
             }
             event.allow();
 
@@ -94,7 +95,7 @@ public class ListenPlayerLogin implements Listener {
         // Fetch soft-whitelisted players
         List<String> whitelistedPlayers = (List<String>) fileConfig.get("players");
 
-        // If player is on soft whitelist, allow. If not, kick player.
+        // If a player is on soft whitelist, allow. If not, kick player.
         if ((whitelistedPlayers.contains(player.getUniqueId().toString()))) {
             event.allow();
 
