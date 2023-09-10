@@ -67,9 +67,9 @@ public class Bot {
         if (!Dreamvisitor.botFailed && channel != null) {
 
             if (channel == DiscCommandsManager.gameLogChannel && !plugin.getConfig().getBoolean("log-console")) {
-                channel.sendMessage(message).queue();
+                channel.sendMessage(message.replaceAll("_", "\\\\_")).queue();
             } else if (channel != DiscCommandsManager.gameLogChannel) {
-                channel.sendMessage(message).queue();
+                channel.sendMessage(message.replaceAll("_", "\\\\_")).queue();
             }
         }
     }

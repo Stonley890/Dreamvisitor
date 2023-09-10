@@ -1,13 +1,14 @@
 package io.github.stonley890.dreamvisitor.commands.discord;
 
+import java.awt.*;
 import java.io.File;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 
 import io.github.stonley890.dreamvisitor.data.AccountLink;
-import io.github.stonley890.dreamvisitor.google.UserTracker;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -22,10 +23,6 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -79,7 +76,7 @@ public class DiscCommandsManager extends ListenerAdapter {
         }
         if (config.getString("tribeRoles") != null) {
             for (int i = 0; i < 10; i++) {
-                tribeRole.add(jda.getRoleById(config.getStringList("tribeRoles").get(i)));
+                tribeRole.add(jda.getRoleById(config.getLongList("tribeRoles").get(i)));
             }
         }
 
@@ -128,15 +125,15 @@ public class DiscCommandsManager extends ListenerAdapter {
 
                 // If one of the tribe names, find the index, get the list from config, and set the specified item
                 int index = Arrays.binarySearch(TRIBE_NAMES, targetRole);
-                List<String> tribeRoles = plugin.getConfig().getStringList("tribeRoles");
+                List<Long> tribeRoles = plugin.getConfig().getLongList("tribeRoles");
 
                 if (tribeRoles.isEmpty()) {
                     for (int i = 0; i < 10; i++) {
-                        tribeRoles.add("none");
+                        tribeRoles.add(0L);
                     }
                 }
 
-                tribeRoles.set(index, role.getId());
+                tribeRoles.set(index, role.getIdLong());
                 plugin.getConfig().set("tribeRoles", tribeRoles);
 
             } else {
@@ -296,9 +293,15 @@ public class DiscCommandsManager extends ListenerAdapter {
             assert message != null;
             if (message.length() < 351) {
                 // Send message
-                Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET + message);
-                Bot.sendMessage(gameChatChannel, "**[Broadcast]** " + message);
-                Bot.sendMessage(gameLogChannel, "**[Broadcast]** " + message);
+                Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.DARK_AQUA + message);
+
+                EmbedBuilder builder = new EmbedBuilder();
+
+                builder.setAuthor("Staff Broadcast");
+                builder.setTitle(message);
+
+                gameChatChannel.sendMessageEmbeds(builder.build()).queue();
+                gameLogChannel.sendMessageEmbeds(builder.build()).queue();
 
                 // Reply
                 event.reply("Broadcast sent.").queue();
@@ -327,24 +330,21 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         } else if (command.equals("link")) {
 
+            Dreamvisitor.debug("Command requested.");
             User targetUser = event.getOption("user").getAsUser();
+            Dreamvisitor.debug("Got user.");
             String username = event.getOption("username").getAsString();
+            Dreamvisitor.debug("Got username.");
 
             Mojang mojang = new Mojang().connect();
+            Dreamvisitor.debug("Connected to Mojang.");
+            Dreamvisitor.debug("Getting UUID of username.");
             String uuid = mojang.getUUIDOfUsername(username);
+            Dreamvisitor.debug("Command requested.");
 
             if (uuid != null) {
                 AccountLink.linkAccounts(uuid, targetUser.getId());
-                if (!Dreamvisitor.googleFailed) {
-                    try {
-                        UserTracker.linkAccount(uuid, targetUser);
-                        event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
-                    } catch (GeneralSecurityException | IOException e) {
-                        Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
-                        e.printStackTrace();
-                        Dreamvisitor.googleFailed = true;
-                    }
-                }
+                event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
 
             } else {
                 event.reply("`" + username + "` could not be found!").queue();
@@ -355,92 +355,68 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         } else if (command.equals("user")) {
 
+            Dreamvisitor.debug("Command requested.");
             User targetUser = event.getOption("user").getAsUser();
-
             Dreamvisitor.debug("Target user: " + targetUser.getId());
 
-            if (!Dreamvisitor.googleFailed) {
-                try {
-                    List<List<Object>> seenIds = UserTracker.getRange("Users!A3:F1000");
+            List<List<Object>> seenIds = new ArrayList<>();
 
-                    if (seenIds == null || seenIds.isEmpty()) {
-                        // Should not happen
-                        event.reply("No data was found on specified spreadsheet.").queue();
-                    } else {
-                        // For each row
-                        for (int i = 0; i < seenIds.size(); i++) {
+            Mojang mojang = new Mojang().connect();
 
-                            Dreamvisitor.debug("ID: " + seenIds.get(i).get(3));
+            // UUID from AccountLink.yml
+            String uuid = AccountLink.getUuid(targetUser.getId());
+            // Minecraft username from Mojang
+            String username = "N/A";
 
-                            // Check ID column for matching ID
-                            if (targetUser.getId().equals(seenIds.get(i).get(3))) {
+            if (uuid != null) {
+                username = mojang.getPlayerProfile(uuid).getUsername();
+            } else {
+                uuid = "N/A";
+            }
 
-                                // Get data
-                                String minecraftUsername = (String) seenIds.get(i).get(0);
-                                String uuid = (String) seenIds.get(i).get(1);
-                                String unbanDate = "N/A";
-                                if (!seenIds.get(i).get(4).equals("")) {
-                                    unbanDate = (String) seenIds.get(i).get(4);
-                                }
-                                String royaltyPosition = (String) seenIds.get(i).get(5);
+            // Send data
+            EmbedBuilder builder = new EmbedBuilder();
 
-                                // Send data
-                                event.reply("Data for user **" + targetUser.getName() + "**:" +
-                                        "\n**ID:** `" + user.getId() +
-                                        "`\n**Minecraft Username:** `" + minecraftUsername +
-                                        "`\n**UUID:** `" + uuid.replaceFirst(
-                                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                                        "$1-$2-$3-$4-$5") +
-                                        "`\n**Date Unbanned:** " + unbanDate +
-                                        "\n**Royalty Position:** " + royaltyPosition
-                                ).queue();
+            builder.setColor(Color.BLUE);
+            builder.setAuthor(targetUser.getName(), targetUser.getAvatarUrl(), targetUser.getAvatarUrl());
 
-                                return;
-                            }
-                        }
+            builder.addField("ID", user.getId(), false);
+            builder.addField("Minecraft Username", username, false);
+            builder.addField("UUID", uuid.replaceFirst(
+                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                    "$1-$2-$3-$4-$5"), false);
 
-                        // Not found
-                        // Fall back to local sources
+            event.replyEmbeds(builder.build()).queue();
 
-                        Mojang mojang = new Mojang().connect();
+        } else if (command.equals("updateroles")) {
+            // Match tribe roles when user joins sister server.
+            Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
-                        // UUID from AccountLink.yml
-                        String uuid = AccountLink.getUuid(targetUser.getId());
-                        // Minecraft username from Mojang
-                        String username = "N/A";
+            for (Member member : event.getGuild().getMembers()) {
+                User targetUser = member.getUser();
 
-                        String unbanDate = "N/A";
-                        if (uuid != null) {
-                            username = mojang.getPlayerProfile(uuid).getUsername();
-                            if (Bukkit.getBannedPlayers().contains(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))) {
-                                if (Bukkit.getBanList(BanList.Type.NAME).getBanEntry(username).getExpiration() != null) {
-                                    unbanDate = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(username).getExpiration().toString();
-                                } else {
-                                    unbanDate = "Infinite";
+                Member mainMember = DiscCommandsManager.gameLogChannel.getGuild().getMember(targetUser);
+
+                if (mainMember != null) {
+                    List<Role> mainRoles = mainMember.getRoles();
+
+                    if (!mainRoles.isEmpty()) {
+                        for (Role role : mainRoles) {
+                            if (DiscCommandsManager.tribeRole.contains(role)) {
+                                int tribeIndex = DiscCommandsManager.tribeRole.indexOf(role);
+
+                                Role targetRole = Bot.getJda().getRoleById((String) Objects.requireNonNull(plugin.getConfig().getList("sisterTribeRoles")).get(tribeIndex));
+
+                                if (targetRole != null) {
+                                    member.getRoles().add(targetRole);
                                 }
                             }
-                        } else {
-                            uuid = "N/A";
                         }
-
-                        // Send data
-                        event.reply("Local data for user **" + targetUser.getName() + "**:" +
-                                "\n**ID:** `" + user.getId() +
-                                "`\n**Minecraft Username:** `" + username +
-                                "`\n**UUID:** `" + uuid.replaceFirst(
-                                "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                                "$1-$2-$3-$4-$5") +
-                                "`\n**Date Unbanned:** " + unbanDate
-                        ).queue();
-
                     }
-
-                } catch (GeneralSecurityException | IOException e) {
-                    Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
-                    e.printStackTrace();
-                    Dreamvisitor.googleFailed = true;
                 }
             }
+
+
 
         }
 
@@ -517,12 +493,11 @@ public class DiscCommandsManager extends ListenerAdapter {
                 .addOption(OptionType.USER, "user", "The user to search for.", true)
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
+        commandData.add(Commands.slash("updateroles", "RUN THIS IN SISTER SERVER. Update roles to match main server.")
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
-        // Only register commands if guild is NOT the tribe server.
-        // Don't need any commands in the tribe server.
-        if (!event.getGuild().getId().equals(String.valueOf(plugin.getConfig().getInt("tribeGuildID")))) {
-            event.getGuild().updateCommands().addCommands(commandData).queue();
-        }
+        // register commands
+        event.getGuild().updateCommands().addCommands(commandData).queue();
 
         commandData.clear();
 

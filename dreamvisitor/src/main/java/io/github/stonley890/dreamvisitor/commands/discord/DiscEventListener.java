@@ -3,7 +3,6 @@ package io.github.stonley890.dreamvisitor.commands.discord;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
-import io.github.stonley890.dreamvisitor.google.UserTracker;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -25,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -49,7 +47,7 @@ public class DiscEventListener extends ListenerAdapter {
 
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
-        // If in whitelist channel and username is "legal"
+        // If in the whitelist channel and username is "legal"
         if (channel.equals(DiscCommandsManager.whitelistChannel) && !user.isBot() && !p.matcher(username).find()) {
 
             // Connect to Mojang services
@@ -59,7 +57,7 @@ public class DiscEventListener extends ListenerAdapter {
             if (mojang.getUUIDOfUsername(username) == null) {
                 // username does not exist alert
                 event.getChannel().sendMessage("`" + username
-                                + "` **could not be found!**").queue();
+                        + "` **could not be found!**").queue();
                 event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
             } else {
 
@@ -67,19 +65,10 @@ public class DiscEventListener extends ListenerAdapter {
                         "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
                         "$1-$2-$3-$4-$5"));
 
-                // Link accounts
-                AccountLink.linkAccounts(uuid.toString(), user.getId());
-                // Add to spreadsheet
-                if (!Dreamvisitor.googleFailed) {
-                    try {
-                        UserTracker.initWhitelistPlayer(username, uuid.toString(), user);
-                    } catch (GeneralSecurityException | IOException e) {
-                        Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
-                        e.printStackTrace();
-                        Dreamvisitor.googleFailed = true;
-                    }
+                // Link accounts if not already linked
+                if (AccountLink.getUuid(user.getId()) == null) {
+                    AccountLink.linkAccounts(uuid.toString(), user.getId());
                 }
-
 
                 // Access whitelist.json file
                 String whitelistPath = Bukkit.getServer().getWorldContainer().getPath() + "/whitelist.json";
@@ -151,7 +140,7 @@ public class DiscEventListener extends ListenerAdapter {
 
             // illegal username
             event.getChannel().sendMessage("`" + username
-                            + "` **contains illegal characters!**").queue();
+                    + "` **contains illegal characters!**").queue();
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
         }
 
@@ -162,12 +151,6 @@ public class DiscEventListener extends ListenerAdapter {
             // Build message
             String discName = user.getName();
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < discName.length(); i++) {
-                char c = discName.charAt(i);
-                if (c == '_')
-                    sb.append("\\");
-                sb.append(c);
-            }
 
             Bukkit.getLogger().log(Level.INFO, "[Discord] <{0}> {1}", event.getMessage().getContentRaw());
 
@@ -184,7 +167,7 @@ public class DiscEventListener extends ListenerAdapter {
                         if (fileConfig.getBoolean("discordToggled", true)) {
 
                             player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<"
-                                    + sb + "> " + event.getMessage().getContentRaw());
+                                    + discName + "> " + event.getMessage().getContentRaw());
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -230,7 +213,7 @@ public class DiscEventListener extends ListenerAdapter {
                     if (DiscCommandsManager.tribeRole.contains(role)) {
                         int tribeIndex = DiscCommandsManager.tribeRole.indexOf(role);
 
-                        Role targetRole = Bot.getJda().getRoleById((String) Objects.requireNonNull(plugin.getConfig().getList("sisterTribeRoles")).get(tribeIndex));
+                        Role targetRole = Bot.getJda().getRoleById(Objects.requireNonNull(plugin.getConfig().getLongList("sisterTribeRoles")).get(tribeIndex));
 
                         if (targetRole != null) {
                             sisterMember.getRoles().add(targetRole);
@@ -239,8 +222,6 @@ public class DiscEventListener extends ListenerAdapter {
                 }
             }
         }
-
-
     }
 
     @SuppressWarnings({"null"})

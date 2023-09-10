@@ -52,20 +52,20 @@ public class ListenPlayerChat implements Listener {
             if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
                     || event.getPlayer().hasPermission("dreamvisitor.nopause")) {
 
-                Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage);
-                Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage);
+                Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage.replaceAll("_", "\\_"));
+                Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage.replaceAll("_", "\\_"));
                 
             } else {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
 
-                Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Blocked: " + chatMessage);
+                Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Blocked: " + chatMessage.replaceAll("_", "\\_"));
 
             }  
         } else if (!event.isCancelled()) {
 
-            Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage);
-            Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage);
+            Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage.replaceAll("_", "\\_"));
+            Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage.replaceAll("_", "\\_"));
 
         }
     }

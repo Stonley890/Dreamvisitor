@@ -49,7 +49,7 @@ public class ConsoleLogger extends AbstractAppender {
         // Pause adding strings if new message will be > 2000
         if (messageBuilder.length() + message.length() + "\n".length() <= 2000) {
 
-            if (messageBuilder.length() != 0) {
+            if (!messageBuilder.isEmpty()) {
                 messageBuilder.append("\n");
             }
             messageBuilder.append(message);

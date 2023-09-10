@@ -1,9 +1,11 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.4.0
+version: 2.4.3
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
+softdepend:
+  - EyeOfOnyx
 
 commands:
   pausechat:
@@ -64,6 +66,10 @@ commands:
     description: Get the details of a player, even if they are offline.
     usage: /<command> <username>
     permission: dreamvisitor.user
+  tribeupdate:
+    description: Update roles based on in-game team.
+    usage: /<command>
+    permission: op
 
 permissions:
   dreamvisitor.pausechat:

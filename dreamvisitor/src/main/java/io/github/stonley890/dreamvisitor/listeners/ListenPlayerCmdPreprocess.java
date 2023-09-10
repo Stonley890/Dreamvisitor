@@ -30,8 +30,8 @@ public class ListenPlayerCmdPreprocess implements Listener {
         String cmd = event.getMessage();
         Player player = event.getPlayer();
 
-        // '/me' passthrough
-        if (cmd.startsWith("/me ") && !event.isCancelled()) {
+        // '/me' and '/rp' pass through
+        if ((cmd.startsWith("/me " ) || cmd.startsWith("/rp " )) && !event.isCancelled()) {
 
             // IF chatPaused stop /me unless bypassing
             if (Dreamvisitor.chatPaused) {
@@ -54,8 +54,10 @@ public class ListenPlayerCmdPreprocess implements Listener {
 
                 // If list contains player, allow
                 if (bypassedPlayers.contains(player.getUniqueId().toString()) || player.isOp()) {
-                    // Remove '/me '
-                    String action = cmd.replaceFirst("/me ", "");
+                    // Remove command
+                    String action = null;
+                    if (cmd.startsWith("/me " )) action = cmd.replaceFirst("/me ", "");
+                    if (cmd.startsWith("/rp " )) action = cmd.replaceFirst("/rp ", "");
                     String message = "**[" + ChatColor.stripColor(player.getDisplayName()) + " **(" + player.getName()
                             + ")**]** " + ChatColor.stripColor(action);
                     // Send message
@@ -69,8 +71,10 @@ public class ListenPlayerCmdPreprocess implements Listener {
             } // If chat is not paused, allow
             else {
 
-                // Remove '/me '
-                String action = cmd.replaceFirst("/me ", "");
+                // Remove command
+                String action = null;
+                if (cmd.startsWith("/me " )) action = cmd.replaceFirst("/me ", "");
+                if (cmd.startsWith("/rp " )) action = cmd.replaceFirst("/rp ", "");
                 String message = "**[" + ChatColor.stripColor(player.getDisplayName()) + " **(" + player.getName()
                         + ")**]** " + ChatColor.stripColor(action);
                 // Send message

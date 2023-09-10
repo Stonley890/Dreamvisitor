@@ -1,26 +1,15 @@
 package io.github.stonley890.dreamvisitor;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 
 import io.github.stonley890.dreamvisitor.data.AccountLink;
-import io.github.stonley890.dreamvisitor.google.UserTracker;
-import net.dv8tion.jda.api.entities.User;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,7 +19,6 @@ import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabPauseBypass;
 import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabSoftWhitelist;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /*
@@ -51,7 +39,6 @@ public class Dreamvisitor extends JavaPlugin {
     public static Location hubLocation;
 
     public static boolean botFailed = false;
-    public static boolean googleFailed = false;
 
     JDA jda;
 
@@ -90,6 +77,7 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
         Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
         Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
+        Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
 
         debug("Initializing tab completers...");
         // Initialize command tab completers
@@ -118,22 +106,25 @@ public class Dreamvisitor extends JavaPlugin {
             DiscCommandsManager.initChannelsRoles();
 
             // Send server start message
-            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been started.\n*Dreamvisitor " + VERSION + "*");
+            DiscCommandsManager.gameLogChannel.sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
         }
 
-        // If chat was previously paused, restore and notify in console
+        // If chat was previously paused, restore and notify in console\
+        debug("Restoring chat pause...");
         if (getConfig().getBoolean("chatPaused")) {
             chatPaused = true;
-            Bukkit.getServer().getLogger().info(
-                    "[Dreamvisitor] Chat is currently paused from last session! Use /pausechat to allow users to chat.");
+            Bukkit.getServer().getLogger().info(PREFIX +
+                    "Chat is currently paused from last session! Use /pausechat to allow users to chat.");
         }
 
         // Restore player limit override
+        debug("Restoring player limit override...");
         playerlimit = getConfig().getInt("playerlimit");
-        Bukkit.getServer().getLogger().info(
-                "[Dreamvisitor] Player limit override is currently set to " + playerlimit);
+        Bukkit.getServer().getLogger().info(PREFIX +
+                "Player limit override is currently set to " + playerlimit);
 
         // Create item blacklist if empty
+        debug("Restoring item blacklist...");
         if (plugin.getConfig().get("itemBlacklist") != null ) {
             ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) plugin.getConfig().get("itemBlacklist");
             if (itemList != null) {
@@ -142,15 +133,8 @@ public class Dreamvisitor extends JavaPlugin {
             }
         }
 
-        try {
-            UserTracker.getSheetsService();
-        } catch (IOException | GeneralSecurityException e) {
-            Bukkit.getLogger().severe("Dreamvisitor cannot reach Google Services. This is likely due to bad authentication. Google integration has been disabled.");
-            e.printStackTrace();
-            googleFailed = true;
-        }
-
         // Console logging
+        debug("Setting up console logging...");
         appender = new ConsoleLogger();
         logger.addAppender(appender);
 
@@ -163,7 +147,7 @@ public class Dreamvisitor extends JavaPlugin {
                     // If there are messages in the queue, send them!
                     if (ConsoleLogger.messageBuilder != null && ConsoleLogger.messageBuilder.length() > 0) {
 
-                        DiscCommandsManager.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder).queue();
+                        DiscCommandsManager.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString().replaceAll("_","\\_")).queue();
                         ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
 
                         // If there are overflow messages, build and send those too
@@ -179,7 +163,7 @@ public class Dreamvisitor extends JavaPlugin {
                                 // Check that it fits
                                 if (overFlowMessageBuilder.length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length() >= 2000) {
                                     // if not, queue current message and clear string builder
-                                    DiscCommandsManager.gameLogChannel.sendMessage(overFlowMessageBuilder).queue();
+                                    DiscCommandsManager.gameLogChannel.sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\_")).queue();
                                     overFlowMessageBuilder = new StringBuilder();
 
                                 } else {
@@ -212,7 +196,7 @@ public class Dreamvisitor extends JavaPlugin {
     }
 
     public static void debug(String message) {
-        if (plugin.getConfig().getBoolean("debug")){
+        if (getPlugin().getConfig().getBoolean("debug")){
             Bukkit.getLogger().info("DEBUG: " + message);
         }
     }
