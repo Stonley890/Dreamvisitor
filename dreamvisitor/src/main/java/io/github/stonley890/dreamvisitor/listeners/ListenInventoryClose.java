@@ -2,7 +2,6 @@ package io.github.stonley890.dreamvisitor.listeners;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.commands.CmdItemBlacklist;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,7 +24,7 @@ public class ListenInventoryClose implements Listener {
                         if (content != null && content.isSimilar(item)) {
 
                             player.getInventory().remove(item);
-                            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
+                            Bot.sendMessage(Bot.gameLogChannel, "Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
                         }
                     }
                 }

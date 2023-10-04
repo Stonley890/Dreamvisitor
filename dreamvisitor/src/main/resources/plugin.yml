@@ -1,6 +1,6 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.4.3
+version: 2.6.0
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -70,6 +70,10 @@ commands:
     description: Update roles based on in-game team.
     usage: /<command>
     permission: op
+  unwax:
+    description: Unwax the sign you are looking at.
+    usage: /<command>
+    permission: dreamvisitor.unwax
 
 permissions:
   dreamvisitor.pausechat:
@@ -107,4 +111,7 @@ permissions:
     default: op
   dreamvisitor.radio:
     description: Allows the radio command.
+    default: op
+  dreamvisitor.unwax:
+    description:  Allows the unwax command.
     default: op

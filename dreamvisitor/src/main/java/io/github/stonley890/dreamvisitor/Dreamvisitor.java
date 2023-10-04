@@ -1,10 +1,16 @@
 package io.github.stonley890.dreamvisitor;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.data.Whitelist;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,12 +20,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.stonley890.dreamvisitor.commands.*;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabPauseBypass;
 import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabSoftWhitelist;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.JDA;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.shanerx.mojang.Mojang;
+import spark.Spark;
 
 /*
  * The main ticking thread.
@@ -37,7 +45,8 @@ public class Dreamvisitor extends JavaPlugin {
     public static boolean chatPaused;
     public static int playerlimit;
     public static Location hubLocation;
-
+    public static String resourcePackHash;
+    public static boolean debug;
     public static boolean botFailed = false;
 
     JDA jda;
@@ -47,6 +56,8 @@ public class Dreamvisitor extends JavaPlugin {
 
         // Initialize variables
         plugin = this;
+
+        debug = getConfig().getBoolean("debug");
 
         debug("Registering listeners...");
         // Register listeners
@@ -78,6 +89,7 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
         Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
         Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
+        Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
 
         debug("Initializing tab completers...");
         // Initialize command tab completers
@@ -106,7 +118,7 @@ public class Dreamvisitor extends JavaPlugin {
             DiscCommandsManager.initChannelsRoles();
 
             // Send server start message
-            DiscCommandsManager.gameLogChannel.sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
+            Bot.gameLogChannel.sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
         }
 
         // If chat was previously paused, restore and notify in console\
@@ -133,10 +145,46 @@ public class Dreamvisitor extends JavaPlugin {
             }
         }
 
+        // Get resource pack hash
+        debug("Getting resource pack hash...");
+        try (InputStream input = new FileInputStream("server.properties")) {
+            java.util.Properties prop = new java.util.Properties();
+            prop.load(input);
+            resourcePackHash = prop.getProperty("resource-pack-sha1");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // Console logging
         debug("Setting up console logging...");
         appender = new ConsoleLogger();
         logger.addAppender(appender);
+
+        // Web whitelist server
+
+        Spark.port(4567); // Choose a port for your API
+        Spark.before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Request-Method", "*");
+            response.header("Access-Control-Allow-Headers", "*");
+        });
+        Spark.post("/process-username", (request, response) -> {
+            String username = request.queryParams("username");
+
+            Dreamvisitor.debug("Username from web form: " + username);
+
+            // Process the username (your logic here)
+            boolean success = processUsername(username);
+
+            Dreamvisitor.debug("Processed. Success: " + success);
+
+            // Send a response back to the web page
+            // response.header("Access-Control-Allow-Origin", "http://0.0.0.0:80/" /* getConfig().getString("website-url") */);
+            Dreamvisitor.debug("response.header");
+            response.type("application/json");
+            Dreamvisitor.debug("response.type");
+            return "{\"success\": " + success + "}";
+        });
 
         Runnable pushConsole = new BukkitRunnable() {
             // Push console log to Discord every 2 seconds
@@ -147,7 +195,7 @@ public class Dreamvisitor extends JavaPlugin {
                     // If there are messages in the queue, send them!
                     if (ConsoleLogger.messageBuilder != null && ConsoleLogger.messageBuilder.length() > 0) {
 
-                        DiscCommandsManager.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString().replaceAll("_","\\_")).queue();
+                        Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString().replaceAll("_","\\_")).queue();
                         ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
 
                         // If there are overflow messages, build and send those too
@@ -163,7 +211,7 @@ public class Dreamvisitor extends JavaPlugin {
                                 // Check that it fits
                                 if (overFlowMessageBuilder.length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length() >= 2000) {
                                     // if not, queue current message and clear string builder
-                                    DiscCommandsManager.gameLogChannel.sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\_")).queue();
+                                    Bot.gameLogChannel.sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\_")).queue();
                                     overFlowMessageBuilder = new StringBuilder();
 
                                 } else {
@@ -187,6 +235,51 @@ public class Dreamvisitor extends JavaPlugin {
 
     }
 
+    private boolean processUsername(String username) throws IOException {
+        // Connect to Mojang services
+        Mojang mojang = new Mojang().connect();
+        Dreamvisitor.debug("Connected to Mojang");
+
+        // Check for valid UUID
+        Dreamvisitor.debug("Checking for valid UUID");
+        if (mojang.getUUIDOfUsername(username) == null) {
+            // username does not exist alert
+            Dreamvisitor.debug("Username does not exist.");
+            Dreamvisitor.debug("Failed whitelist.");
+        } else {
+
+            Dreamvisitor.debug("Got UUID");
+            UUID uuid = UUID.fromString(mojang.getUUIDOfUsername(username).replaceFirst(
+                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                    "$1-$2-$3-$4-$5"));
+
+            // No account to link
+
+            // Check if already whitelisted
+            Dreamvisitor.debug("Is user already whitelisted?");
+
+            if (Whitelist.isUserWhitelisted(uuid)) {
+                Dreamvisitor.debug("Already whitelisted.");
+                Dreamvisitor.debug("Resolved.");
+
+                return true;
+            } else {
+                Dreamvisitor.debug("Player is not whitelisted.");
+
+                Whitelist.add(username, uuid);
+
+                // success message
+                Dreamvisitor.debug("Success.");
+
+                TextChannel systemChannel = Bot.gameLogChannel.getGuild().getSystemChannel();
+                if (systemChannel != null) systemChannel.sendMessage("Whitelisted " + username + " from web whitelist. Use `/unwhitelist <username>` to undo this action or `/toggleweb` to disable web whitelisting.").queue();
+
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Dreamvisitor getPlugin() {
         return plugin;
     }
@@ -207,7 +300,7 @@ public class Dreamvisitor extends JavaPlugin {
         if (!botFailed) {
             // Shutdown messages
             getLogger().info("Closing bot instance.");
-            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Server has been shut down.");
+            Bot.sendMessage(Bot.gameLogChannel, "Server has been shut down.");
             Bot.getJda().shutdownNow();
         }
 

@@ -2,9 +2,7 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
@@ -55,12 +53,12 @@ public class CmdTribeUpdate implements CommandExecutor {
                     if (playerTeam != null) {
 
                         // Iterate through team names to get index
-                        for (int i = 0; i < DiscCommandsManager.TRIBE_NAMES.length; i++) {
-                            if (playerTeam.getName().equals(DiscCommandsManager.TRIBE_NAMES[i])) {
+                        for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
+                            if (playerTeam.getName().equals(Bot.TRIBE_NAMES[i])) {
 
                                 // Remove roles
                                 for (String roleId : Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles")) {
-                                    DiscCommandsManager.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
+                                    Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
                                 }
 
                                 Role targetRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles").get(i));
@@ -71,23 +69,8 @@ public class CmdTribeUpdate implements CommandExecutor {
                                     return true;
                                 }
 
-                                /*
-                                if (sisterRole == null) {
-                                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find sister role for " + playerTeam.getName());
-                                    return true;
-                                }
-                                 */
-
                                 // Add role
-                                DiscCommandsManager.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
-
-                                /*
-                                Guild sisterGuild = Bot.getJda().getGuildById(Dreamvisitor.getPlugin().getConfig().getInt("tribeGuildID"));
-                                if (sisterGuild != null) {
-                                    sisterGuild.addRoleToMember(user, sisterRole).queue();
-                                }
-                                 */
-
+                                Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
 
                             }
                         }
@@ -105,8 +88,7 @@ public class CmdTribeUpdate implements CommandExecutor {
                 Player target = Bukkit.getPlayer(args[0]);
 
                 assert target != null;
-                String uuid = target.getUniqueId().toString();
-
+                String uuid = target.getUniqueId().toString().replaceAll("-","");
                 String discordId = AccountLink.getDiscordId(uuid);
 
                 if (discordId == null) {
@@ -121,12 +103,12 @@ public class CmdTribeUpdate implements CommandExecutor {
                     if (playerTeam != null) {
 
                         // Iterate through team names to get index
-                        for (int i = 0; i < DiscCommandsManager.TRIBE_NAMES.length; i++) {
-                            if (playerTeam.getName().equals(DiscCommandsManager.TRIBE_NAMES[i])) {
+                        for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
+                            if (playerTeam.getName().equals(Bot.TRIBE_NAMES[i])) {
 
                                 // Remove roles
                                 for (String roleId : Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles")) {
-                                    DiscCommandsManager.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
+                                    Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
                                 }
 
                                 Role targetRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles").get(i));
@@ -137,7 +119,7 @@ public class CmdTribeUpdate implements CommandExecutor {
                                 }
 
                                 // Add role
-                                DiscCommandsManager.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
+                                Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
 
                                 sender.sendMessage(Dreamvisitor.PREFIX + "Roles updated successfully.");
                             }

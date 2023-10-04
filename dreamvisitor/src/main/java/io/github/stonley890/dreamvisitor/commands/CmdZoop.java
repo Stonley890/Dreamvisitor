@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,14 +40,14 @@ public class CmdZoop implements CommandExecutor {
 
                     memory.setVanished(false);
                     String chatMessage = "**" + player.getName() + " joined the game**";
-                    Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage);
-                    Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage);
+                    Bot.sendMessage(Bot.gameChatChannel, chatMessage);
+                    Bot.sendMessage(Bot.gameLogChannel, chatMessage);
 
                 } else {
                     memory.setVanished(true);
                     String chatMessage = "**" + player.getName() + " left the game**";
-                    Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage);
-                    Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage);
+                    Bot.sendMessage(Bot.gameChatChannel, chatMessage);
+                    Bot.sendMessage(Bot.gameLogChannel, chatMessage);
 
                 }
 

@@ -9,6 +9,10 @@ debug: false
 # Default: BOT_TOKEN
 bot-token: BOT_TOKEN
 
+# Website URL
+# The URL for the whitelisting website.
+website-url: "file:///home/stonley890/Documents/GitHub/Website/index.html"
+
 # The channel ID of the game chat.
 # This can be set on Discord with /setgamechat
 # Default: 880269118975119410
@@ -37,19 +41,6 @@ triberoles:
   - 660599559654735893
   - 964773212321882132
   - 660599708145942581
-
-# The role IDs of tribes on the tribe server.
-sisterTribeRoles:
-  - 1103730791181197332
-  - 1103730830427303946
-  - 1103730855324680224
-  - 1103730876212322354
-  - 1103730892205207602
-  - 1103734734179270729
-  - 1103730908974026822
-  - 1103730925185024074
-  - 1103730937788907570
-  - 1103730953630789774
 
 # The guild ID of the tribe server.
 # This will allow Dreamvistor to sync roles across servers.

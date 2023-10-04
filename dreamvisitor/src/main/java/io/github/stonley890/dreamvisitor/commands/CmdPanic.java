@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdPanic implements CommandExecutor {
@@ -42,7 +41,7 @@ public class CmdPanic implements CommandExecutor {
             plugin.saveConfig();
             Bukkit.getServer().broadcastMessage(
                     ChatColor.RED + "Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.");
-            Bot.sendMessage(DiscCommandsManager.gameLogChannel, "**Panicked by " + sender.getName());
+            Bot.sendMessage(Bot.gameLogChannel, "**Panicked by " + sender.getName());
         }
         return true;
     }

@@ -15,7 +15,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import net.md_5.bungee.api.ChatColor;
 
 public class ListenPlayerCmdPreprocess implements Listener {
@@ -61,8 +60,8 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     String message = "**[" + ChatColor.stripColor(player.getDisplayName()) + " **(" + player.getName()
                             + ")**]** " + ChatColor.stripColor(action);
                     // Send message
-                    Bot.sendMessage(DiscCommandsManager.gameChatChannel, message);
-                    Bot.sendMessage(DiscCommandsManager.gameLogChannel, message);
+                    Bot.sendMessage(Bot.gameChatChannel, message);
+                    Bot.sendMessage(Bot.gameLogChannel, message);
                 } // If list does not contain player, stop the command
                 else {
                     event.setCancelled(true);
@@ -78,8 +77,8 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 String message = "**[" + ChatColor.stripColor(player.getDisplayName()) + " **(" + player.getName()
                         + ")**]** " + ChatColor.stripColor(action);
                 // Send message
-                Bot.sendMessage(DiscCommandsManager.gameChatChannel, message);
-                Bot.sendMessage(DiscCommandsManager.gameLogChannel, message);
+                Bot.sendMessage(Bot.gameChatChannel, message);
+                Bot.sendMessage(Bot.gameLogChannel, message);
             }
         } else {
             boolean isMsg = false;
@@ -92,7 +91,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
 
             if (isMsg) {
                 String message = "**" + player.getName() + "** sent command: `" + cmd + "`";
-                Bot.sendMessage(DiscCommandsManager.gameLogChannel, message);
+                Bot.sendMessage(Bot.gameLogChannel, message);
             }
         }
     }

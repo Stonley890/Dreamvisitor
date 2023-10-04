@@ -1,6 +1,5 @@
 package io.github.stonley890.dreamvisitor;
 
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -10,9 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Formatter;
 // other imports that you need here
 
 public class ConsoleLogger extends AbstractAppender {

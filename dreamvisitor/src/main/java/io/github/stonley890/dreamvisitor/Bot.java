@@ -3,11 +3,12 @@ package io.github.stonley890.dreamvisitor;
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
 
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscEventListener;
+import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.discord.DiscEventListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -15,11 +16,19 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static io.github.stonley890.dreamvisitor.Dreamvisitor.debug;
 import static io.github.stonley890.dreamvisitor.Dreamvisitor.plugin;
 
 public class Bot {
 
+    public static final String[] TRIBE_NAMES = {"HiveWing", "IceWing", "LeafWing", "MudWing", "NightWing", "RainWing", "SandWing", "SeaWing", "SilkWing", "SkyWing"};
+    public static TextChannel gameChatChannel;
+    public static TextChannel gameLogChannel;
+    public static TextChannel whitelistChannel;
+    public static List<Role> tribeRole = new ArrayList<>();
     static JDA jda;
 
     private Bot() {
@@ -66,10 +75,10 @@ public class Bot {
     public static void sendMessage(TextChannel channel, @Nonnull String message) {
         if (!Dreamvisitor.botFailed && channel != null) {
 
-            if (channel == DiscCommandsManager.gameLogChannel && !plugin.getConfig().getBoolean("log-console")) {
+            if ((channel == gameLogChannel && !plugin.getConfig().getBoolean("log-console")) || channel == gameChatChannel) {
                 channel.sendMessage(message.replaceAll("_", "\\\\_")).queue();
-            } else if (channel != DiscCommandsManager.gameLogChannel) {
-                channel.sendMessage(message.replaceAll("_", "\\\\_")).queue();
+            } else {
+                channel.sendMessage(message).queue();
             }
         }
     }

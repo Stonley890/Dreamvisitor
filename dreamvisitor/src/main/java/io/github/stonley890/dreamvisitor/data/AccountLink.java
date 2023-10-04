@@ -68,16 +68,19 @@ public class AccountLink {
     }
 
     public static void linkAccounts(String minecraftUUID, String discordId) {
-        uuidToDiscordIdMap.put(minecraftUUID, discordId);
+        loadFromFile();
+        uuidToDiscordIdMap.put(minecraftUUID.replaceAll("-",""), discordId);
         discordIdToUuidMap.put(discordId, minecraftUUID);
         saveFile();
     }
 
     public static String getDiscordId(String minecraftUUID) {
+        loadFromFile();
         return uuidToDiscordIdMap.get(minecraftUUID);
     }
 
     public static String getUuid(String discordId) {
+        loadFromFile();
         return discordIdToUuidMap.get(discordId);
     }
 }

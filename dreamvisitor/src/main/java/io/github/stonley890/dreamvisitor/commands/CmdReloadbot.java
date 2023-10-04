@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import net.md_5.bungee.api.ChatColor;
 import org.jetbrains.annotations.NotNull;
 

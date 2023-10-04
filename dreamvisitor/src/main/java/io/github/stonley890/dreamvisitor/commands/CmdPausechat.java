@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdPausechat implements CommandExecutor {
@@ -29,7 +28,7 @@ public class CmdPausechat implements CommandExecutor {
             Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been unpaused.");
             
             // Broadcast to chat channel
-            Bot.sendMessage(DiscCommandsManager.gameChatChannel, "**Chat has been unpaused. Messages will now be sent to Minecraft**");
+            Bot.sendMessage(Bot.gameChatChannel, "**Chat has been unpaused. Messages will now be sent to Minecraft**");
 
         } else {
 
@@ -41,7 +40,7 @@ public class CmdPausechat implements CommandExecutor {
             Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been paused.");
 
             // Broadcast to chat channel
-            Bot.sendMessage(DiscCommandsManager.gameChatChannel, "**Chat has been paused. Messages will not be sent to Minecraft**");
+            Bot.sendMessage(Bot.gameChatChannel, "**Chat has been paused. Messages will not be sent to Minecraft**");
 
         }
         plugin.saveConfig();

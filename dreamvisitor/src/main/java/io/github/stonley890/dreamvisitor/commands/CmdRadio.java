@@ -10,7 +10,6 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdRadio implements CommandExecutor {
@@ -63,7 +62,7 @@ public class CmdRadio implements CommandExecutor {
                 operator.sendMessage(finalMessage);
             }
         }
-        Bot.sendMessage(DiscCommandsManager.gameLogChannel, ChatColor.stripColor(finalMessage));
+        Bot.sendMessage(Bot.gameLogChannel, ChatColor.stripColor(finalMessage));
     }
     
 }

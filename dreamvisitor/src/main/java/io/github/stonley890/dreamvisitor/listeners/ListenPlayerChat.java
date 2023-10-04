@@ -14,7 +14,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.commands.discord.DiscCommandsManager;
 
 public class ListenPlayerChat implements Listener {
 
@@ -52,20 +51,20 @@ public class ListenPlayerChat implements Listener {
             if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
                     || event.getPlayer().hasPermission("dreamvisitor.nopause")) {
 
-                Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage.replaceAll("_", "\\_"));
-                Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage.replaceAll("_", "\\_"));
+                Bot.sendMessage(Bot.gameChatChannel, chatMessage.replaceAll("_", "\\_"));
+                Bot.sendMessage(Bot.gameLogChannel, chatMessage.replaceAll("_", "\\_"));
                 
             } else {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
 
-                Bot.sendMessage(DiscCommandsManager.gameLogChannel, "Blocked: " + chatMessage.replaceAll("_", "\\_"));
+                Bot.sendMessage(Bot.gameLogChannel, "Blocked: " + chatMessage.replaceAll("_", "\\_"));
 
             }  
         } else if (!event.isCancelled()) {
 
-            Bot.sendMessage(DiscCommandsManager.gameChatChannel, chatMessage.replaceAll("_", "\\_"));
-            Bot.sendMessage(DiscCommandsManager.gameLogChannel, chatMessage.replaceAll("_", "\\_"));
+            Bot.sendMessage(Bot.gameChatChannel, chatMessage.replaceAll("_", "\\_"));
+            Bot.sendMessage(Bot.gameLogChannel, chatMessage.replaceAll("_", "\\_"));
 
         }
     }
