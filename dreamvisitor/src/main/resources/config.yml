@@ -11,7 +11,13 @@ bot-token: BOT_TOKEN
 
 # Website URL
 # The URL for the whitelisting website.
-website-url: "file:///home/stonley890/Documents/GitHub/Website/index.html"
+# Default: "https://woftnw.duckdns.org"
+website-url: "https://woftnw.duckdns.org"
+
+# Whether web whitelisting is enabled or not
+# This can be set with the /toggleweb Discord command.
+# Default: true
+web-whitelist: true
 
 # The channel ID of the game chat.
 # This can be set on Discord with /setgamechat
@@ -46,11 +52,6 @@ triberoles:
 # This will allow Dreamvistor to sync roles across servers.
 # Default: 1103730296068788358
 tribeGuildID: 1103730296068788358
-
-# The ID of the user tracker spreadsheet.
-# This is the long string of random character in a Google Sheets link.
-# Default: 1Tz3_JRr214ia_mHrgqwT4uANcwAzUyjXgTgNSWxKiqg
-userSpreadsheet: 1Tz3_JRr214ia_mHrgqwT4uANcwAzUyjXgTgNSWxKiqg
 
 # Whether chat is paused or not.
 # This can be toggled in Minecraft with /pausechat

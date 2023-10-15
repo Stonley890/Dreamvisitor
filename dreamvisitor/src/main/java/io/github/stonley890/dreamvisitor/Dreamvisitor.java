@@ -8,9 +8,11 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabHub;
+import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabTribeUpdate;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
-import net.dv8tion.jda.api.entities.TextChannel;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,8 +28,6 @@ import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabSoftWhitelist;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.JDA;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.shanerx.mojang.Mojang;
-import spark.Spark;
 
 /*
  * The main ticking thread.
@@ -46,7 +46,9 @@ public class Dreamvisitor extends JavaPlugin {
     public static int playerlimit;
     public static Location hubLocation;
     public static String resourcePackHash;
+    public static boolean webWhitelist;
     public static boolean debug;
+    public static boolean restartScheduled;
     public static boolean botFailed = false;
 
     JDA jda;
@@ -80,7 +82,6 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
         Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
         Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
-        // getCommand("reloadbot").setExecutor(new CmdReloadbot());
         Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
         Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
         Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdTagRadio());
@@ -90,11 +91,15 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
         Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
         Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
+        Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
+        Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
 
         debug("Initializing tab completers...");
         // Initialize command tab completers
         Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
         Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
+        Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
+        Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
 
         debug("Creating data folder...");
         // Create config if needed
@@ -160,31 +165,9 @@ public class Dreamvisitor extends JavaPlugin {
         appender = new ConsoleLogger();
         logger.addAppender(appender);
 
-        // Web whitelist server
-
-        Spark.port(4567); // Choose a port for your API
-        Spark.before((request, response) -> {
-            response.header("Access-Control-Allow-Origin", "*");
-            response.header("Access-Control-Request-Method", "*");
-            response.header("Access-Control-Allow-Headers", "*");
-        });
-        Spark.post("/process-username", (request, response) -> {
-            String username = request.queryParams("username");
-
-            Dreamvisitor.debug("Username from web form: " + username);
-
-            // Process the username (your logic here)
-            boolean success = processUsername(username);
-
-            Dreamvisitor.debug("Processed. Success: " + success);
-
-            // Send a response back to the web page
-            // response.header("Access-Control-Allow-Origin", "http://0.0.0.0:80/" /* getConfig().getString("website-url") */);
-            Dreamvisitor.debug("response.header");
-            response.type("application/json");
-            Dreamvisitor.debug("response.type");
-            return "{\"success\": " + success + "}";
-        });
+        // Set up web whitelist if enabled
+        webWhitelist = getConfig().getBoolean("web-whitelist");
+        if (webWhitelist) Whitelist.startWeb();
 
         Runnable pushConsole = new BukkitRunnable() {
             // Push console log to Discord every 2 seconds
@@ -227,65 +210,36 @@ public class Dreamvisitor extends JavaPlugin {
             }
         };
 
+        Runnable scheduledRestarts = new BukkitRunnable() {
+            @Override
+            public void run() {
+                // Restart if requested and no players are online
+                if (restartScheduled && Bukkit.getOnlinePlayers().isEmpty()) {
+                    Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
+                    Bot.sendMessage(Bot.gameLogChannel, "Restarting the server as scheduled.");
+                    getServer().spigot().restart();
+                }
+            }
+        };
+
         if (!botFailed) {
+            // Push console every two seconds
             Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
         }
 
+        // Check for scheduled restart every minute
+        Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
+
         debug("Enable finished.");
 
-    }
-
-    private boolean processUsername(String username) throws IOException {
-        // Connect to Mojang services
-        Mojang mojang = new Mojang().connect();
-        Dreamvisitor.debug("Connected to Mojang");
-
-        // Check for valid UUID
-        Dreamvisitor.debug("Checking for valid UUID");
-        if (mojang.getUUIDOfUsername(username) == null) {
-            // username does not exist alert
-            Dreamvisitor.debug("Username does not exist.");
-            Dreamvisitor.debug("Failed whitelist.");
-        } else {
-
-            Dreamvisitor.debug("Got UUID");
-            UUID uuid = UUID.fromString(mojang.getUUIDOfUsername(username).replaceFirst(
-                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                    "$1-$2-$3-$4-$5"));
-
-            // No account to link
-
-            // Check if already whitelisted
-            Dreamvisitor.debug("Is user already whitelisted?");
-
-            if (Whitelist.isUserWhitelisted(uuid)) {
-                Dreamvisitor.debug("Already whitelisted.");
-                Dreamvisitor.debug("Resolved.");
-
-                return true;
-            } else {
-                Dreamvisitor.debug("Player is not whitelisted.");
-
-                Whitelist.add(username, uuid);
-
-                // success message
-                Dreamvisitor.debug("Success.");
-
-                TextChannel systemChannel = Bot.gameLogChannel.getGuild().getSystemChannel();
-                if (systemChannel != null) systemChannel.sendMessage("Whitelisted " + username + " from web whitelist. Use `/unwhitelist <username>` to undo this action or `/toggleweb` to disable web whitelisting.").queue();
-
-                return true;
-            }
-        }
-        return false;
     }
 
     public static Dreamvisitor getPlugin() {
         return plugin;
     }
 
-    public static String getPlayerPath(Player player) {
-        return plugin.getDataFolder().getAbsolutePath() + "/player/" + player.getUniqueId() + ".yml";
+    public static String getPlayerPath(UUID uuid) {
+        return plugin.getDataFolder().getAbsolutePath() + "/player/" + uuid + ".yml";
     }
 
     public static void debug(String message) {
@@ -300,8 +254,20 @@ public class Dreamvisitor extends JavaPlugin {
         if (!botFailed) {
             // Shutdown messages
             getLogger().info("Closing bot instance.");
-            Bot.sendMessage(Bot.gameLogChannel, "Server has been shut down.");
+            int requestsCanceled = Bot.getJda().cancelRequests();
+            if (requestsCanceled > 0) getLogger().info(requestsCanceled + " queued bot requests were canceled for shutdown.");
+            Bot.gameLogChannel.sendMessage("*Server has been shut down.*").complete();
             Bot.getJda().shutdownNow();
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            try {
+                PlayerUtility.savePlayerMemory(player.getUniqueId());
+                PlayerUtility.clearPlayerMemory(player.getUniqueId());
+            } catch (IOException e) {
+                Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access?");
+                if (Dreamvisitor.debug) e.printStackTrace();
+            }
         }
 
         logger.removeAppender(appender);

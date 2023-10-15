@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import io.github.stonley890.dreamvisitor.Utils;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -142,17 +145,15 @@ public class DiscCommandsManager extends ListenerAdapter {
                 if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
 
                     Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
-                    PlayerMemory memory = new PlayerMemory();
+
                     List<Player> countedPlayers = new ArrayList<>();
 
                     // Iterate through each player
                     for (Player player : players) {
-                        File file = new File(Dreamvisitor.getPlayerPath(player));
-                        FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-                        memory.setVanished(fileConfig.getBoolean("vanished"));
+                        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
                         // If player is not vanished, add to list
-                        if (!memory.isVanished()) {
+                        if (!memory.vanished) {
                             countedPlayers.add(player);
                         }
                     }
@@ -460,7 +461,7 @@ public class DiscCommandsManager extends ListenerAdapter {
 
             Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
-            if (!p.matcher(username).find()) {
+            if (p.matcher(username).find()) {
                 event.reply("`" + username + "` contains illegal characters!").queue();
                 return;
             }
@@ -473,7 +474,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             }
 
             try {
-                Whitelist.add(username, UUID.fromString(stringUuid));
+                Whitelist.remove(username, UUID.fromString(Utils.formatUuid(stringUuid)));
             } catch (IOException e) {
                 event.reply("There was a problem accessing the whitelist file.").queue();
                 return;
@@ -482,16 +483,42 @@ public class DiscCommandsManager extends ListenerAdapter {
             OptionMapping banOption = event.getOption("ban");
             boolean ban;
 
-            if (banOption != null) ban = usernameOption.getAsBoolean();
+            if (banOption != null) {
+                ban = usernameOption.getAsBoolean();
+                if (ban) {
+                    Bukkit.getBanList(BanList.Type.NAME).addBan(username, "Banned by Dreamvistitor.", null, null);
+                    event.reply("Banned " + username + ".").queue();
+                }
+            }
             else {
-                event.reply("Option `ban` could not be found.").queue();
+                event.reply("Removed " + username + " from the whitelist.").queue();
                 return;
             }
 
-            if (ban) {
-                Bukkit.getBanList(BanList.Type.NAME).addBan(username, "Banned by Dreamvistitor.", null, null);
-                event.reply("Banned " + username + ".").queue();
-            } else event.reply("Removed " + username + " from the whitelist.").queue();
+        } else if (command.equals("toggleweb")) {
+
+            if (!Dreamvisitor.webWhitelist) {
+                Whitelist.startWeb();
+                Dreamvisitor.webWhitelist = true;
+                event.reply("Web whitelist enabled.").queue();
+            } else {
+                Whitelist.stopWeb();
+                Dreamvisitor.webWhitelist = false;
+                event.reply("Web whitelist disabled.").queue();
+            }
+
+            Dreamvisitor.getPlugin().getConfig().set("web-whitelist", Dreamvisitor.webWhitelist);
+
+        } else if (command.equals("schedulerestart")) {
+
+            if (Dreamvisitor.restartScheduled) {
+                Dreamvisitor.restartScheduled = false;
+                event.reply("✅ Canceled server restart. Run /schedulerestart again to cancel.").queue();
+            } else {
+                Dreamvisitor.restartScheduled = true;
+                event.reply("✅ The server will restart when there are no players online. Run /schedulerestart again to cancel.").queue();
+            }
+
 
         }
 
@@ -574,6 +601,12 @@ public class DiscCommandsManager extends ListenerAdapter {
         commandData.add(Commands.slash("unwhitelist", "Remove a user from the whitelist.")
                 .addOption(OptionType.STRING, "username", "The username to remove.", true)
                 .addOption(OptionType.BOOLEAN, "ban", "Whether to ban the user from the server.", false)
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
+        commandData.add(Commands.slash("toggleweb", "Toggle the web whitelist system on or off.")
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
+
+        commandData.add(Commands.slash("schedulerestart", "Schedule a server restart when no players are online.")
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
         // register commands

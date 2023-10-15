@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.discord;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Channel;
@@ -32,6 +33,11 @@ public class DiscEventListener extends ListenerAdapter {
     @SuppressWarnings({"null"})
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 
+        if (event.getAuthor().isBot()) {
+            return;
+        }
+
+        Dreamvisitor.debug("MessageReceivedEvent (not bot)");
 
         User user = event.getAuthor();
         Channel channel = event.getChannel();
@@ -41,12 +47,8 @@ public class DiscEventListener extends ListenerAdapter {
 
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
-        TextChannel whitelistChannel = Bot.getJda().getTextChannelById(plugin.getConfig().getLong("whitelistChannelID"));
-        TextChannel gameChatChannel = Bot.getJda().getTextChannelById(plugin.getConfig().getLong("chatChannelID"));
-        TextChannel gameLogChannel = Bot.getJda().getTextChannelById(plugin.getConfig().getLong("chatChannelID"));
-
         // If in the whitelist channel and username is "legal"
-        if (channel.equals(whitelistChannel) && !user.isBot() && !p.matcher(username).find()) {
+        if (channel.equals(Bot.whitelistChannel) && !user.isBot() && !p.matcher(username).find()) {
 
             // Connect to Mojang services
             Mojang mojang = new Mojang().connect();
@@ -100,7 +102,7 @@ public class DiscEventListener extends ListenerAdapter {
                 }
             }
 
-        } else if (channel.equals(whitelistChannel) && !user.isBot()) {
+        } else if (channel.equals(Bot.whitelistChannel) && !user.isBot()) {
 
             // illegal username
             event.getChannel().sendMessage("`" + username
@@ -109,7 +111,7 @@ public class DiscEventListener extends ListenerAdapter {
         }
 
         // If in the chat channel and the chat is not paused, send to Minecraft
-        if (channel.equals(gameChatChannel) && !user.isBot()
+        if (channel.equals(Bot.gameChatChannel) && !user.isBot()
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             // Build message
@@ -121,40 +123,34 @@ public class DiscEventListener extends ListenerAdapter {
             if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
 
-                    try {
-                        // Init file config
-                        File file = new File(Dreamvisitor.getPlayerPath(player));
-                        FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
+                    // If the player has discord on, build and send the message
+                    if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordToggled) {
 
-                        // If the player has discord on, build and send the message
-                        if (fileConfig.getBoolean("discordToggled", true)) {
-
-                            player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<"
-                                    + discName + "> " + event.getMessage().getContentRaw());
-                        }
-                    } catch (Exception e) {
-                        Bukkit.getLogger().warning("There was a problem ");
-                        if (Dreamvisitor.debug) e.printStackTrace();
+                        player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<"
+                                + discName + "> " + event.getMessage().getContentRaw());
                     }
                 }
             }
         }
 
-        if (!event.getAuthor().isBot() && event.getChannel().equals(gameLogChannel) && plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+        if (event.getChannel().equals(Bot.gameLogChannel)) {
 
-            Dreamvisitor.debug("Sending console command from log channel...");
+            if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 
-            String message = event.getMessage().getContentRaw();
+                Dreamvisitor.debug("Sending console command from log channel...");
 
-            // Running commands from log channel
-            Runnable runCommand = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message);
-                }
-            };
-            Bukkit.getScheduler().runTask(plugin, runCommand);
+                String message = event.getMessage().getContentRaw();
 
+                // Running commands from log channel
+                Runnable runCommand = new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message);
+                    }
+                };
+                Bukkit.getScheduler().runTask(plugin, runCommand);
+
+            }
         }
     }
 

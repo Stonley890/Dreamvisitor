@@ -11,127 +11,116 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class CmdTribeUpdate implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+
+        List<Player> targets = new ArrayList<>();
+
         if (args.length == 0) {
-            if (sender instanceof BlockCommandSender cmdblock) {
-
-                // Find the closest player
-                double lastDistance = 10;
-                Player closest = null;
-
-                for (Entity entity : cmdblock.getBlock().getWorld().getNearbyEntities(cmdblock.getBlock().getLocation(), 10, 10, 10)) {
-                    if (entity instanceof Player) {
-                        double distance = entity.getLocation().distance(cmdblock.getBlock().getLocation());
-                        if (distance < lastDistance) {
-                            lastDistance = distance;
-                            closest = (Player) entity;
-                        }
-                    }
-                }
-
-                if (closest != null) {
-
-                    String uuid = closest.getUniqueId().toString();
-
-                    String discordId = AccountLink.getDiscordId(uuid);
-
-                    User user = Bot.getUser(discordId);
-
-                    Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
-                    Team playerTeam = scoreboard.getEntryTeam(closest.getName());
-
-                    if (playerTeam != null) {
-
-                        // Iterate through team names to get index
-                        for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
-                            if (playerTeam.getName().equals(Bot.TRIBE_NAMES[i])) {
-
-                                // Remove roles
-                                for (String roleId : Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles")) {
-                                    Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
-                                }
-
-                                Role targetRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles").get(i));
-                                // Role sisterRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("sisterTribeRoles").get(i));
-
-                                if (targetRole == null) {
-                                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
-                                    return true;
-                                }
-
-                                // Add role
-                                Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
-
-                            }
-                        }
-
-                    }
-
-                } else {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No player within 10 blocks!");
-                }
+            // If no arguments, do self (if player)
+            if (sender instanceof Player player) {
+                targets.add(player);
             } else {
-                sender.sendMessage(Dreamvisitor.PREFIX + "Must specify a player! /tribeupdate <player>");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments! /tribeupdate <targets>");
+                return true;
             }
-        } else {
-            if (Bukkit.getPlayer(args[0]) != null) {
-                Player target = Bukkit.getPlayer(args[0]);
+        } else if (args.length == 1) {
 
-                assert target != null;
-                String uuid = target.getUniqueId().toString().replaceAll("-","");
-                String discordId = AccountLink.getDiscordId(uuid);
+            // Use vanilla target selector args
+            List<Entity> entities;
+            try {
+                entities = Bukkit.selectEntities(sender, args[0]);
+            } catch (IllegalArgumentException e) {
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Incorrect arguments! /tribeupdate <targets>");
+                return true;
+            }
 
-                if (discordId == null) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + "No Discord user associated with this player.");
-                    return true;
+            // Check if empty
+            if (entities.isEmpty()) {
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No players were selected.");
+                return true;
+            }
+
+            // Check for non-players
+            for (Entity entity : entities) {
+                if (entity instanceof Player player) {
+                    targets.add(player);
                 } else {
-                    User user = Bot.getUser(discordId);
-
-                    Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
-                    Team playerTeam = scoreboard.getEntryTeam(target.getName());
-
-                    if (playerTeam != null) {
-
-                        // Iterate through team names to get index
-                        for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
-                            if (playerTeam.getName().equals(Bot.TRIBE_NAMES[i])) {
-
-                                // Remove roles
-                                for (String roleId : Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles")) {
-                                    Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
-                                }
-
-                                Role targetRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles").get(i));
-
-                                if (targetRole == null) {
-                                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
-                                    return true;
-                                }
-
-                                // Add role
-                                Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
-
-                                sender.sendMessage(Dreamvisitor.PREFIX + "Roles updated successfully.");
-                            }
-                        }
-
-                    }
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command is only applicable to players.");
+                    return true;
                 }
-
             }
+
+        } else {
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Too many arguments! /tribeupdate <targets>");
+            return true;
         }
 
+        for (Player player : targets) {
+
+            String uuid = player.getUniqueId().toString();
+
+            String discordId = AccountLink.getDiscordId(uuid);
+
+            if (discordId == null) {
+                sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
+                continue;
+            }
+
+            Dreamvisitor.debug(player.getUniqueId().toString());
+            Dreamvisitor.debug(discordId);
+
+            User user = Bot.getUser(discordId);
+
+            Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
+            Team playerTeam = scoreboard.getEntryTeam(player.getName());
+
+            if (playerTeam != null) {
+
+                // Iterate through team names to get index
+                for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
+                    if (playerTeam.getName().equals(Bot.TRIBE_NAMES[i])) {
+
+                        // Remove roles
+                        for (String roleId : Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles")) {
+                            Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
+                        }
+
+                        Role targetRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles").get(i));
+
+                        if (targetRole == null) {
+                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
+                            return true;
+                        }
+
+                        // Add role
+                        Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
+
+                    }
+                }
+
+            }
+
+        }
+
+        sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + targets.size() + " players.");
+
         return true;
+
     }
 
 }

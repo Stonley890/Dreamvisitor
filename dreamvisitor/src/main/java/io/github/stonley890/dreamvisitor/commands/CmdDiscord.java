@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import java.io.File;
 
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -20,30 +21,15 @@ public class CmdDiscord implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            PlayerMemory memory = new PlayerMemory();
-            try {
-                // Init file config
-                File file = new File(Dreamvisitor.getPlayerPath(player));
-                FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-                memory.setDiscordToggled(fileConfig.getBoolean("discordToggled"));
+        if (sender instanceof Player player) {
+            PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+            memory.discordToggled = !memory.discordToggled;
 
-                // Change data
-                memory.setDiscordToggled(!memory.isDiscordToggled());
+            player.sendMessage(Dreamvisitor.PREFIX +
+                    ChatColor.WHITE + "Discord visibility toggled to " + !memory.discordToggled + ".");
 
-                // Save data
-                fileConfig.set("discordToggled", memory.isDiscordToggled());
-                fileConfig.save(file);
+            PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
 
-                player.sendMessage(Dreamvisitor.PREFIX +
-                        ChatColor.WHITE + "Discord visibility toggled to " + memory.isDiscordToggled() + ".");
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("ERROR: Unable to access player memory!");
-                player.sendMessage(Dreamvisitor.PREFIX +
-                        ChatColor.RED + "There was a problem accessing player memory. Check logs for stacktrace.");
-                e.printStackTrace();
-            }
             return true;
 
         } else {

@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import java.io.File;
 
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -27,42 +28,27 @@ public class CmdZoop implements CommandExecutor {
         if (sender instanceof Player) {
 
             Player player = (Player) sender;
-            PlayerMemory memory = new PlayerMemory();
+            PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
-            try {
-                // Init file config
-                File file = new File(Dreamvisitor.getPlayerPath(player));
-                FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
-                memory.setVanished(fileConfig.getBoolean("vanished"));
+            // Change data
+            if (memory.vanished) {
 
-                // Change data
-                if (memory.isVanished()) {
+                memory.vanished = false;
+                String chatMessage = "**" + player.getName() + " joined the game**";
+                Bot.sendMessage(Bot.gameChatChannel, chatMessage);
+                Bot.sendMessage(Bot.gameLogChannel, chatMessage);
 
-                    memory.setVanished(false);
-                    String chatMessage = "**" + player.getName() + " joined the game**";
-                    Bot.sendMessage(Bot.gameChatChannel, chatMessage);
-                    Bot.sendMessage(Bot.gameLogChannel, chatMessage);
+            } else {
+                memory.vanished = true;
+                String chatMessage = "**" + player.getName() + " left the game**";
+                Bot.sendMessage(Bot.gameChatChannel, chatMessage);
+                Bot.sendMessage(Bot.gameLogChannel, chatMessage);
 
-                } else {
-                    memory.setVanished(true);
-                    String chatMessage = "**" + player.getName() + " left the game**";
-                    Bot.sendMessage(Bot.gameChatChannel, chatMessage);
-                    Bot.sendMessage(Bot.gameLogChannel, chatMessage);
-
-                }
-
-                // Save data
-                fileConfig.set("vanished", memory.isVanished());
-                fileConfig.save(file);
-
-                player.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.isVanished() + ".");
-
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("ERROR: Unable to access player memory!");
-                player.sendMessage(
-                        ChatColor.RED + "There was a problem accessing player memory. Check logs for stacktrace.");
-                e.printStackTrace();
             }
+
+            PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
+
+            player.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.vanished + ".");
 
         } else {
             sender.sendMessage(ChatColor.RED + "This command can only be executed by a player!");

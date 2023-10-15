@@ -1,11 +1,12 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.6.0
+version: 2.7.1
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
 softdepend:
   - EyeOfOnyx
+  - Essentials
 
 commands:
   pausechat:
@@ -74,6 +75,14 @@ commands:
     description: Unwax the sign you are looking at.
     usage: /<command>
     permission: dreamvisitor.unwax
+  schedulerestart:
+    description: Schedule a server restart when no players are online.
+    usage: /<command>
+    permission: op
+  invswap:
+    description: Swap between two different inventories.
+    usage: /<command>
+    permission: dreamvisitor.invswap
 
 permissions:
   dreamvisitor.pausechat:
@@ -114,4 +123,7 @@ permissions:
     default: op
   dreamvisitor.unwax:
     description:  Allows the unwax command.
+    default: op
+  dreamvisitor.invswap:
+    description: Allows the invswap command.
     default: op

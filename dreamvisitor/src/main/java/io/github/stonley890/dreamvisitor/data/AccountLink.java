@@ -76,7 +76,7 @@ public class AccountLink {
 
     public static String getDiscordId(String minecraftUUID) {
         loadFromFile();
-        return uuidToDiscordIdMap.get(minecraftUUID);
+        return uuidToDiscordIdMap.get(minecraftUUID.replaceAll("-",""));
     }
 
     public static String getUuid(String discordId) {
