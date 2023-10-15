@@ -129,6 +129,7 @@ permissions:
     default: op
   dreamvisitor.hub:
     description: Allows the hub command.
-    default: default
+    default: true
   dreamvisitor.hub.select:
     description: Allows using selectors with the hub command.
+    default: op
