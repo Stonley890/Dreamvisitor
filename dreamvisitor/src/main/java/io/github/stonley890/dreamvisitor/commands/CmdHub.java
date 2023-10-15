@@ -22,7 +22,9 @@ public class CmdHub implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
-        if (args.length == 1) {
+        if (sender.hasPermission("dreamvisitor.hub")) {
+
+        if (args.length == 1 && sender.hasPermission("dreamvisitor.hub.select")) {
 
             List<Entity> entities;
             try {
@@ -128,6 +130,8 @@ public class CmdHub implements CommandExecutor {
                 sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments! /hub [targets]");
             }
         }
+
+        } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You do not have permission to run that command!");
 
         return true;
 

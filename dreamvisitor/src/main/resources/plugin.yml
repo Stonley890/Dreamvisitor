@@ -1,6 +1,6 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.7.1
+version: 2.7.2
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -127,3 +127,8 @@ permissions:
   dreamvisitor.invswap:
     description: Allows the invswap command.
     default: op
+  dreamvisitor.hub:
+    description: Allows the hub command.
+    default: default
+  dreamvisitor.hub.select:
+    description: Allows using selectors with the hub command.
