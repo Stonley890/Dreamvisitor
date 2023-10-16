@@ -29,7 +29,7 @@ public class ConsoleLogger extends AbstractAppender {
 
     @Override
     public void append(LogEvent event) {
-        // if you don`t make it immutable, then you may have some unexpected behaviours
+        // if you don't make it immutable, then you may have some unexpected behaviors
         LogEvent log = event.toImmutable();
 
         String message = log.getMessage().getFormattedMessage();
@@ -43,7 +43,7 @@ public class ConsoleLogger extends AbstractAppender {
             message = message.substring(0, 1999 - tooLongMessage.length());
         }
 
-        // Pause adding strings if new message will be > 2000
+        // Pause adding strings if the new message will be > 2000
         if (messageBuilder.length() + message.length() + "\n".length() <= 2000) {
 
             if (!messageBuilder.isEmpty()) {

@@ -4,6 +4,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PlayerMemory {
 
     public FileConfiguration toFileConfig() {
@@ -22,8 +25,14 @@ public class PlayerMemory {
         memory.discordToggled = fileConfig.getBoolean("discordToggled");
         memory.vanished = fileConfig.getBoolean("vanished");
         memory.creative = fileConfig.getBoolean("vanished");
-        memory.survivalInv = (ItemStack[]) fileConfig.get("survivalInv");
-        memory.creativeInv = (ItemStack[]) fileConfig.get("creativeInv");
+        List<ItemStack> survivalInvList = (List<ItemStack>) fileConfig.getList("survivalInv");
+        List<ItemStack> creativeInvList = (List<ItemStack>) fileConfig.getList("creativeInv");
+
+        if (survivalInvList == null) survivalInvList = new ArrayList<>();
+        if (creativeInvList == null) creativeInvList = new ArrayList<>();
+
+        memory.survivalInv = survivalInvList.toArray(ItemStack[]::new);
+        memory.creativeInv = creativeInvList.toArray(ItemStack[]::new);
 
         return memory;
     }
