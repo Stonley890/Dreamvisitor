@@ -30,7 +30,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
         Player player = event.getPlayer();
 
         // '/me' and '/rp' pass through
-        if ((cmd.startsWith("/me " ) || cmd.startsWith("/rp " )) && !event.isCancelled()) {
+        if ((cmd.startsWith("/me " ) || cmd.startsWith("/rp" )) && !event.isCancelled()) {
 
             // IF chatPaused stop /me unless bypassing
             if (Dreamvisitor.chatPaused) {
@@ -45,18 +45,18 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     fileConfig.load(file);
                 } catch (IOException | InvalidConfigurationException e1) {
                     Bukkit.getLogger().warning("Could not load 'pauseBypass.yml' file! Restart to reinitialize.");
-                    e1.printStackTrace();
+                    if (Dreamvisitor.debug) e1.printStackTrace();
                 }
 
                 // Remember bypassed players
-                bypassedPlayers = (List<String>) fileConfig.get("players");
+                bypassedPlayers = fileConfig.getStringList("players");
 
                 // If list contains player, allow
                 if (bypassedPlayers.contains(player.getUniqueId().toString()) || player.isOp()) {
                     // Remove command
-                    String action = null;
-                    if (cmd.startsWith("/me " )) action = cmd.replaceFirst("/me ", "");
-                    if (cmd.startsWith("/rp " )) action = cmd.replaceFirst("/rp ", "");
+                    int spaceIndex = cmd.indexOf(' ');
+                    if (spaceIndex == -1) return;
+                    String action = cmd.substring(spaceIndex + 1);
                     String message = "**[" + ChatColor.stripColor(player.getDisplayName()) + " **(" + player.getName()
                             + ")**]** " + ChatColor.stripColor(action);
                     // Send message
@@ -71,9 +71,9 @@ public class ListenPlayerCmdPreprocess implements Listener {
             else {
 
                 // Remove command
-                String action = null;
-                if (cmd.startsWith("/me " )) action = cmd.replaceFirst("/me ", "");
-                if (cmd.startsWith("/rp " )) action = cmd.replaceFirst("/rp ", "");
+                int spaceIndex = cmd.indexOf(' ');
+                if (spaceIndex == -1) return;
+                String action = cmd.substring(spaceIndex + 1);
                 String message = "**[" + ChatColor.stripColor(player.getDisplayName()) + " **(" + player.getName()
                         + ")**]** " + ChatColor.stripColor(action);
                 // Send message

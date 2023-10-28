@@ -16,6 +16,8 @@ public class PlayerMemory {
         fileConfig.set("creative", creative);
         fileConfig.set("survivalInv", survivalInv);
         fileConfig.set("creativeInv", creativeInv);
+        fileConfig.set("autoinvswap", autoinvswap);
+        fileConfig.set("autoRadio", autoRadio);
 
         return fileConfig;
     }
@@ -25,6 +27,8 @@ public class PlayerMemory {
         memory.discordToggled = fileConfig.getBoolean("discordToggled");
         memory.vanished = fileConfig.getBoolean("vanished");
         memory.creative = fileConfig.getBoolean("vanished");
+        memory.autoinvswap = fileConfig.getBoolean("autoinvswap");
+        memory.autoRadio = fileConfig.getBoolean("autoradio");
         List<ItemStack> survivalInvList = (List<ItemStack>) fileConfig.getList("survivalInv");
         List<ItemStack> creativeInvList = (List<ItemStack>) fileConfig.getList("creativeInv");
 
@@ -40,6 +44,8 @@ public class PlayerMemory {
     public boolean discordToggled;
     public boolean vanished;
     public boolean creative;
+    public boolean autoinvswap;
+    public boolean autoRadio;
     public ItemStack[] survivalInv;
     public ItemStack[] creativeInv;
 }

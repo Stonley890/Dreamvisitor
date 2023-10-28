@@ -38,7 +38,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
 
         // Init saved players
-        List<String> whitelistedPlayers = new ArrayList<>(100);
+        List<String> whitelistedPlayers;
 
         // If file does not exist, create one
         if (!file.exists()) {

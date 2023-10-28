@@ -71,6 +71,7 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenPlayerLogin(), this);
         getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
         getServer().getPluginManager().registerEvents(new ListenInventoryClose(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerGameModeChange(), this);
 
         debug("Initializing command executors...");
         // Initialize command executors
@@ -93,6 +94,7 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
         Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
         Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
+        Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
 
         debug("Initializing tab completers...");
         // Initialize command tab completers

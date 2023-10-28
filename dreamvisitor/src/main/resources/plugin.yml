@@ -1,6 +1,6 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.7.3
+version: 2.8.0
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -9,6 +9,9 @@ softdepend:
   - Essentials
 
 commands:
+  dvset:
+    description: Open Dreamvisitor settings.
+    usage: /<command>
   pausechat:
     description: Pauses chat for non-OPs. Players will not be able to send messages, use `/me`, use OpenRP, or communicate through the game chat channel.
     usage: /<command> 
@@ -43,7 +46,7 @@ commands:
   togglepvp:
     description: Globally disable PvP.
     usage: /<command>
-    permission: dreanvisitor.togglepvp
+    permission: dreamvisitor.togglepvp
   pausebypass:
     description: Let certain players bypass chat pause.
     usage: /<command> <add|remove|list>
@@ -85,6 +88,27 @@ commands:
     permission: dreamvisitor.invswap
 
 permissions:
+  
+  dreamvisitor.userset:
+    description: Allow user settings configuration.
+    default: true
+  dreamvisitor.adminset:
+    description: Allow admin settings configuration.
+    default: op
+
+  dreamvisitor.set.discord:
+    description: Set Discord visibility for self.
+    default: true
+  dreamvisitor.set.zoop:
+    description: Set Discord vanish for self.
+    default: op
+  dreamvisitor.set.autoinvswap:
+    description: Set auto invswap for self.
+    default: op
+  dreamvisitor.set.autoradio:
+    description: Set auto radio for self.
+    default: op
+
   dreamvisitor.pausechat:
     description: Allows all chat pause commands.
     default: op
