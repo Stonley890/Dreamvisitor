@@ -1,15 +1,5 @@
 package io.github.stonley890.dreamvisitor;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.UUID;
-
-import static io.github.stonley890.dreamvisitor.Dreamvisitor.plugin;
-
 public class Utils {
 
     /**
@@ -21,5 +11,9 @@ public class Utils {
         return uuid.replaceFirst(
                 "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
                 "$1-$2-$3-$4-$5");
+    }
+
+    public static String escapeMarkdownFormatting(String string) {
+        return string.replaceAll("_","\\_").replaceAll("\\*","\\\\*").replaceAll("\\|","\\\\|");
     }
 }

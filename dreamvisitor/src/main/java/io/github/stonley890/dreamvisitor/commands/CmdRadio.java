@@ -54,7 +54,7 @@ public class CmdRadio implements CommandExecutor {
         String finalMessage = message.toString();
 
         // Send message
-        Bukkit.getLogger().info(finalMessage);
+        Bukkit.getLogger().info(ChatColor.stripColor(finalMessage));
         for (Player operator : Bukkit.getServer().getOnlinePlayers())
         {
             if (operator.isOp() || operator.hasPermission("dreamvisitor.radio"))

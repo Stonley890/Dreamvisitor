@@ -189,7 +189,7 @@ public class Whitelist {
                 Dreamvisitor.debug("Success.");
 
                 TextChannel systemChannel = Bot.gameLogChannel.getGuild().getSystemChannel();
-                if (systemChannel != null) systemChannel.sendMessage("Whitelisted " + username + " from web whitelist. Use `/unwhitelist <username>` to undo this action or `/toggleweb` to disable web whitelisting.").queue();
+                if (systemChannel != null) systemChannel.sendMessage("Whitelisted `" + username + "` from web whitelist. Use **/unwhitelist <username>** to undo this action or **/toggleweb** to disable web whitelisting.").queue();
 
                 return true;
             }

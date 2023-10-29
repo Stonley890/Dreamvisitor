@@ -13,6 +13,7 @@ import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabTribeUpdate;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
+import net.dv8tion.jda.api.MessageBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -36,6 +37,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 @SuppressWarnings({ "null" })
 public class Dreamvisitor extends JavaPlugin {
 
+    public static String MOTD = null;
     public final String VERSION = getDescription().getVersion();
     public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
 
@@ -72,6 +74,7 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
         getServer().getPluginManager().registerEvents(new ListenInventoryClose(), this);
         getServer().getPluginManager().registerEvents(new ListenPlayerGameModeChange(), this);
+        getServer().getPluginManager().registerEvents(new ListenServerPing(), this);
 
         debug("Initializing command executors...");
         // Initialize command executors
@@ -95,6 +98,7 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
         Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
         Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
+        Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
 
         debug("Initializing tab completers...");
         // Initialize command tab completers
@@ -139,8 +143,9 @@ public class Dreamvisitor extends JavaPlugin {
         // Restore player limit override
         debug("Restoring player limit override...");
         playerlimit = getConfig().getInt("playerlimit");
-        Bukkit.getServer().getLogger().info(PREFIX +
+        getServer().getLogger().info(PREFIX +
                 "Player limit override is currently set to " + playerlimit);
+        getServer().setMaxPlayers(playerlimit);
 
         // Create item blacklist if empty
         debug("Restoring item blacklist...");
@@ -178,9 +183,9 @@ public class Dreamvisitor extends JavaPlugin {
                 if (Dreamvisitor.getPlugin().getConfig().getBoolean("log-console")) {
 
                     // If there are messages in the queue, send them!
-                    if (ConsoleLogger.messageBuilder != null && ConsoleLogger.messageBuilder.length() > 0) {
+                    if (ConsoleLogger.messageBuilder != null && !ConsoleLogger.messageBuilder.isEmpty()) {
 
-                        Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString().replaceAll("_","\\_")).queue();
+                        Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString()).queue();
                         ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
 
                         // If there are overflow messages, build and send those too

@@ -51,7 +51,7 @@ public class CmdTagRadio implements CommandExecutor {
         String finalMessage = message.toString();
 
         // Send message
-        Bukkit.getLogger().info(finalMessage);
+        Bukkit.getLogger().info(ChatColor.stripColor(finalMessage));
         for (Player players : Bukkit.getServer().getOnlinePlayers())
         {
             if (players.getScoreboardTags().contains(receiverTag) || players.isOp()) {

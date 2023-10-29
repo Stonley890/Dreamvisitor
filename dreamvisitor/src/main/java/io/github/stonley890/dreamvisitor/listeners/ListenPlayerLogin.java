@@ -46,7 +46,7 @@ public class ListenPlayerLogin implements Listener {
             // Always deny non-whitelisted
             event.disallow(Result.KICK_WHITELIST, "You are not whitelisted.");
 
-        } else if (Dreamvisitor.playerlimit != -1) {
+        }/* else if (Dreamvisitor.playerlimit != -1) {
             // If player limit has been overridden
 
             // If server is full
@@ -65,7 +65,8 @@ public class ListenPlayerLogin implements Listener {
                 event.allow();
             }
 
-        } else {
+
+        } */ else {
             // Player limit is not overridden
 
             // If soft whitelist is on

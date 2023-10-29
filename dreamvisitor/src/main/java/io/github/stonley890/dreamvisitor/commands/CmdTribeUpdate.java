@@ -70,54 +70,67 @@ public class CmdTribeUpdate implements CommandExecutor {
             return true;
         }
 
-        for (Player player : targets) {
+        // Target selection is good
 
-            String uuid = player.getUniqueId().toString();
+        // This may take some time
+        sender.sendMessage(Dreamvisitor.PREFIX + "Please wait...");
 
-            String discordId = AccountLink.getDiscordId(uuid);
+        Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
 
-            if (discordId == null) {
-                sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
-                continue;
-            }
+        // Run async
+        Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
+            for (Player player : targets) {
 
-            Dreamvisitor.debug(player.getUniqueId().toString());
-            Dreamvisitor.debug(discordId);
+                String uuid = player.getUniqueId().toString();
 
-            User user = Bot.getUser(discordId);
+                // Get stored Discord ID
+                String discordId = AccountLink.getDiscordId(uuid);
 
-            Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
-            Team playerTeam = scoreboard.getEntryTeam(player.getName());
+                if (discordId == null) {
+                    sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
+                    continue;
+                }
 
-            if (playerTeam != null) {
+                Dreamvisitor.debug(player.getUniqueId().toString());
+                Dreamvisitor.debug(discordId);
 
-                // Iterate through team names to get index
-                for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
-                    if (playerTeam.getName().equals(Bot.TRIBE_NAMES[i])) {
+                // Retrieve user from JDA
+                User user = Bot.getJda().retrieveUserById(discordId).complete();
 
-                        // Remove roles
-                        for (String roleId : Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles")) {
-                            Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
+                // Get team
+                Team playerTeam = scoreboard.getEntryTeam(player.getName());
+
+                if (playerTeam != null) {
+
+                    // Iterate through team names to get index
+                    for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
+                        if (playerTeam.getName().equals(Bot.TRIBE_NAMES[i])) {
+
+                            // Remove roles
+                            for (String roleId : Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles")) {
+                                Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
+                            }
+
+                            Role targetRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles").get(i));
+
+                            if (targetRole == null) {
+                                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
+                                return;
+                            }
+
+                            // Add role
+                            Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
+
                         }
-
-                        Role targetRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles").get(i));
-
-                        if (targetRole == null) {
-                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
-                            return true;
-                        }
-
-                        // Add role
-                        Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
-
                     }
+
                 }
 
             }
 
-        }
+            sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + targets.size() + " players.");
 
-        sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + targets.size() + " players.");
+        });
 
         return true;
 

@@ -20,9 +20,19 @@ public class CmdPlayerlimit implements CommandExecutor {
             try {
                 // Change config
                 int result = Integer.parseInt(args[0]);
+                Dreamvisitor.getPlugin().getServer().setMaxPlayers(result);
+
+                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                    if (player.isOp()) {
+                        player.sendMessage(ChatColor.BLUE + "Player limit override set to " + args[0]);
+                    }
+                }
+
                 Dreamvisitor.playerlimit = result;
                 plugin.getConfig().set("playerlimit", result);
                 plugin.saveConfig();
+
+                /*
                 if (args[0].equals("-1")) {
                     for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                         if (player.isOp()) {
@@ -40,13 +50,14 @@ public class CmdPlayerlimit implements CommandExecutor {
                             + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
                     return false;
                 }
+                 */
             } catch (NumberFormatException e) {
                 sender.sendMessage(Dreamvisitor.PREFIX +
                         ChatColor.RED + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
                 return false;
             }
         } else {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Player limit override is currently set to " + Dreamvisitor.playerlimit + ".");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Player limit override is currently set to " + Dreamvisitor.getPlugin().getServer().getMaxPlayers() + ".");
         }
         return true;
     }

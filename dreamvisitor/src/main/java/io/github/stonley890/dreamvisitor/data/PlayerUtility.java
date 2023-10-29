@@ -56,10 +56,19 @@ public class PlayerUtility {
         return MEMORY_MAP.get(uuid.toString());
     }
 
+    /**
+     * Removes the specified player's memory from random access storage. This does NOT save memory first.
+     * @param uuid The UUID of the player whose data to remove.
+     */
     public static void clearPlayerMemory(UUID uuid) {
         MEMORY_MAP.remove(uuid.toString());
     }
 
+    /**
+     * Update a player's memory configuration. This must be used to update a player's memory after it has been modified.
+     * @param uuid The UUID of the player whose data to modify.
+     * @param memory The modified {@link PlayerMemory}.
+     */
     public static void setPlayerMemory(UUID uuid, PlayerMemory memory) {
         if (memory == null) MEMORY_MAP.remove(uuid.toString());
         else MEMORY_MAP.put(uuid.toString(), memory);

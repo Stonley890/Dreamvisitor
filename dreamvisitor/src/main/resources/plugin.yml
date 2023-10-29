@@ -1,12 +1,13 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.8.0
+version: 2.8.1
 api-version: 1.19
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
 softdepend:
   - EyeOfOnyx
   - Essentials
+  - OpenRP
 
 commands:
   dvset:
@@ -86,6 +87,10 @@ commands:
     description: Swap between two different inventories.
     usage: /<command>
     permission: dreamvisitor.invswap
+  setmotd:
+    description: Set the MOTD shown in the server list. Does not persist through restarts.
+    usage: /<command> [MOTD]
+    permission: dreamvisitor.setmotd
 
 permissions:
   
@@ -156,4 +161,7 @@ permissions:
     default: true
   dreamvisitor.hub.select:
     description: Allows using selectors with the hub command.
+    default: op
+  dreamvisitor.setmotd:
+    description: Allows the setmotd command.
     default: op

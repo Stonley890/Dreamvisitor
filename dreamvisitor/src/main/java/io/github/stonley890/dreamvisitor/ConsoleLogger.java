@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 // other imports that you need here
 
@@ -19,12 +20,12 @@ public class ConsoleLogger extends AbstractAppender {
 
     public ConsoleLogger() {
         // do your calculations here before starting to capture
-        super("MyLogAppender", null, null);
+        super("MyLogAppender", null, null, false, null);
         start();
     }
 
     protected ConsoleLogger(String name, Filter filter, Layout<? extends Serializable> layout) {
-        super(name, filter, layout);
+        super(name, filter, layout, false, null);
     }
 
     @Override
@@ -32,10 +33,21 @@ public class ConsoleLogger extends AbstractAppender {
         // if you don't make it immutable, then you may have some unexpected behaviors
         LogEvent log = event.toImmutable();
 
-        String message = log.getMessage().getFormattedMessage();
+        StringBuilder builder = new StringBuilder(log.getMessage().getFormattedMessage());
 
-        // and you can construct your whole log message like this:
-        message = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " " + event.getLevel().toString() + "] " + message;
+        if (log.getThrown() != null) {
+            builder.append("\n").append(log.getThrown().getMessage());
+            for (StackTraceElement stackTraceElement : log.getThrown().getStackTrace()) {
+                builder.append("\n").append(stackTraceElement.toString());
+            }
+
+        }
+
+        String message = builder.toString();
+
+        // Remove Minecraft formatting codes
+        message = message.replaceAll("\u001B?(\\W1B)?\\[([0-9,;]+)m", "");
+        message = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " " + event.getLevel().toString() + "] " + Utils.escapeMarkdownFormatting(message);
 
         // Truncate messages over 2000 characters
         if (message.length() >= 2000) {

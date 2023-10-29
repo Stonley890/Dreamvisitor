@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import io.github.stonley890.dreamvisitor.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -57,7 +58,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     int spaceIndex = cmd.indexOf(' ');
                     if (spaceIndex == -1) return;
                     String action = cmd.substring(spaceIndex + 1);
-                    String message = "**[" + ChatColor.stripColor(player.getDisplayName()) + " **(" + player.getName()
+                    String message = "**[" + Utils.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
                             + ")**]** " + ChatColor.stripColor(action);
                     // Send message
                     Bot.sendMessage(Bot.gameChatChannel, message);
@@ -74,7 +75,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 int spaceIndex = cmd.indexOf(' ');
                 if (spaceIndex == -1) return;
                 String action = cmd.substring(spaceIndex + 1);
-                String message = "**[" + ChatColor.stripColor(player.getDisplayName()) + " **(" + player.getName()
+                String message = "**[" + Utils.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
                         + ")**]** " + ChatColor.stripColor(action);
                 // Send message
                 Bot.sendMessage(Bot.gameChatChannel, message);
@@ -90,7 +91,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
             }
 
             if (isMsg) {
-                String message = "**" + player.getName() + "** sent command: `" + cmd + "`";
+                String message = "**" + Utils.escapeMarkdownFormatting(player.getName()) + "** sent command: `" + cmd + "`";
                 Bot.sendMessage(Bot.gameLogChannel, message);
             }
         }

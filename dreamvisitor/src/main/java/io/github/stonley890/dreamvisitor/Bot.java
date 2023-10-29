@@ -75,8 +75,8 @@ public class Bot {
     public static void sendMessage(TextChannel channel, @Nonnull String message) {
         if (!Dreamvisitor.botFailed && channel != null) {
 
-            if ((channel == gameLogChannel && !plugin.getConfig().getBoolean("log-console")) || channel == gameChatChannel) {
-                channel.sendMessage(message.replaceAll("_", "\\\\_")).queue();
+            if (channel == gameLogChannel) {
+                if (!plugin.getConfig().getBoolean("log-console")) channel.sendMessage(message.replaceAll("_", "\\\\_")).queue();
             } else {
                 channel.sendMessage(message).queue();
             }
