@@ -20,7 +20,7 @@ public class CmdPlayerlimit implements CommandExecutor {
             try {
                 // Change config
                 int result = Integer.parseInt(args[0]);
-                Dreamvisitor.getPlugin().getServer().setMaxPlayers(result);
+                // Dreamvisitor.getPlugin().getServer().setMaxPlayers(result);
 
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                     if (player.isOp()) {

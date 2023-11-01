@@ -58,186 +58,208 @@ public class Dreamvisitor extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        // Initialize variables
-        plugin = this;
+        try {
+            // Initialize variables
+            plugin = this;
 
-        debug = getConfig().getBoolean("debug");
+            debug = getConfig().getBoolean("debug");
 
-        debug("Registering listeners...");
-        // Register listeners
-        getServer().getPluginManager().registerEvents(new ListenEntityDamage(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerChat(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerCmdPreprocess(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerDeath(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerJoin(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerLogin(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
-        getServer().getPluginManager().registerEvents(new ListenInventoryClose(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerGameModeChange(), this);
-        getServer().getPluginManager().registerEvents(new ListenServerPing(), this);
+            debug("Registering listeners...");
+            // Register listeners
+            getServer().getPluginManager().registerEvents(new ListenEntityDamage(), this);
+            getServer().getPluginManager().registerEvents(new ListenPlayerChat(), this);
+            getServer().getPluginManager().registerEvents(new ListenPlayerCmdPreprocess(), this);
+            getServer().getPluginManager().registerEvents(new ListenPlayerDeath(), this);
+            getServer().getPluginManager().registerEvents(new ListenPlayerJoin(), this);
+            getServer().getPluginManager().registerEvents(new ListenPlayerLogin(), this);
+            getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
+            getServer().getPluginManager().registerEvents(new ListenInventoryClose(), this);
+            getServer().getPluginManager().registerEvents(new ListenPlayerGameModeChange(), this);
+            getServer().getPluginManager().registerEvents(new ListenServerPing(), this);
 
-        debug("Initializing command executors...");
-        // Initialize command executors
-        Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdAradio());
-        Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
-        Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
-        Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
-        Objects.requireNonNull(getCommand("pausebypass")).setExecutor(new CmdPauseBypass());
-        Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
-        Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
-        Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
-        Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
-        Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
-        Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdTagRadio());
-        Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
-        Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
-        Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
-        Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
-        Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
-        Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
-        Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
-        Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
-        Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
-        Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
+            debug("Initializing command executors...");
+            // Initialize command executors
+            Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdAradio());
+            Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
+            Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
+            Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
+            Objects.requireNonNull(getCommand("pausebypass")).setExecutor(new CmdPauseBypass());
+            Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
+            Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
+            Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
+            Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
+            Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
+            Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdTagRadio());
+            Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
+            Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
+            Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
+            Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
+            Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
+            Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
+            Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
+            Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
+            Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
+            Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
 
-        debug("Initializing tab completers...");
-        // Initialize command tab completers
-        Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
-        Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
-        Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
-        Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
+            debug("Initializing tab completers...");
+            // Initialize command tab completers
+            Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
+            Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
+            Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
+            Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
 
-        debug("Creating data folder...");
-        // Create config if needed
-        getDataFolder().mkdir();
-        saveDefaultConfig();
+            debug("Creating data folder...");
+            // Create config if needed
+            getDataFolder().mkdir();
+            saveDefaultConfig();
 
-        debug("Initializing accountLink.txt");
-        AccountLink.init();
+            debug("Initializing accountLink.txt");
+            AccountLink.init();
 
-        // Start message
-        getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
+            // Start message
+            getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
 
-        // Bot
-        debug("Starting Dreamvisitor bot...");
-        Bot.startBot();
-        jda = Bot.getJda();
+            // Bot
+            debug("Starting Dreamvisitor bot...");
+            Bot.startBot();
+            jda = Bot.getJda();
 
-        if (!botFailed) {
-            // Get saved data
-            debug("Fetching recorded channels and roles from config.");
-            DiscCommandsManager.initChannelsRoles();
+            if (!botFailed) {
+                // Get saved data
+                debug("Fetching recorded channels and roles from config.");
+                DiscCommandsManager.initChannelsRoles();
 
-            // Send server start message
-            Bot.gameLogChannel.sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
-        }
-
-        // If chat was previously paused, restore and notify in console\
-        debug("Restoring chat pause...");
-        if (getConfig().getBoolean("chatPaused")) {
-            chatPaused = true;
-            Bukkit.getServer().getLogger().info(PREFIX +
-                    "Chat is currently paused from last session! Use /pausechat to allow users to chat.");
-        }
-
-        // Restore player limit override
-        debug("Restoring player limit override...");
-        playerlimit = getConfig().getInt("playerlimit");
-        getServer().getLogger().info(PREFIX +
-                "Player limit override is currently set to " + playerlimit);
-        getServer().setMaxPlayers(playerlimit);
-
-        // Create item blacklist if empty
-        debug("Restoring item blacklist...");
-        if (plugin.getConfig().get("itemBlacklist") != null ) {
-            ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) plugin.getConfig().get("itemBlacklist");
-            if (itemList != null) {
-                debug("Item blacklist is null. Creating an empty blacklist...");
-                CmdItemBlacklist.badItems = itemList.toArray(new ItemStack[0]);
+                // Send server start message
+                Bot.gameLogChannel.sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
             }
-        }
 
-        // Get resource pack hash
-        debug("Getting resource pack hash...");
-        try (InputStream input = new FileInputStream("server.properties")) {
-            java.util.Properties prop = new java.util.Properties();
-            prop.load(input);
-            resourcePackHash = prop.getProperty("resource-pack-sha1");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            // If chat was previously paused, restore and notify in console\
+            debug("Restoring chat pause...");
+            if (getConfig().getBoolean("chatPaused")) {
+                chatPaused = true;
+                Bukkit.getServer().getLogger().info(PREFIX +
+                        "Chat is currently paused from last session! Use /pausechat to allow users to chat.");
+            }
 
-        // Console logging
-        debug("Setting up console logging...");
-        appender = new ConsoleLogger();
-        logger.addAppender(appender);
+            // Restore player limit override
+            debug("Restoring player limit override...");
+            playerlimit = getConfig().getInt("playerlimit");
+            getServer().getLogger().info(PREFIX +
+                    "Player limit override is currently set to " + playerlimit);
+            // getServer().setMaxPlayers(playerlimit);
 
-        // Set up web whitelist if enabled
-        webWhitelist = getConfig().getBoolean("web-whitelist");
-        if (webWhitelist) Whitelist.startWeb();
+            // Create item blacklist if empty
+            debug("Restoring item blacklist...");
+            if (plugin.getConfig().get("itemBlacklist") != null ) {
+                ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) plugin.getConfig().get("itemBlacklist");
+                if (itemList != null) {
+                    debug("Item blacklist is null. Creating an empty blacklist...");
+                    CmdItemBlacklist.badItems = itemList.toArray(new ItemStack[0]);
+                }
+            }
 
-        Runnable pushConsole = new BukkitRunnable() {
-            // Push console log to Discord every 2 seconds
-            @Override
-            public void run() {
-                if (Dreamvisitor.getPlugin().getConfig().getBoolean("log-console")) {
+            // Get resource pack hash
+            debug("Getting resource pack hash...");
+            try (InputStream input = new FileInputStream("server.properties")) {
+                java.util.Properties prop = new java.util.Properties();
+                prop.load(input);
+                resourcePackHash = prop.getProperty("resource-pack-sha1");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-                    // If there are messages in the queue, send them!
-                    if (ConsoleLogger.messageBuilder != null && !ConsoleLogger.messageBuilder.isEmpty()) {
+            // Console logging
+            debug("Setting up console logging...");
+            appender = new ConsoleLogger();
+            logger.addAppender(appender);
 
-                        Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString()).queue();
-                        ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
+            // Set up web whitelist if enabled
+            webWhitelist = getConfig().getBoolean("web-whitelist");
+            if (webWhitelist) Whitelist.startWeb();
 
-                        // If there are overflow messages, build and send those too
-                        if (ConsoleLogger.overFlowMessages != null && !ConsoleLogger.overFlowMessages.isEmpty()) {
+            Runnable pushConsole = new BukkitRunnable() {
+                // Push console log to Discord every 2 seconds
+                @Override
+                public void run() {
+                    if (Dreamvisitor.getPlugin().getConfig().getBoolean("log-console")) {
 
-                            StringBuilder overFlowMessageBuilder = new StringBuilder();
-                            // First is safe, so add now
-                            overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(0));
+                        // If there are messages in the queue, send them!
+                        if (ConsoleLogger.messageBuilder != null && !ConsoleLogger.messageBuilder.isEmpty()) {
 
-                            // For each message in overflow
-                            for (int i = 1; i < ConsoleLogger.overFlowMessages.size(); i++) {
+                            Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString()).queue();
+                            ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
 
-                                // Check that it fits
-                                if (overFlowMessageBuilder.length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length() >= 2000) {
-                                    // if not, queue current message and clear string builder
-                                    Bot.gameLogChannel.sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\_")).queue();
-                                    overFlowMessageBuilder = new StringBuilder();
+                            // If there are overflow messages, build and send those too
+                            if (ConsoleLogger.overFlowMessages != null && !ConsoleLogger.overFlowMessages.isEmpty()) {
 
-                                } else {
-                                    overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(i)).append("\n");
+                                StringBuilder overFlowMessageBuilder = new StringBuilder();
+                                // First is safe, so add now
+                                overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(0));
+
+                                // For each message in overflow
+                                for (int i = 1; i < ConsoleLogger.overFlowMessages.size(); i++) {
+
+                                    // Check that it fits
+                                    if (overFlowMessageBuilder.length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length() >= 2000) {
+                                        // if not, queue current message and clear string builder
+                                        Bot.gameLogChannel.sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\_")).queue();
+                                        overFlowMessageBuilder = new StringBuilder();
+
+                                    } else {
+                                        overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(i)).append("\n");
+                                    }
                                 }
+
+                                ConsoleLogger.overFlowMessages.clear();
+
                             }
-
-                            ConsoleLogger.overFlowMessages.clear();
-
                         }
                     }
                 }
-            }
-        };
+            };
 
-        Runnable scheduledRestarts = new BukkitRunnable() {
-            @Override
-            public void run() {
-                // Restart if requested and no players are online
-                if (restartScheduled && Bukkit.getOnlinePlayers().isEmpty()) {
-                    Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
-                    Bot.sendMessage(Bot.gameLogChannel, "Restarting the server as scheduled.");
-                    getServer().spigot().restart();
+            Runnable scheduledRestarts = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    // Restart if requested and no players are online
+                    if (restartScheduled && Bukkit.getOnlinePlayers().isEmpty()) {
+                        Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
+                        Bot.sendMessage(Bot.gameLogChannel, "Restarting the server as scheduled.");
+                        getServer().spigot().restart();
+                    }
                 }
-            }
-        };
+            };
 
-        if (!botFailed) {
-            // Push console every two seconds
-            Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
+            if (!botFailed) {
+                // Push console every two seconds
+                Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
+            }
+
+            // Check for scheduled restart every minute
+            Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
+
+            debug("Enable finished.");
+        } catch (Exception e) {
+
+            Bukkit.getLogger().severe("Dreamvisitor was unable to start :(\nPlease notify Bog with the following stack trace:");
+            e.printStackTrace();
+
+            if (!botFailed) {
+                // Send startup crashes.
+                StringBuilder builder = new StringBuilder();
+
+                builder.append(e.getMessage());
+
+                for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                    builder.append("\n").append(stackTraceElement.toString());
+                }
+
+                Bot.getJda().retrieveUserById(505833634134228992L).complete().openPrivateChannel().complete().sendMessage(builder.toString()).complete();
+                Bukkit.getPluginManager().disablePlugin(this);
+            }
+
         }
 
-        // Check for scheduled restart every minute
-        Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
-
-        debug("Enable finished.");
 
     }
 
