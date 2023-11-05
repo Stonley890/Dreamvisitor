@@ -19,9 +19,8 @@ public class CmdZoop implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         // If cmd executor is player
-        if (sender instanceof Player) {
+        if (sender instanceof Player player) {
 
-            Player player = (Player) sender;
             PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
             // Change data

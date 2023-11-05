@@ -24,18 +24,10 @@ public class CmdReloadbot implements CommandExecutor {
 
         sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Starting a new bot instance...");
         Dreamvisitor.botFailed = false;
-        Bukkit.getScheduler().runTask(Dreamvisitor.plugin, new Runnable() {
-
-            @Override
-            public void run() {
-                Bot.startBot();
-            }
-            
-        });
-        
+        Bukkit.getScheduler().runTask(Dreamvisitor.plugin, Bot::startBot);
 
         if (Dreamvisitor.botFailed) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "The bot was unable to start due to an invalid login token.");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "The bot was unable to start.");
         } else {
             DiscCommandsManager.initChannelsRoles();
             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.BLUE + "Dreamvisitor bot has been restarted.");

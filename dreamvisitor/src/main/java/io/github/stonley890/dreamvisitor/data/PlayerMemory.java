@@ -18,6 +18,7 @@ public class PlayerMemory {
         fileConfig.set("creativeInv", creativeInv);
         fileConfig.set("autoinvswap", autoinvswap);
         fileConfig.set("autoRadio", autoRadio);
+        fileConfig.set("resourcePackHash", resourcePackHash);
 
         return fileConfig;
     }
@@ -38,14 +39,35 @@ public class PlayerMemory {
         memory.survivalInv = survivalInvList.toArray(ItemStack[]::new);
         memory.creativeInv = creativeInvList.toArray(ItemStack[]::new);
 
+        memory.resourcePackHash = fileConfig.getString("resourcePackHash");
+
         return memory;
     }
 
+    /**
+     * Whether the user can see messages sent from the Discord game chat.
+     */
     public boolean discordToggled;
+    /**
+     * Whether the user is hidden from Discord.
+     */
     public boolean vanished;
+    /**
+     * Tracks the user's current inventory. May not necessarily correlate to actual gamemode.
+     */
     public boolean creative;
+    /**
+     * Whether the user has automatic inventory swap enabled.
+     */
     public boolean autoinvswap;
+    /**
+     * Whether the user has automatic staff radio enabled.
+     */
     public boolean autoRadio;
     public ItemStack[] survivalInv;
     public ItemStack[] creativeInv;
+    /**
+     * The user's last resource pack hash
+     */
+    public String resourcePackHash;
 }

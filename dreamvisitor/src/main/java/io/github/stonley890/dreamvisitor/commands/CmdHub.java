@@ -50,6 +50,7 @@ public class CmdHub implements CommandExecutor {
 
                         if (entity instanceof Player player) {
 
+                            // Set /back location
                             if (ess != null) {
                                 User user = ess.getUser(player);
                                 user.setLastLocation(player.getLocation());

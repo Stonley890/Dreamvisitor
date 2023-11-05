@@ -19,8 +19,6 @@ public class CmdAradio implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
-        debug("aradio executed.");
-
         if (args.length == 0) {
             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /aradio <message>");
             return false;

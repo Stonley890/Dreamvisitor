@@ -16,15 +16,13 @@ public class CmdItemBlacklist implements CommandExecutor {
     public static ItemStack[] badItems;
     static Dreamvisitor plugin = Dreamvisitor.getPlugin();
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        if (sender instanceof Player player) {
 
             if (badItems != null) {
                 inv.setContents(CmdItemBlacklist.badItems);
             }
-
 
             player.openInventory(inv);
         }

@@ -18,6 +18,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -300,20 +302,12 @@ public class DiscCommandsManager extends ListenerAdapter {
             }
         } else if (command.equals("panic")) {
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                    if (!player.isOp()) {
-                        player.kickPlayer("Panic!");
-                    }
-                }
-            });
-            Dreamvisitor.playerlimit = 0;
-            plugin.getConfig().set("playerlimit", 0);
-            plugin.saveConfig();
-            Bukkit.getServer().broadcastMessage(
-                    ChatColor.RED + "Panicked by " + user.getName() + ".\nPlayer limit override set to 0.");
-            Bot.sendMessage(Bot.gameLogChannel, "**Panicked by " + user.getName());
-            event.reply("Panicked!").queue();
+            EmbedBuilder replyEmbed = new EmbedBuilder();
+            replyEmbed.setTitle("Are you sure?").setDescription("This will kick all players and set the player limit to 0. Click the button to confirm.");
+
+            ActionRow actionRow = ActionRow.of(Button.danger("panic", "Yes, I'm sure."));
+
+            event.replyEmbeds(replyEmbed.build()).addActionRows(actionRow).queue();
 
         } else if (command.equals("link")) {
 
@@ -511,12 +505,14 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         } else if (command.equals("schedulerestart")) {
 
+            ActionRow button = ActionRow.of(Button.primary("schedulerestart", "Undo"));
+
             if (Dreamvisitor.restartScheduled) {
                 Dreamvisitor.restartScheduled = false;
-                event.reply("✅ Canceled server restart. Run /schedulerestart again to cancel.").queue();
+                event.reply("✅ Canceled server restart.").addActionRows(button).queue();
             } else {
                 Dreamvisitor.restartScheduled = true;
-                event.reply("✅ The server will restart when there are no players online. Run /schedulerestart again to cancel.").queue();
+                event.reply("✅ The server will restart when there are no players online").addActionRows(button).queue();
             }
 
 

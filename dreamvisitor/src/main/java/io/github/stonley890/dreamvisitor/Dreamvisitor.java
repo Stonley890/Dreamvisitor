@@ -1,19 +1,16 @@
 package io.github.stonley890.dreamvisitor;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.logging.Level;
-
+import io.github.stonley890.dreamvisitor.commands.*;
 import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabHub;
+import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabPauseBypass;
+import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabSoftWhitelist;
 import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabTribeUpdate;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
-import net.dv8tion.jda.api.MessageBuilder;
+import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.listeners.*;
+import net.dv8tion.jda.api.JDA;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,14 +18,16 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import io.github.stonley890.dreamvisitor.commands.*;
-import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
-import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabPauseBypass;
-import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabSoftWhitelist;
-import io.github.stonley890.dreamvisitor.listeners.*;
-import net.dv8tion.jda.api.JDA;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.logging.Level;
 
 /*
  * The main ticking thread.
@@ -160,7 +159,7 @@ public class Dreamvisitor extends JavaPlugin {
 
             // Get resource pack hash
             debug("Getting resource pack hash...");
-            try (InputStream input = new FileInputStream("server.properties")) {
+            try (InputStream input = Files.newInputStream(Paths.get("server.properties"))) {
                 java.util.Properties prop = new java.util.Properties();
                 prop.load(input);
                 resourcePackHash = prop.getProperty("resource-pack-sha1");

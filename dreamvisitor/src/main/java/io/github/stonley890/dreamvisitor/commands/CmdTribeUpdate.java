@@ -79,6 +79,9 @@ public class CmdTribeUpdate implements CommandExecutor {
 
         // Run async
         Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
+
+            List<String> tribeRoles = Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles");
+
             for (Player player : targets) {
 
                 String uuid = player.getUniqueId().toString();
@@ -104,23 +107,24 @@ public class CmdTribeUpdate implements CommandExecutor {
 
                     // Iterate through team names to get index
                     for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
-                        if (playerTeam.getName().equals(Bot.TRIBE_NAMES[i])) {
+                        if (playerTeam.getName().equalsIgnoreCase(Bot.TRIBE_NAMES[i])) {
 
                             // Remove roles
-                            for (String roleId : Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles")) {
+                            for (String roleId : tribeRoles) {
                                 Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
                             }
 
-                            Role targetRole = Bot.getJda().getRoleById(Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles").get(i));
+                            Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(i));
 
                             if (targetRole == null) {
                                 sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
-                                return;
+                                break;
                             }
 
                             // Add role
                             Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
 
+                            break;
                         }
                     }
 
