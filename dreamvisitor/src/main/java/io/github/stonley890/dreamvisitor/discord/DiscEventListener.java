@@ -85,9 +85,9 @@ public class DiscEventListener extends ListenerAdapter {
 
                 // Link accounts if not already linked
                 Dreamvisitor.debug("Do accounts need to be linked?");
-                if (AccountLink.getUuid(user.getId()) == null) {
+                if (AccountLink.getUuid(user.getIdLong()) == null) {
                     Dreamvisitor.debug("Yes, linking account.");
-                    AccountLink.linkAccounts(uuid.toString(), user.getId());
+                    AccountLink.linkAccounts(uuid, user.getIdLong());
                     Dreamvisitor.debug("Linked.");
                 }
 

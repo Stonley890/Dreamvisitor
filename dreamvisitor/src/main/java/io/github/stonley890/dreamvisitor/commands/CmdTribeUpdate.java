@@ -23,6 +23,7 @@ import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class CmdTribeUpdate implements CommandExecutor {
     @Override
@@ -84,18 +85,19 @@ public class CmdTribeUpdate implements CommandExecutor {
 
             for (Player player : targets) {
 
-                String uuid = player.getUniqueId().toString();
+                UUID uuid = player.getUniqueId();
 
                 // Get stored Discord ID
-                String discordId = AccountLink.getDiscordId(uuid);
-
-                if (discordId == null) {
+                long discordId;
+                try {
+                    discordId = AccountLink.getDiscordId(uuid);
+                } catch (NullPointerException e) {
                     sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
                     continue;
                 }
 
                 Dreamvisitor.debug(player.getUniqueId().toString());
-                Dreamvisitor.debug(discordId);
+                Dreamvisitor.debug(String.valueOf(discordId));
 
                 // Retrieve user from JDA
                 User user = Bot.getJda().retrieveUserById(discordId).complete();

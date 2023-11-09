@@ -10,6 +10,8 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.shanerx.mojang.Mojang;
 
+import java.util.UUID;
+
 public class CmdUser implements CommandExecutor {
 
     Mojang mojang = new Mojang().connect();
@@ -21,32 +23,34 @@ public class CmdUser implements CommandExecutor {
             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Searching for " + args[0]);
 
             // Get UUID
-            String uuid = mojang.getUUIDOfUsername(args[0]);
+            String uuidString = mojang.getUUIDOfUsername(args[0]);
 
-
-            if /* The UUID could not be found */ (uuid == null) {
+            if /* The UUID could not be found */ (uuidString == null) {
                 sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That user could not be found!");
             } else {
 
+                UUID uuid = UUID.fromString(uuidString);
+
                 // Get username (for proper CASE)
-                String username = mojang.getPlayerProfile(uuid).getUsername();
+                String username = mojang.getPlayerProfile(uuid.toString()).getUsername();
 
                 sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Player found. Looking for data.");
 
-                // Discord ID from AccountLink.yml
-                String discordID = AccountLink.getDiscordId(uuid);
-                // Discord username from JDA
+                String discordID;
                 String discordUsername = "N/A";
-                if (discordID != null) {
-                    discordUsername = Bot.getJda().retrieveUserById(discordID).complete().getName();
-                } else {
+
+                // Discord ID from AccountLink.yml
+                try {
+                    long discord = AccountLink.getDiscordId(uuid);
+                    discordID = String.valueOf(discord);
+                } catch (NullPointerException e) {
                     discordID = "N/A";
+                    // Discord username from JDA
+                    discordUsername = Bot.getJda().retrieveUserById(discordID).complete().getName();
                 }
 
                 sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Local data for player " + username + ":" +
-                        "\nUUID: " + uuid.replaceFirst(
-                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                        "$1-$2-$3-$4-$5") +
+                        "\nUUID: " + uuid.toString() +
                         "\nDiscord Username: " + discordUsername +
                         "\nDiscord ID: " + discordID
                 );

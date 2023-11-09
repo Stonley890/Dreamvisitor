@@ -185,37 +185,6 @@ public class DiscCommandsManager extends ListenerAdapter {
                         .queue();
             }
 
-        } else if (command.equals("tempban")) {
-
-            // Get args
-            String member = event.getOption(usernameOption, OptionMapping::getAsString);
-            int hours = event.getOption("hours", OptionMapping::getAsInt);
-            String reason = event.getOption("reason", OptionMapping::getAsString);
-
-            // Add a ban if player is online
-            assert member != null;
-            if (Bukkit.getServer().getPlayer(member) != null) {
-
-                // Create timestamp
-                Date date = new Date(System.currentTimeMillis() + 60L * 60 * 1000 * hours);
-                // Add to ban list
-                Bukkit.getServer().getBanList(BanList.Type.NAME).addBan(member, reason, date, null);
-                // Kick player
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        Objects.requireNonNull(Bukkit.getServer().getPlayer(member)).kickPlayer(reason);
-
-                    }
-                }.runTask(Dreamvisitor.getPlugin());
-                // Success message
-                event.reply("**`" + member + "` was successfully banned for " + hours + " hours. Reason:** " + reason)
-                        .queue();
-
-            } else {
-                event.reply("**Player is offline!**").setEphemeral(true).queue();
-            }
-
         } else if (command.equals("msg")) {
 
             // args
@@ -320,18 +289,20 @@ public class DiscCommandsManager extends ListenerAdapter {
             Mojang mojang = new Mojang().connect();
             Dreamvisitor.debug("Connected to Mojang.");
             Dreamvisitor.debug("Getting UUID of username.");
-            String uuid = mojang.getUUIDOfUsername(username);
+            String stringUuid = mojang.getUUIDOfUsername(username);
             Dreamvisitor.debug("Command requested.");
 
-            if (uuid != null) {
-                AccountLink.linkAccounts(uuid, targetUser.getId());
-                event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
+            UUID uuid;
 
-            } else {
+            try {
+                uuid = UUID.fromString(stringUuid);
+            } catch (IllegalArgumentException e) {
                 event.reply("`" + username + "` could not be found!").queue();
                 return;
             }
 
+            AccountLink.linkAccounts(uuid, targetUser.getIdLong());
+            event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
 
 
         } else if (command.equals("user")) {
@@ -345,14 +316,14 @@ public class DiscCommandsManager extends ListenerAdapter {
             Mojang mojang = new Mojang().connect();
 
             // UUID from AccountLink.yml
-            String uuid = AccountLink.getUuid(targetUser.getId());
+            UUID uuid = AccountLink.getUuid(targetUser.getIdLong());
+            String stringUuid = "N/A";
             // Minecraft username from Mojang
             String username = "N/A";
 
             if (uuid != null) {
-                username = mojang.getPlayerProfile(uuid).getUsername();
-            } else {
-                uuid = "N/A";
+                username = mojang.getPlayerProfile(uuid.toString()).getUsername();
+                stringUuid = uuid.toString();
             }
 
             // Send data
@@ -363,9 +334,7 @@ public class DiscCommandsManager extends ListenerAdapter {
 
             builder.addField("ID", user.getId(), false);
             builder.addField("Minecraft Username", username, false);
-            builder.addField("UUID", uuid.replaceFirst(
-                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                    "$1-$2-$3-$4-$5"), false);
+            builder.addField("UUID", stringUuid, false);
 
             event.replyEmbeds(builder.build()).queue();
 
@@ -423,7 +392,11 @@ public class DiscCommandsManager extends ListenerAdapter {
                                 Dreamvisitor.resourcePackHash = newHash;
                                 if (!Bukkit.getOnlinePlayers().isEmpty()) {
                                     for (Player player : Bukkit.getOnlinePlayers()) {
+                                        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+
                                         player.setResourcePack(Bukkit.getResourcePack(), HexFormat.of().parseHex(Dreamvisitor.resourcePackHash));
+                                        memory.resourcePackHash = Dreamvisitor.resourcePackHash;
+                                        PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
                                     }
                                 }
 
@@ -474,20 +447,7 @@ public class DiscCommandsManager extends ListenerAdapter {
                 return;
             }
 
-            OptionMapping banOption = event.getOption("ban");
-            boolean ban;
-
-            if (banOption != null) {
-                ban = usernameOption.getAsBoolean();
-                if (ban) {
-                    Bukkit.getBanList(BanList.Type.NAME).addBan(username, "Banned by Dreamvistitor.", null, null);
-                    event.reply("Banned " + username + ".").queue();
-                }
-            }
-            else {
-                event.reply("Removed " + username + " from the whitelist.").queue();
-                return;
-            }
+            event.reply("Removed " + username + " from the whitelist.").queue();
 
         } else if (command.equals("toggleweb")) {
 
@@ -557,12 +517,6 @@ public class DiscCommandsManager extends ListenerAdapter {
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
         commandData.add(Commands.slash("list", "List online players."));
-
-        commandData.add(Commands.slash("tempban", "Tempban a player from the Minecraft server.")
-                .addOption(OptionType.STRING, usernameOption, "The Minecraft user to tempban.", true)
-                .addOption(OptionType.INTEGER, "hours", "The number of hours to enforce the tempban.", true)
-                .addOption(OptionType.STRING, "reason", "Reason for tempban.", true)
-                .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 
         commandData.add(
                 Commands.slash("msg", "Message a player on the Minecraft server.")

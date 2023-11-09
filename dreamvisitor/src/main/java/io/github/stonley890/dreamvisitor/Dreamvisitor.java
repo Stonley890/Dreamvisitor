@@ -99,6 +99,7 @@ public class Dreamvisitor extends JavaPlugin {
             Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
             Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
             Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
+            Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
 
             debug("Initializing tab completers...");
             // Initialize command tab completers

@@ -21,7 +21,7 @@ public class CmdSetmotd implements CommandExecutor {
                 builder.append(arg).append(" ");
             }
 
-            String newMotd = builder.toString().replaceAll("&", "§").strip();
+            String newMotd = builder.toString().replaceAll("&", "§").replaceAll("\\n","\n").strip();
 
             Dreamvisitor.MOTD = newMotd;
             sender.sendMessage(Dreamvisitor.PREFIX + "MOTD set to\n" + newMotd);
