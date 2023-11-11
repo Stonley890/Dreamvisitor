@@ -9,13 +9,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HexFormat;
 
 public class ListenPlayerJoin implements Listener {
     
     @EventHandler
-    public void onPlayerJoinEvent(PlayerJoinEvent event) {
+    public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
 
         PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
 

@@ -2,11 +2,12 @@ package io.github.stonley890.dreamvisitor.data;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Utils;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.shanerx.mojang.Mojang;
 import spark.Spark;
 
 import java.io.File;
@@ -17,7 +18,7 @@ import java.util.UUID;
 
 public class Whitelist {
 
-    private static JSONArray get() throws IOException {
+    private static @NotNull JSONArray get() throws IOException {
 
         // Access whitelist.json file
         Dreamvisitor.debug("Trying to access whitelist file");
@@ -39,7 +40,7 @@ public class Whitelist {
         return whitelist;
     }
 
-    public static boolean isUserWhitelisted(UUID uuid) throws IOException {
+    public static boolean isUserWhitelisted(@NotNull UUID uuid) throws IOException {
         JSONArray whitelist = get();
         for (Object entry : whitelist) {
             JSONObject object = (JSONObject) entry;
@@ -56,7 +57,7 @@ public class Whitelist {
      * @param uuid The {@link UUID} to add.
      * @throws IOException If there is an issue accessing the whitelist file.
      */
-    public static void add(String username, UUID uuid) throws IOException {
+    public static void add(@NotNull String username, @NotNull UUID uuid) throws IOException {
 
         Dreamvisitor.debug("Adding " + username + " to the whitelist.");
 
@@ -90,7 +91,7 @@ public class Whitelist {
      * @param uuid The {@link UUID} to remove.
      * @throws IOException If there is an issue accessing the whitelist file.
      */
-    public static void remove(String username, UUID uuid) throws IOException {
+    public static void remove(@NotNull String username, @NotNull UUID uuid) throws IOException {
 
         Dreamvisitor.debug("Removing " + username + " to the whitelist.");
 
@@ -152,23 +153,18 @@ public class Whitelist {
         Spark.stop();
     }
 
-    private static boolean processUsername(String username) throws IOException {
-        // Connect to Mojang services
-        Mojang mojang = new Mojang().connect();
-        Dreamvisitor.debug("Connected to Mojang");
+    private static boolean processUsername(@NotNull String username) throws IOException {
 
         // Check for valid UUID
         Dreamvisitor.debug("Checking for valid UUID");
-        if (mojang.getUUIDOfUsername(username) == null) {
+        UUID uuid = Utils.getUUIDOfUsername(username);
+        if (uuid == null) {
             // username does not exist alert
             Dreamvisitor.debug("Username does not exist.");
             Dreamvisitor.debug("Failed whitelist.");
         } else {
 
             Dreamvisitor.debug("Got UUID");
-            UUID uuid = UUID.fromString(mojang.getUUIDOfUsername(username).replaceFirst(
-                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                    "$1-$2-$3-$4-$5"));
 
             // No account to link
 

@@ -18,6 +18,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerChat implements Listener {
 
@@ -25,7 +26,7 @@ public class ListenPlayerChat implements Listener {
     
     @EventHandler
     @SuppressWarnings({"unchecked","null"})
-    public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
+    public void onPlayerChatEvent(@NotNull AsyncPlayerChatEvent event) {
 
         if (event.getPlayer().hasPermission("dreamvisitor.set.autoradio")) {
             PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());

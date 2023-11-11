@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.discord;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Utils;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
@@ -20,15 +21,12 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.shanerx.mojang.Mojang;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -59,13 +57,10 @@ public class DiscEventListener extends ListenerAdapter {
 
             EmbedBuilder builder = new EmbedBuilder();
 
-            // Connect to Mojang services
-            Mojang mojang = new Mojang().connect();
-            Dreamvisitor.debug("Connected to Mojang");
-
             // Check for valid UUID
             Dreamvisitor.debug("Checking for valid UUID");
-            if (mojang.getUUIDOfUsername(username) == null) {
+            UUID uuid = Utils.getUUIDOfUsername(username);
+            if (uuid == null) {
                 // username does not exist alert
                 Dreamvisitor.debug("Username does not exist.");
 
@@ -79,9 +74,6 @@ public class DiscEventListener extends ListenerAdapter {
             } else {
 
                 Dreamvisitor.debug("Got UUID");
-                UUID uuid = UUID.fromString(mojang.getUUIDOfUsername(username).replaceFirst(
-                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                        "$1-$2-$3-$4-$5"));
 
                 // Link accounts if not already linked
                 Dreamvisitor.debug("Do accounts need to be linked?");
@@ -193,7 +185,7 @@ public class DiscEventListener extends ListenerAdapter {
     }
 
     @Override
-    public void onButtonInteraction(ButtonInteractionEvent event) {
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
 
         Button button = event.getButton();
         ButtonInteraction interaction = event.getInteraction();
@@ -219,7 +211,7 @@ public class DiscEventListener extends ListenerAdapter {
         } else if (button.getId().startsWith("unwhitelist-")) {
 
             String uuid = button.getId().substring("unwhitelist-".length());
-            String username = new Mojang().connect().getPlayerProfile(uuid).getUsername();
+            String username = Utils.getUsernameOfUuid(uuid);
 
             try {
                 if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
@@ -238,7 +230,7 @@ public class DiscEventListener extends ListenerAdapter {
         } else if (button.getId().startsWith("ban-")) {
 
             String uuid = button.getId().substring("ban-".length());
-            String username = new Mojang().connect().getPlayerProfile(uuid).getUsername();
+            String username = Utils.getUsernameOfUuid(uuid);
 
             try {
 

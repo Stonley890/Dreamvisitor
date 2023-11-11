@@ -1,39 +1,19 @@
 package io.github.stonley890.dreamvisitor.discord;
 
-import java.awt.*;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.util.*;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-
+import io.github.stonley890.dreamvisitor.Bot;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.Utils;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.bukkit.BanList;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
-
-import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Activity.ActivityType;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -42,7 +22,24 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import org.shanerx.mojang.Mojang;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.awt.*;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 public class DiscCommandsManager extends ListenerAdapter {
 
@@ -286,17 +283,10 @@ public class DiscCommandsManager extends ListenerAdapter {
             String username = event.getOption("username").getAsString();
             Dreamvisitor.debug("Got username.");
 
-            Mojang mojang = new Mojang().connect();
-            Dreamvisitor.debug("Connected to Mojang.");
-            Dreamvisitor.debug("Getting UUID of username.");
-            String stringUuid = mojang.getUUIDOfUsername(username);
+            UUID uuid = Utils.getUUIDOfUsername(username);
             Dreamvisitor.debug("Command requested.");
 
-            UUID uuid;
-
-            try {
-                uuid = UUID.fromString(stringUuid);
-            } catch (IllegalArgumentException e) {
+            if (uuid == null) {
                 event.reply("`" + username + "` could not be found!").queue();
                 return;
             }
@@ -311,18 +301,13 @@ public class DiscCommandsManager extends ListenerAdapter {
             User targetUser = event.getOption("user").getAsUser();
             Dreamvisitor.debug("Target user: " + targetUser.getId());
 
-            List<List<Object>> seenIds = new ArrayList<>();
-
-            Mojang mojang = new Mojang().connect();
-
             // UUID from AccountLink.yml
             UUID uuid = AccountLink.getUuid(targetUser.getIdLong());
             String stringUuid = "N/A";
-            // Minecraft username from Mojang
             String username = "N/A";
 
             if (uuid != null) {
-                username = mojang.getPlayerProfile(uuid.toString()).getUsername();
+                username = Utils.getUsernameOfUuid(uuid);
                 stringUuid = uuid.toString();
             }
 
@@ -416,8 +401,6 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         } else if (command.equals("unwhitelist")) {
 
-            Mojang mojang = new Mojang().connect();
-
             OptionMapping usernameOption = event.getOption("username");
             String username;
             if (usernameOption != null) username = usernameOption.getAsString();
@@ -433,15 +416,15 @@ public class DiscCommandsManager extends ListenerAdapter {
                 return;
             }
 
-            String stringUuid = mojang.getUUIDOfUsername(username);
+            UUID uuid = Utils.getUUIDOfUsername(username);
 
-            if (stringUuid == null) {
+            if (uuid == null) {
                 event.reply("`" + username + "` could not be found!").queue();
                 return;
             }
 
             try {
-                Whitelist.remove(username, UUID.fromString(Utils.formatUuid(stringUuid)));
+                Whitelist.remove(username, uuid);
             } catch (IOException e) {
                 event.reply("There was a problem accessing the whitelist file.").queue();
                 return;

@@ -15,7 +15,7 @@ public class CmdPlayerlimit implements CommandExecutor {
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (args.length > 0) {
             try {
                 // Change config

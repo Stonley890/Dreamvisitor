@@ -16,13 +16,15 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerLogin implements Listener {
 
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @EventHandler
-    public void onPlayerLoginEvent(PlayerLoginEvent event) {
+    public void onPlayerLoginEvent(@NotNull PlayerLoginEvent event) {
+
         Player player = event.getPlayer();
 
         if (player.hasPermission("dreamvisitor.nowhitelist")) {

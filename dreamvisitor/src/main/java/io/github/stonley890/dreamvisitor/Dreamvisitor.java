@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,7 +79,7 @@ public class Dreamvisitor extends JavaPlugin {
 
             debug("Initializing command executors...");
             // Initialize command executors
-            Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdAradio());
+            Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdRadio());
             Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
             Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
             Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
@@ -88,7 +89,7 @@ public class Dreamvisitor extends JavaPlugin {
             Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
             Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
             Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
-            Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdTagRadio());
+            Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdRadio());
             Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
             Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
             Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
@@ -267,7 +268,7 @@ public class Dreamvisitor extends JavaPlugin {
         return plugin;
     }
 
-    public static String getPlayerPath(UUID uuid) {
+    public static @NotNull String getPlayerPath(UUID uuid) {
         return plugin.getDataFolder().getAbsolutePath() + "/player/" + uuid + ".yml";
     }
 

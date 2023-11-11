@@ -27,7 +27,7 @@ import java.util.UUID;
 
 public class CmdTribeUpdate implements CommandExecutor {
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
 
         List<Player> targets = new ArrayList<>();
 

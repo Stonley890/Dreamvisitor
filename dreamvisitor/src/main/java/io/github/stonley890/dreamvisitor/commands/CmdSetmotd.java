@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CmdSetmotd implements CommandExecutor {
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
 
         if (args.length == 0) {
             Dreamvisitor.MOTD = null;
@@ -21,7 +21,8 @@ public class CmdSetmotd implements CommandExecutor {
                 builder.append(arg).append(" ");
             }
 
-            String newMotd = builder.toString().replaceAll("&", "§").replaceAll("\\n","\n").strip();
+            Dreamvisitor.debug("Before formatting: " + builder);
+            String newMotd = builder.toString().replaceAll("&", "§").replaceAll("\\\\n","\n").strip();
 
             Dreamvisitor.MOTD = newMotd;
             sender.sendMessage(Dreamvisitor.PREFIX + "MOTD set to\n" + newMotd);

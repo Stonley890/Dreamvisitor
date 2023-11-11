@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Utils;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import net.md_5.bungee.api.ChatColor;
@@ -15,7 +16,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.shanerx.mojang.Mojang;
 
 import java.io.File;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.List;
 public class CmdDvset implements CommandExecutor {
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
 
         if (args.length == 0) {
             if (sender instanceof Player player && sender.hasPermission("dreamvisitor.userset")) {
@@ -299,10 +299,8 @@ public class CmdDvset implements CommandExecutor {
 
         ComponentBuilder componentBuilder = new ComponentBuilder();
 
-        Mojang mojang = new Mojang().connect();
-
         for (String player : players) {
-            TextComponent playerButton = new TextComponent(mojang.getPlayerProfile(player).getUsername());
+            TextComponent playerButton = new TextComponent(Utils.getUsernameOfUuid(player));
             componentBuilder.append(playerButton);
         }
 

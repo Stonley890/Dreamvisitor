@@ -1,11 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -16,9 +12,12 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
-import org.shanerx.mojang.Mojang;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class CmdPauseBypass implements CommandExecutor {
 
@@ -99,8 +98,6 @@ public class CmdPauseBypass implements CommandExecutor {
 
         } else if (args[0].equalsIgnoreCase("list")) {
 
-            Mojang mojang = new Mojang().connect();
-
             // Build list
             StringBuilder list = new StringBuilder();
 
@@ -108,7 +105,7 @@ public class CmdPauseBypass implements CommandExecutor {
                 if (list.length() > 0) {
                     list.append(", ");
                 }
-                list.append(mojang.getPlayerProfile(players).getUsername());
+                list.append(Utils.getUsernameOfUuid(players));
             }
             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Players bypassing: " + list);
 
@@ -123,15 +120,7 @@ public class CmdPauseBypass implements CommandExecutor {
         return true;
     }
 
-    String getCleanUUID(String playerName) {
-
-        Mojang mojang = new Mojang().connect();
-        return mojang.getUUIDOfUsername(playerName).replaceFirst(
-                "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
-                "$1-$2-$3-$4-$5");
-    }
-
-    void saveFile(FileConfiguration fileConfig, File file) {
+    void saveFile(@NotNull FileConfiguration fileConfig, File file) {
         try {
             fileConfig.save(file);
         } catch (IOException e) {
@@ -142,7 +131,7 @@ public class CmdPauseBypass implements CommandExecutor {
     void modifyList(boolean add, String playerName, CommandSender sender) {
 
         // Get player from UUID
-        OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(getCleanUUID(playerName)));
+        OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(Utils.formatUuid(playerName)));
 
         if (bypassedPlayers.contains(player.getUniqueId().toString())) {
             if (add) {

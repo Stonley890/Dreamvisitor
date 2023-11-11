@@ -15,20 +15,19 @@ import org.jetbrains.annotations.NotNull;
 public class CmdRadio implements CommandExecutor {
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
 
         if (args.length == 0) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /aradio <message>");
+            if (command.getName().equals("tagradio")) sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /" + label + " <message>");
+            else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /" + label + "<tag> <message>");
             return false;
         }
 
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            buildMessage(args, player.getName());
+        if (sender instanceof Player player) {
+            buildMessage(args, player.getName(), command);
             return true;
         } else if (sender instanceof ConsoleCommandSender) {
-
-            buildMessage(args, "Console");
+            buildMessage(args, "Console", command);
             return true;
         } else {
             return false;
@@ -36,7 +35,7 @@ public class CmdRadio implements CommandExecutor {
         
     }
 
-    void buildMessage(String[] args, String name) {
+    static void buildMessage(String[] args, @NotNull String name, @NotNull Command command) {
 
         // Set color of name to red if from console
         ChatColor nameColor = ChatColor.YELLOW;
@@ -45,11 +44,15 @@ public class CmdRadio implements CommandExecutor {
         }
 
         // Build message
-        StringBuilder message = new StringBuilder().append(ChatColor.DARK_AQUA).append("[Staff Radio] ").append(nameColor).append("<").append(name).append("> ").append(ChatColor.WHITE);
-        for (int i = 0; i != args.length; i++)
-        {
-            message.append(args[i]).append(" ");
-        }
+        String radioType = "[Staff Radio]";
+        if (command.getName().equals("aradio")) radioType = "[Admin Radio]";
+        else if (command.getName().equals("tagradio")) radioType = "[Radio]";
+
+        StringBuilder message = new StringBuilder().append(ChatColor.DARK_AQUA).append(radioType).append(nameColor).append(" <").append(name).append("> ").append(ChatColor.WHITE);
+        int i;
+        if (command.getName().equals("tagradio")) i = 1;
+        else i = 0;
+        for (; i != args.length; i++) message.append(args[i]).append(" ");
 
         String finalMessage = message.toString();
 
@@ -57,10 +60,10 @@ public class CmdRadio implements CommandExecutor {
         Bukkit.getLogger().info(ChatColor.stripColor(finalMessage));
         for (Player operator : Bukkit.getServer().getOnlinePlayers())
         {
-            if (operator.isOp() || operator.hasPermission("dreamvisitor.radio"))
-            {
-                operator.sendMessage(finalMessage);
-            }
+            if (command.getName().equals("radio")) if (operator.isOp() || operator.hasPermission("dreamvisitor.radio")) operator.sendMessage(finalMessage);
+            else if (command.getName().equals("aradio")) if (operator.isOp()) operator.sendMessage(finalMessage);
+            else if (command.getName().equals("tagradio")) if (operator.getScoreboardTags().contains(args[0])) operator.sendMessage(finalMessage);
+
         }
         Bot.sendMessage(Bot.gameLogChannel, ChatColor.stripColor(finalMessage));
     }

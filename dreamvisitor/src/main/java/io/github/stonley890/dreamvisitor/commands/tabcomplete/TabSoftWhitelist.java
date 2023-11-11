@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
+import io.github.stonley890.dreamvisitor.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -22,7 +24,7 @@ public class TabSoftWhitelist implements TabCompleter {
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
 
         ArrayList<String> suggestions = new ArrayList<>();
 
@@ -59,7 +61,7 @@ public class TabSoftWhitelist implements TabCompleter {
 
                     // Get names and add them to tab suggestions
                     for (String player : ((List<String>) Objects.requireNonNull(fileConfig.get("players")))) {
-                        suggestions.add(mojang.getPlayerProfile(player).getUsername());
+                        suggestions.add(Utils.getUsernameOfUuid(player));
                     }
 
                 }

@@ -10,6 +10,7 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class PlayerUtility {
     private static final Map<String, PlayerMemory> MEMORY_MAP = new HashMap<>();
@@ -24,7 +25,7 @@ public class PlayerUtility {
      * @param uuid The UUID of the player whose data to fetch.
      * @return The {@link PlayerMemory} of the given player.
      */
-    private static PlayerMemory fetchPlayerMemory(UUID uuid) {
+    private static @NotNull PlayerMemory fetchPlayerMemory(UUID uuid) {
         File file = new File(Dreamvisitor.getPlayerPath(uuid));
         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
         return PlayerMemory.getFromFileConfig(fileConfig);
@@ -34,7 +35,7 @@ public class PlayerUtility {
      * Saves the specified player's memory to file. Does nothing if the player is not in memory.
      * @param uuid The UUID of the player whose data to save.
      */
-    public static void savePlayerMemory(UUID uuid) throws IOException {
+    public static void savePlayerMemory(@NotNull UUID uuid) throws IOException {
         if(MEMORY_MAP.containsKey(uuid.toString())) {
             PlayerMemory memory = getPlayerMemory(uuid);
             memory.toFileConfig().save(Dreamvisitor.getPlayerPath(uuid));
@@ -46,7 +47,7 @@ public class PlayerUtility {
      * @param uuid The UUID of the player whose data to get.
      * @return The {@link PlayerMemory} of the given player.
      */
-    public static PlayerMemory getPlayerMemory(UUID uuid) {
+    public static @NotNull PlayerMemory getPlayerMemory(@NotNull UUID uuid) {
         // If it does not exist in memory, add it
         if(!MEMORY_MAP.containsKey(uuid.toString())) {
             PlayerMemory memory = fetchPlayerMemory(uuid);
@@ -60,7 +61,7 @@ public class PlayerUtility {
      * Removes the specified player's memory from random access storage. This does NOT save memory first.
      * @param uuid The UUID of the player whose data to remove.
      */
-    public static void clearPlayerMemory(UUID uuid) {
+    public static void clearPlayerMemory(@NotNull UUID uuid) {
         MEMORY_MAP.remove(uuid.toString());
     }
 

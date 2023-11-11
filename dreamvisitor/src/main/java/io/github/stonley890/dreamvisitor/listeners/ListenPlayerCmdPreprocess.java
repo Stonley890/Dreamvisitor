@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.md_5.bungee.api.ChatColor;
+import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerCmdPreprocess implements Listener {
 
@@ -25,7 +26,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
 
     @EventHandler
     @SuppressWarnings({ "unchecked"})
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+    public void onPlayerCommandPreprocess(@NotNull PlayerCommandPreprocessEvent event) {
 
         String cmd = event.getMessage();
         Player player = event.getPlayer();

@@ -4,14 +4,13 @@ import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-// other imports that you need here
 
 public class ConsoleLogger extends AbstractAppender {
 
@@ -29,7 +28,7 @@ public class ConsoleLogger extends AbstractAppender {
     }
 
     @Override
-    public void append(LogEvent event) {
+    public void append(@NotNull LogEvent event) {
         // if you don't make it immutable, then you may have some unexpected behaviors
         LogEvent log = event.toImmutable();
 

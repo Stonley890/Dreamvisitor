@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.data;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +24,11 @@ public class PlayerMemory {
         return fileConfig;
     }
 
-    public static PlayerMemory getFromFileConfig(FileConfiguration fileConfig) {
+    public static @NotNull PlayerMemory getFromFileConfig(@NotNull FileConfiguration fileConfig) {
         PlayerMemory memory = new PlayerMemory();
         memory.discordToggled = fileConfig.getBoolean("discordToggled");
         memory.vanished = fileConfig.getBoolean("vanished");
-        memory.creative = fileConfig.getBoolean("vanished");
+        memory.creative = fileConfig.getBoolean("creative");
         memory.autoinvswap = fileConfig.getBoolean("autoinvswap");
         memory.autoRadio = fileConfig.getBoolean("autoradio");
         List<ItemStack> survivalInvList = (List<ItemStack>) fileConfig.getList("survivalInv");

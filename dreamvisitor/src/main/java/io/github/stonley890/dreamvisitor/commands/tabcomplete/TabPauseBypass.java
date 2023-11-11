@@ -1,10 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands.tabcomplete;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -13,16 +10,19 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.shanerx.mojang.Mojang;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class TabPauseBypass implements TabCompleter {
 
     Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
 
         ArrayList<String> suggestions = new ArrayList<>();
 
@@ -46,8 +46,6 @@ public class TabPauseBypass implements TabCompleter {
 
                 //pausebypass remove <player>
 
-                Mojang mojang = new Mojang().connect();
-
                 // Load pauseBypass.yml
                 File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
                 FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
@@ -57,7 +55,7 @@ public class TabPauseBypass implements TabCompleter {
 
                     // Get names and add them to tab suggestions
                     for (String player : ((List<String>) Objects.requireNonNull(fileConfig.get("players")))) {
-                        suggestions.add(mojang.getPlayerProfile(player).getUsername());
+                        suggestions.add(Utils.getUsernameOfUuid(player));
                     }
 
                 }

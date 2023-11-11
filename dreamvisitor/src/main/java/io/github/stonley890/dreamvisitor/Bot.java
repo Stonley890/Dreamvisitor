@@ -90,9 +90,5 @@ public class Bot {
         }
     }
 
-    public static User getUser(@NotNull String discordId) {
-        return jda.retrieveUserById(discordId).complete();
-    }
-
 
 }

@@ -13,8 +13,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class CmdZoop implements CommandExecutor {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
-
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 

@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -16,7 +17,7 @@ public class ListenPlayerQuit implements Listener {
     
     @EventHandler
     @SuppressWarnings({"null"})
-    public void onPlayerQuitEvent(PlayerQuitEvent event) {
+    public void onPlayerQuitEvent(@NotNull PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
 
