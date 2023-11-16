@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -65,7 +66,7 @@ public class DiscEventListener extends ListenerAdapter {
                 Dreamvisitor.debug("Username does not exist.");
 
                 builder.setTitle("❌ `" + username + "` could not be found!")
-                        .setDescription("Make sure you typed your username as shown in the bottom-left corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
+                        .setDescription("Make sure you type your username exactly as shown in the bottom-left corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
                         .setColor(Color.RED);
                 event.getMessage().replyEmbeds(builder.build()).queue();
 
@@ -165,7 +166,7 @@ public class DiscEventListener extends ListenerAdapter {
 
         if (event.getChannel().equals(Bot.gameLogChannel)) {
 
-            if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
 
                 Dreamvisitor.debug("Sending console command from log channel...");
 

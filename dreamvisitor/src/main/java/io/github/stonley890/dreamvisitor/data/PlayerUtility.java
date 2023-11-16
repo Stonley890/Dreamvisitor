@@ -9,7 +9,6 @@ import java.util.UUID;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerUtility {
@@ -25,7 +24,7 @@ public class PlayerUtility {
      * @param uuid The UUID of the player whose data to fetch.
      * @return The {@link PlayerMemory} of the given player.
      */
-    private static @NotNull PlayerMemory fetchPlayerMemory(UUID uuid) {
+    private static @NotNull PlayerMemory fetchPlayerMemory(@NotNull UUID uuid) {
         File file = new File(Dreamvisitor.getPlayerPath(uuid));
         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
         return PlayerMemory.getFromFileConfig(fileConfig);
@@ -70,8 +69,7 @@ public class PlayerUtility {
      * @param uuid The UUID of the player whose data to modify.
      * @param memory The modified {@link PlayerMemory}.
      */
-    public static void setPlayerMemory(UUID uuid, PlayerMemory memory) {
-        if (memory == null) MEMORY_MAP.remove(uuid.toString());
-        else MEMORY_MAP.put(uuid.toString(), memory);
+    public static void setPlayerMemory(@NotNull UUID uuid, @NotNull PlayerMemory memory) {
+        MEMORY_MAP.put(uuid.toString(), memory);
     }
 }

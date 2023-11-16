@@ -101,7 +101,7 @@ public class Whitelist {
         for (int i = 0; i < whitelist.length(); i++) {
             JSONObject object = (JSONObject) whitelist.get(i);
 
-            Dreamvisitor.debug("Checking " + object.get("uuid") + " with " + uuid.toString());
+            Dreamvisitor.debug("Checking " + object.get("uuid") + " with " + uuid);
 
             if (object.get("uuid").equals(uuid.toString())) {
 
@@ -136,7 +136,7 @@ public class Whitelist {
 
             Dreamvisitor.debug("Username from web form: " + username);
 
-            // Process the username (your logic here)
+            // Process the username
             boolean success = processUsername(username);
 
             Dreamvisitor.debug("Processed. Success: " + success);

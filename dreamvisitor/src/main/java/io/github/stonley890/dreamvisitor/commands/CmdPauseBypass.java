@@ -26,7 +26,6 @@ public class CmdPauseBypass implements CommandExecutor {
     List<String> bypassedPlayers = new ArrayList<>(100);
 
     @Override
-    @SuppressWarnings({ "unchecked" })
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         // Load pauseBypass.yml
@@ -67,7 +66,7 @@ public class CmdPauseBypass implements CommandExecutor {
             return false;
         }
         // Get bypassing players
-        bypassedPlayers = (List<String>) fileConfig.get(playerList);
+        bypassedPlayers = fileConfig.getStringList(playerList);
 
         if (args.length == 0) {
             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments!");
@@ -101,8 +100,9 @@ public class CmdPauseBypass implements CommandExecutor {
             // Build list
             StringBuilder list = new StringBuilder();
 
+            assert bypassedPlayers != null;
             for (String players : bypassedPlayers) {
-                if (list.length() > 0) {
+                if (!list.isEmpty()) {
                     list.append(", ");
                 }
                 list.append(Utils.getUsernameOfUuid(players));

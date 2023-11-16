@@ -27,7 +27,7 @@ public class Utils {
      * @return the formatted {@link String}.
      */
     public static @NotNull String escapeMarkdownFormatting(@NotNull String string) {
-        return string.replaceAll("_","\\_").replaceAll("\\*","\\\\*").replaceAll("\\|","\\\\|");
+        return string.replaceAll("_","\\\\_").replaceAll("\\*","\\\\*").replaceAll("\\|","\\\\|");
     }
 
     public static String getUsernameOfUuid(@NotNull UUID uuid) {

@@ -16,8 +16,7 @@ public class CmdSethub implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        if (sender instanceof Player player) {
             Dreamvisitor.hubLocation = player.getLocation().getBlock().getLocation()
                     .add(new Location(player.getLocation().getWorld(), 0.5, 0, 0.5));
                     plugin.getConfig().set("hubLocation", Dreamvisitor.hubLocation);

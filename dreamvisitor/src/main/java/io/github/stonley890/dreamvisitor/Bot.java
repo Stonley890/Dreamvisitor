@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.bukkit.Bukkit;
 
@@ -15,9 +14,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import org.jetbrains.annotations.NotNull;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 

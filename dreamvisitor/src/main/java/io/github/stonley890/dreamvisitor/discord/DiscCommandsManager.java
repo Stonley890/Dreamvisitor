@@ -56,19 +56,16 @@ public class DiscCommandsManager extends ListenerAdapter {
     public static void initChannelsRoles() {
         FileConfiguration config = Dreamvisitor.getPlugin().getConfig();
 
-        if (config.getString("chatChannelID") != null) {
-            Bot.gameChatChannel = jda.getTextChannelById(Objects.requireNonNull(config.getString("chatChannelID")));
-        }
-        if (config.getString("logChannelID") != null) {
-            Bot.gameLogChannel = jda.getTextChannelById(Objects.requireNonNull(config.getString("logChannelID")));
-        }
-        if (config.getString("whitelistChannelID") != null) {
-            Bot.whitelistChannel = jda.getTextChannelById(Objects.requireNonNull(config.getString("whitelistChannelID")));
-        }
-        if (config.getString("tribeRoles") != null) {
-            for (int i = 0; i < 10; i++) {
-                Bot.tribeRole.add(jda.getRoleById(config.getLongList("tribeRoles").get(i)));
-            }
+        long chatChannelID = config.getLong("chatChannelID");
+        long logChannelID = config.getLong("logChannelID");
+        long whitelistChannelID = config.getLong("whitelistChannelID");
+
+        Bot.gameChatChannel = jda.getTextChannelById(chatChannelID);
+        Bot.gameLogChannel = jda.getTextChannelById(logChannelID);
+        Bot.whitelistChannel = jda.getTextChannelById(whitelistChannelID);
+
+        for (int i = 0; i < 10; i++) {
+            Bot.tribeRole.add(jda.getRoleById(config.getLongList("tribeRoles").get(i)));
         }
 
     }
@@ -137,7 +134,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Compile players to list unless no players online
             if (event.getChannel() == Bot.gameChatChannel) {
 
-                // Create a stringbuilder
+                // Create a string builder
                 StringBuilder list = new StringBuilder();
 
                 // If there are players online
@@ -168,8 +165,14 @@ public class DiscCommandsManager extends ListenerAdapter {
                             }
                             list.append(player.getName());
                         }
+                        String playerForm = "players";
+                        String isAreForm = "are";
+                        if (players.size() == 1) {
+                            playerForm = "player";
+                            isAreForm = "is";
+                        }
                         // Send list
-                        event.reply("**There are " + players.size() + " player(s) online:** `" + list + "`")
+                        event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Dreamvisitor.playerlimit + " " + playerForm + " online:** `" + list + "`")
                                 .queue();
                     }
 
@@ -278,9 +281,9 @@ public class DiscCommandsManager extends ListenerAdapter {
         } else if (command.equals("link")) {
 
             Dreamvisitor.debug("Command requested.");
-            User targetUser = event.getOption("user").getAsUser();
+            User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
             Dreamvisitor.debug("Got user.");
-            String username = event.getOption("username").getAsString();
+            String username = Objects.requireNonNull(event.getOption("username")).getAsString();
             Dreamvisitor.debug("Got username.");
 
             UUID uuid = Utils.getUUIDOfUsername(username);
@@ -298,7 +301,7 @@ public class DiscCommandsManager extends ListenerAdapter {
         } else if (command.equals("user")) {
 
             Dreamvisitor.debug("Command requested.");
-            User targetUser = event.getOption("user").getAsUser();
+            User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
             Dreamvisitor.debug("Target user: " + targetUser.getId());
 
             // UUID from AccountLink.yml
@@ -317,7 +320,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             builder.setColor(Color.BLUE);
             builder.setAuthor(targetUser.getName(), targetUser.getAvatarUrl(), targetUser.getAvatarUrl());
 
-            builder.addField("ID", user.getId(), false);
+            builder.addField("ID", targetUser.getId(), false);
             builder.addField("Minecraft Username", username, false);
             builder.addField("UUID", stringUuid, false);
 
@@ -507,8 +510,14 @@ public class DiscCommandsManager extends ListenerAdapter {
                         .addOption(OptionType.STRING, "message", "The message to send.", true));
 
         commandData.add(Commands.slash(activityOption, "Set the bot activity.")
-                .addOption(OptionType.STRING, "type",
-                        "The type of activity; COMPETING, LISTENING, PLAYING, WATCHING", true)
+                .addOptions(new OptionData(OptionType.STRING, "type",
+                        "The type of activity.", true)
+                        .setAutoComplete(false)
+                        .addChoice("COMPETING", "COMPETING")
+                        .addChoice("LISTENING", "LISTENING")
+                        .addChoice("PLAYING", "PLAYING")
+                        .addChoice("WATCHING", "WATCHING")
+                )
                 .addOption(OptionType.STRING, activityOption, "The status to display on the bot.", true)
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED));
 

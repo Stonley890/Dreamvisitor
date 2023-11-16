@@ -90,9 +90,7 @@ public class CmdDvset implements CommandExecutor {
 
                                 } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
                             }
-                            default -> {
-                                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
-                            }
+                            default -> sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
                         }
 
                         PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);

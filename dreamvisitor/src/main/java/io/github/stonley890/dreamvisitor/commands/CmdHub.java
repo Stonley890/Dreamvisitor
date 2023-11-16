@@ -91,9 +91,7 @@ public class CmdHub implements CommandExecutor {
                             1f);
                 }
 
-            } else if (sender instanceof BlockCommandSender) {
-
-                BlockCommandSender cmdblock = (BlockCommandSender) sender;
+            } else if (sender instanceof BlockCommandSender cmdblock) {
 
                 // Find the closest player
                 double lastDistance = 10;

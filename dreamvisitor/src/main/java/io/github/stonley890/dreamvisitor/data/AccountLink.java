@@ -3,6 +3,8 @@ package io.github.stonley890.dreamvisitor.data;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.Utils;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.HashMap;
@@ -66,20 +68,28 @@ public class AccountLink {
         }
     }
 
-    public static void linkAccounts(UUID minecraftUUID, Long discordId) {
-        loadFromFile();
+    public static void linkAccounts(@NotNull UUID minecraftUUID, @NotNull Long discordId) {
         uuidToDiscordIdMap.put(minecraftUUID, discordId);
         discordIdToUuidMap.put(discordId, minecraftUUID);
-        saveFile();
+        Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), AccountLink::saveFile);
     }
 
-    public static long getDiscordId(UUID minecraftUUID) throws NullPointerException {
-        loadFromFile();
+    /**
+     * Get the Discord ID of the given {@link UUID}.
+     * @param minecraftUUID the {@link UUID} to get the Discord ID of.
+     * @return the {@code long} Discord ID.
+     * @throws NullPointerException if the given {@link UUID} does not have an associated Discord ID.
+     */
+    public static long getDiscordId(@NotNull UUID minecraftUUID) throws NullPointerException {
         return uuidToDiscordIdMap.get(minecraftUUID);
     }
 
-    public static UUID getUuid(long discordId) {
-        loadFromFile();
+    /**
+     * Get the {@link UUID} of the given Discord ID.
+     * @param discordId the {@code long} Discord ID to get the {@link UUID} of.
+     * @return the {@link UUID} associated with this Discord ID or {@code null} if it does not exist.
+     */
+    public static @Nullable UUID getUuid(long discordId) {
         return discordIdToUuidMap.get(discordId);
     }
 }
