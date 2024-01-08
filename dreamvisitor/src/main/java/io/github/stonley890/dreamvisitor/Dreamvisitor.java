@@ -128,7 +128,7 @@ public class Dreamvisitor extends JavaPlugin {
             if (!botFailed) {
                 // Get saved data
                 debug("Fetching recorded channels and roles from config.");
-                DiscCommandsManager.initChannelsRoles();
+                DiscCommandsManager.initChannelsRoles(getConfig());
 
                 // Send server start message
                 Bot.gameLogChannel.sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
@@ -228,6 +228,9 @@ public class Dreamvisitor extends JavaPlugin {
                         Bot.sendMessage(Bot.gameLogChannel, "**Restarting the server as scheduled.**");
                         getServer().spigot().restart();
                     }
+
+                    // also check for missing channels
+                    if (Bot.gameLogChannel == null || Bot.gameChatChannel == null || Bot.whitelistChannel == null) DiscCommandsManager.initChannelsRoles(getConfig());
                 }
             };
 

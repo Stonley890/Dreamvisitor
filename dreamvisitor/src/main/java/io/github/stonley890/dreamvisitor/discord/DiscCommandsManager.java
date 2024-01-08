@@ -53,16 +53,23 @@ public class DiscCommandsManager extends ListenerAdapter {
 
     // Get channels and roles from config
     @SuppressWarnings({"null"})
-    public static void initChannelsRoles() {
-        FileConfiguration config = Dreamvisitor.getPlugin().getConfig();
+    public static void initChannelsRoles(@NotNull FileConfiguration config) {
 
         long chatChannelID = config.getLong("chatChannelID");
         long logChannelID = config.getLong("logChannelID");
         long whitelistChannelID = config.getLong("whitelistChannelID");
 
+        Dreamvisitor.debug(String.valueOf(chatChannelID));
+        Dreamvisitor.debug(String.valueOf(logChannelID));
+        Dreamvisitor.debug(String.valueOf(whitelistChannelID));
+
         Bot.gameChatChannel = jda.getTextChannelById(chatChannelID);
         Bot.gameLogChannel = jda.getTextChannelById(logChannelID);
         Bot.whitelistChannel = jda.getTextChannelById(whitelistChannelID);
+
+        if (Bot.gameChatChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + chatChannelID + " does not exist!");
+        if (Bot.gameLogChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + logChannelID + " does not exist!");
+        if (Bot.whitelistChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + whitelistChannelID + " does not exist!");
 
         for (int i = 0; i < 10; i++) {
             Bot.tribeRole.add(jda.getRoleById(config.getLongList("tribeRoles").get(i)));
@@ -83,7 +90,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Reply success
             event.reply("Game chat channel set to " + Bot.gameChatChannel.getAsMention()).queue();
             // Update config
-            Dreamvisitor.getPlugin().getConfig().set("chatChannelID", Bot.gameChatChannel.getId());
+            Dreamvisitor.getPlugin().getConfig().set("chatChannelID", Bot.gameChatChannel.getIdLong());
 
         } else if (command.equals("setlogchat")) {
 
@@ -92,7 +99,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Reply success
             event.reply("Log chat channel set to " + Bot.gameLogChannel.getAsMention()).queue();
             // Update config
-            Dreamvisitor.getPlugin().getConfig().set("logChannelID", Bot.gameLogChannel.getId());
+            Dreamvisitor.getPlugin().getConfig().set("logChannelID", Bot.gameLogChannel.getIdLong());
 
         } else if (command.equals("setwhitelist")) {
 
@@ -101,7 +108,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Reply success
             event.reply("Whitelist channel set to " + Bot.whitelistChannel.getAsMention()).queue();
             // Update config
-            Dreamvisitor.getPlugin().getConfig().set("whitelistChannelID", Bot.whitelistChannel.getId());
+            Dreamvisitor.getPlugin().getConfig().set("whitelistChannelID", Bot.whitelistChannel.getIdLong());
 
         } else if (command.equals("setrole")) {
 
@@ -378,16 +385,6 @@ public class DiscCommandsManager extends ListenerAdapter {
                                 prop.store(output, null);
                                 event.getHook().editOriginal("Hash updated to " + newHash + "!").queue();
                                 Dreamvisitor.resourcePackHash = newHash;
-                                if (!Bukkit.getOnlinePlayers().isEmpty()) {
-                                    for (Player player : Bukkit.getOnlinePlayers()) {
-                                        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-
-                                        player.setResourcePack(Bukkit.getResourcePack(), HexFormat.of().parseHex(Dreamvisitor.resourcePackHash));
-                                        memory.resourcePackHash = Dreamvisitor.resourcePackHash;
-                                        PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
-                                    }
-                                }
-
                             }
                         } catch (IOException e) {
                             if (Dreamvisitor.debug) e.printStackTrace();

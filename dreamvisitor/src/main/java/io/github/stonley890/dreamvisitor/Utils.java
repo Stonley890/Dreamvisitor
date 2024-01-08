@@ -15,10 +15,14 @@ public class Utils {
      * @return a UUID as a string with hyphens.
      */
     @Contract(pure = true)
-    public static @NotNull String formatUuid(@NotNull String uuid) {
-        return uuid.replaceFirst(
+    public static @NotNull String formatUuid(@NotNull String uuid) throws NullPointerException {
+
+        String formattedUuid = uuid.replaceFirst(
                 "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
                 "$1-$2-$3-$4-$5");
+        return formattedUuid;
+
+
     }
 
     /**
@@ -42,9 +46,11 @@ public class Utils {
 
     public static @Nullable UUID getUUIDOfUsername(@NotNull String username) {
         Mojang mojang = new Mojang().connect();
+        String uuid = mojang.getUUIDOfUsername(username);
+        if (uuid == null) return null;
         try {
-            return UUID.fromString(formatUuid(mojang.getUUIDOfUsername(username)));
-        } catch (IllegalArgumentException e) {
+            return UUID.fromString(formatUuid(uuid));
+        } catch (IllegalArgumentException NullPointerException) {
             return null;
         }
     }

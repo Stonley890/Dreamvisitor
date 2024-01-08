@@ -35,15 +35,17 @@ public class CmdUser implements CommandExecutor {
 
                 String discordID;
                 String discordUsername = "N/A";
+                long discord = 0;
 
                 // Discord ID from AccountLink.yml
                 try {
-                    long discord = AccountLink.getDiscordId(uuid);
+                    discord = AccountLink.getDiscordId(uuid);
                     discordID = String.valueOf(discord);
+                    discordUsername = Bot.getJda().retrieveUserById(discord).complete().getName();
                 } catch (NullPointerException e) {
                     discordID = "N/A";
                     // Discord username from JDA
-                    discordUsername = Bot.getJda().retrieveUserById(discordID).complete().getName();
+
                 }
 
                 sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Local data for player " + username + ":" +

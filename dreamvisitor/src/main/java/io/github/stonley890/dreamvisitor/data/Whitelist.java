@@ -3,7 +3,11 @@ package io.github.stonley890.dreamvisitor.data;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.Utils;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -184,13 +188,35 @@ public class Whitelist {
                 // success message
                 Dreamvisitor.debug("Success.");
 
-                TextChannel systemChannel = Bot.gameLogChannel.getGuild().getSystemChannel();
-                if (systemChannel != null) systemChannel.sendMessage("Whitelisted `" + username + "` from web whitelist. Use **/unwhitelist <username>** to undo this action or **/toggleweb** to disable web whitelisting.").queue();
+                report(username, uuid, null);
 
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Report a whitelist to the system log channel.
+     * @param username the username that is being whitelisted.
+     * @param source the {@link User} (or {@code null} if by web) that caused this whitelist.
+     */
+    public static void report(String username, UUID uuid, User source) {
+
+        String sourceName = "web whitelist";
+        if (source != null) sourceName = source.getName();
+
+        TextChannel systemChannel = Bot.gameLogChannel.getGuild().getSystemChannel();
+        if (systemChannel != null) {
+            EmbedBuilder logEmbed = new EmbedBuilder();
+            logEmbed.setTitle("Whitelisted " + username + " from " + sourceName);
+
+            if (source != null) logEmbed.setDescription(source.getAsMention() + " added " + username + " to the whitelist with Dreamvisitor. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a different member.");
+            else logEmbed.setDescription("Added " + username + " to the whitelist via the web whitelist. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a Discord member.");
+
+            ActionRow buttons = ActionRow.of(Button.secondary("unwhitelist-" + uuid, "Unwhitelist"), Button.danger("ban-" + uuid, "Ban"));
+            systemChannel.sendMessageEmbeds(logEmbed.build()).setActionRows(buttons).queue();
+        }
     }
 
 }

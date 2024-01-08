@@ -41,7 +41,7 @@ public class Bot {
         // Try to create a bot
         debug("Attempting to create a bot...");
         try {
-            jda = JDABuilder.createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
+            jda = JDABuilder.createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                     .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER)
                     .build();
             debug("Bot created.");
@@ -80,7 +80,7 @@ public class Bot {
         if (!Dreamvisitor.botFailed && channel != null) {
 
             if (channel == gameLogChannel) {
-                if (!plugin.getConfig().getBoolean("log-console")) channel.sendMessage(message.replaceAll("_", "\\\\_")).queue();
+                if (!plugin.getConfig().getBoolean("log-console")) channel.sendMessage(message).queue();
             } else {
                 channel.sendMessage(message).queue();
             }

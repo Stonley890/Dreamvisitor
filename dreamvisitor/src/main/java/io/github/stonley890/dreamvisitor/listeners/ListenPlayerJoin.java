@@ -1,34 +1,19 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.data.PlayerMemory;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import org.bukkit.Bukkit;
+import io.github.stonley890.dreamvisitor.Bot;
+import io.github.stonley890.dreamvisitor.Utils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-
-import io.github.stonley890.dreamvisitor.Bot;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HexFormat;
 
 public class ListenPlayerJoin implements Listener {
     
     @EventHandler
     public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
 
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
-
-        // Prompt resource pack if hash has changed
-        if (memory.resourcePackHash == null || !memory.resourcePackHash.equals(Dreamvisitor.resourcePackHash)) {
-            event.getPlayer().setResourcePack(Bukkit.getResourcePack(), HexFormat.of().parseHex(Dreamvisitor.resourcePackHash));
-            memory.resourcePackHash = Dreamvisitor.resourcePackHash;
-            PlayerUtility.setPlayerMemory(event.getPlayer().getUniqueId(), memory);
-        }
-
         // Send join messages
-        String chatMessage = "**" + event.getPlayer().getName() + " joined the game**";
+        String chatMessage = "**" + Utils.escapeMarkdownFormatting(event.getPlayer().getName()) + " joined the game**";
         Bot.sendMessage(Bot.gameChatChannel, chatMessage);
         Bot.sendMessage(Bot.gameLogChannel, chatMessage);
 

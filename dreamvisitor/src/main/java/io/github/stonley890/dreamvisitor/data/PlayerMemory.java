@@ -19,7 +19,6 @@ public class PlayerMemory {
         fileConfig.set("creativeInv", creativeInv);
         fileConfig.set("autoinvswap", autoinvswap);
         fileConfig.set("autoRadio", autoRadio);
-        fileConfig.set("resourcePackHash", resourcePackHash);
 
         return fileConfig;
     }
@@ -39,8 +38,6 @@ public class PlayerMemory {
 
         memory.survivalInv = survivalInvList.toArray(ItemStack[]::new);
         memory.creativeInv = creativeInvList.toArray(ItemStack[]::new);
-
-        memory.resourcePackHash = fileConfig.getString("resourcePackHash");
 
         return memory;
     }
@@ -67,8 +64,4 @@ public class PlayerMemory {
     public boolean autoRadio;
     public ItemStack[] survivalInv;
     public ItemStack[] creativeInv;
-    /**
-     * The user's last resource pack hash
-     */
-    public String resourcePackHash;
 }

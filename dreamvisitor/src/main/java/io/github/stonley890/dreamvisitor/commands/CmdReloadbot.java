@@ -29,7 +29,7 @@ public class CmdReloadbot implements CommandExecutor {
         if (Dreamvisitor.botFailed) {
             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "The bot was unable to start.");
         } else {
-            DiscCommandsManager.initChannelsRoles();
+            DiscCommandsManager.initChannelsRoles(Dreamvisitor.getPlugin().getConfig());
             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.BLUE + "Dreamvisitor bot has been restarted.");
         }
 

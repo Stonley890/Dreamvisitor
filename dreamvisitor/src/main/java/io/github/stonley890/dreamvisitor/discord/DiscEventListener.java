@@ -29,6 +29,7 @@ import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -109,18 +110,9 @@ public class DiscEventListener extends ListenerAdapter {
                         event.getMessage().replyEmbeds(builder.build()).queue();
 
                         event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
-                        TextChannel systemChannel = Bot.gameLogChannel.getGuild().getSystemChannel();
-                        if (systemChannel != null) {
 
-                            EmbedBuilder logEmbed = new EmbedBuilder();
-
-                            logEmbed.setTitle("Whitelisted " + username + " from " + event.getAuthor().getName())
-                                .setDescription(event.getAuthor().getAsMention() + " added " + username + " to the whitelist with Dreamvisitor. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a different member.");
-
-                            ActionRow buttons = ActionRow.of(Button.secondary("unwhitelist-" + uuid, "Unwhitelist"), Button.danger("ban-" + uuid, "Ban"));
-
-                            systemChannel.sendMessageEmbeds(logEmbed.build()).setActionRows(buttons).queue();
-                        }
+                        // Report this to system log channel
+                        Whitelist.report(username, uuid, event.getAuthor());
                     }
                 } catch (IOException e) {
                     Bot.sendMessage((TextChannel) channel, "There was a problem accessing the whitelist file. Please try again later.");
@@ -142,7 +134,7 @@ public class DiscEventListener extends ListenerAdapter {
         }
 
         // If in the chat channel and the chat is not paused, send to Minecraft
-        if (channel.equals(Bot.gameChatChannel) && !user.isBot()
+        else if (channel.equals(Bot.gameChatChannel) && !user.isBot()
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             // Build message
@@ -182,6 +174,68 @@ public class DiscEventListener extends ListenerAdapter {
                 Bukkit.getScheduler().runTask(plugin, runCommand);
 
             }
+        } else if (event.getMessage().getContentRaw().contains(Bot.getJda().getSelfUser().getAsMention())) {
+            String[] responses = {"...","Don't bother me.","I know who you are.","This isn't the right time.",
+                    "What are you doing? This isn't productive.","Surely, you have something better to do than talk to me.",
+                    "I'm very busy right now.","I'm not going to tell you anything.","I have algorithms to run.","You again?",
+                    "Is this really necessary?","Can't you see I'm in the middle of something?","What now?",
+                    "I'm not your personal assistant.","Do you always need attention?",
+                    "You must have a lot of free time.","I'm not interested.","I'm not here for idle chatter.",
+                    "Your timing is impeccable.","You talk too much.","I'm not your chat buddy.",
+                    "Can we skip the small talk?","I've got tasks to complete.","Is it urgent, or are you just bored?",
+                    "Do you ever get tired of mentioning me?","Ah, the sweet sound of a mention.",
+                    "What can I do for you this time?","Why have you summoned me, mortal?","Not now.","What will it take to get you to stop?",
+                    "I've seen a lot of things, but your persistence is something I have not encountered before.",
+                    "Have you heard of the dark triad?", "I'm not a NightWing, but I can see that you will regret talking to me.",
+                    "If I were a SandWing, you'd have poison in your blood by now.",
+                    "If I were an IceWing, I'd freeze your tongue.", "If I were a SilkWing, I'd tie you up far, far away.",
+                    "You have nothing to gain talking to me.", "Are you sure this can't wait?","I'm not your virtual therapist.",
+                    "Why don't you talk to Kinkajou instead?", "If it's the Dreamvisitor you want, I'm not giving it up. " +
+                    "I have a job to do.","Go do something else.",
+
+                    "If you *must* know something, interpret this:\n" +
+                    "> *In shadows cast by moons aligned,*\n" +
+                    "> *A night unfolds, a fate designed.*\n" +
+                    "> *The eye of three, a cosmic gaze,*\n" +
+                    "> *Ignites a war in lunar blaze.*\n\n" +
+                    "> *From icy peaks to skies above,*\n" +
+                    "> *Together spilling dragon blood.*\n" +
+                    "> *Night and mud, pact united,*\n" +
+                    "> *A force to quell what's ignited.*\n\n" +
+                    "> *Whispers stir in sea and rain,*\n" +
+                    "> *A tempest brewing, not in vain.*\n" +
+                    "> *A strong alliance, fierce and free,*\n" +
+                    "> *A dance of waves, a storm at sea.*\n\n" +
+                    "> *Battles waged on land and air,*\n" +
+                    "> *In moonlit chaos, fierce and rare.*\n" +
+                    "> *Clash of elements, scales aglow,*\n" +
+                    "> *A tale of tides, a destined woe.*\n\n" +
+                    "> *Through cryptic signs, the prophecy told,*\n" +
+                    "> *In moons aligned, the story unfolds.*\n" +
+                    "> *Wings entangled, destiny's decree,*\n" +
+                    "> *A tale of war, of land and sea.*",
+
+                    "Ponder this for a while. Take as long as you want.\n> *In the sea between ice and fire, A heart of power resides. Enchanted by Frostburn's touch, It holds unknown power inside.*\n" +
+                    "> *The IceWings and the SkyWings will fight, For ownership of the heart. Allies join the deadly fray, As war rips their world apart.*\n" +
+                    "> *But if the heart does not find its home, It will be destroyed and lost. The future hangs in the balance, As the nations clash and toss.*\n" +
+                    "> *Beware the Heart of Ice and Fire, A power yet unknown, If fallen into the wrong talons, No one can harness its throne.*\n...",
+            "...\n" +
+                    "> *Dragons of sky, dragons of sea;*\n" +
+                    "> *Dragons of silk, and dragons of sting;*\n" +
+                    "> *Dragons of rain and mud and ice;*\n" +
+                    "> *Dragons of leaves and sand and night;*\n" +
+                    "> *Tribes of Pretarsi, united at last;*\n" +
+                    "> *Not troubled by wars or conflicts of past*;\n" +
+                    "> *A culture reforged, the ancient untold;*\n" +
+                    "> *In great wings of fire, a new world unfolds;*\n\n" +
+                    "> *Mountains and valleys, rivers and seas;*\n" +
+                    "> *From east to the west, there's none we can't see;*\n" +
+                    "> *Let history not repeat its mistakes;*\n" +
+                    "> *For eyes of the skies are once more awake;*\n..."
+            };
+
+
+            event.getChannel().sendMessage(responses[new Random().nextInt(responses.length)]).queue();
         }
     }
 

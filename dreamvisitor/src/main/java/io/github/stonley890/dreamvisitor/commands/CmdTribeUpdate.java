@@ -130,7 +130,7 @@ public class CmdTribeUpdate implements CommandExecutor {
 
             }
 
-            sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + targets.size() + " players.");
+            Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + targets.size() + " players."));
 
         });
 
