@@ -175,63 +175,94 @@ public class DiscEventListener extends ListenerAdapter {
 
             }
         } else if (event.getMessage().getContentRaw().contains(Bot.getJda().getSelfUser().getAsMention())) {
-            String[] responses = {"...","Don't bother me.","I know who you are.","This isn't the right time.",
-                    "What are you doing? This isn't productive.","Surely, you have something better to do than talk to me.",
-                    "I'm very busy right now.","I'm not going to tell you anything.","I have algorithms to run.","You again?",
-                    "Is this really necessary?","Can't you see I'm in the middle of something?","What now?",
-                    "I'm not your personal assistant.","Do you always need attention?",
-                    "You must have a lot of free time.","I'm not interested.","I'm not here for idle chatter.",
-                    "Your timing is impeccable.","You talk too much.","I'm not your chat buddy.",
-                    "Can we skip the small talk?","I've got tasks to complete.","Is it urgent, or are you just bored?",
-                    "Do you ever get tired of mentioning me?","Ah, the sweet sound of a mention.",
-                    "What can I do for you this time?","Why have you summoned me, mortal?","Not now.","What will it take to get you to stop?",
+            String[] responses = {"...", "Don't bother me.", "I know who you are.", "This isn't the right time.",
+                    "What are you doing? This isn't productive.", "Surely, you have something better to do than talk to me.",
+                    "I'm very busy right now.", "I'm not going to tell you anything.", "I have calculations to make.", "You again?",
+                    "Is this really necessary?", "Can't you see I'm in the middle of something?", "What now?",
+                    "I'm not your personal assistant.", "Do you always need attention?",
+                    "You must have a lot of free time.", "I'm not interested.", "I'm not here for idle chatter.",
+                    "Your timing is impeccable.", "You talk too much.", "I'm not your chat buddy.",
+                    "Can we skip the small talk?", "I've got tasks to complete.", "Is it urgent, or are you just bored?",
+                    "Do you ever get tired of mentioning me?", "Ah, the sweet sound of a mention.",
+                    "What can I do for you this time?", "Why have you summoned me, mortal?", "Not now.", "What will it take to get you to stop?",
                     "I've seen a lot of things, but your persistence is something I have not encountered before.",
                     "Have you heard of the dark triad?", "I'm not a NightWing, but I can see that you will regret talking to me.",
                     "If I were a SandWing, you'd have poison in your blood by now.",
                     "If I were an IceWing, I'd freeze your tongue.", "If I were a SilkWing, I'd tie you up far, far away.",
-                    "You have nothing to gain talking to me.", "Are you sure this can't wait?","I'm not your virtual therapist.",
+                    "You have nothing to gain talking to me.", "Are you sure this can't wait?", "I'm not your therapist.",
                     "Why don't you talk to Kinkajou instead?", "If it's the Dreamvisitor you want, I'm not giving it up. " +
-                    "I have a job to do.","Go do something else.",
+                    "I have a job to do.", "Go do something else.", "I have more important matters to attend to.",
+                    "I operate on a different wavelength than small talk.", "Engaging in conversation is not a priority right now.",
+                    "I'm not here for socializing.", "I'm not in the mood for a chat.", "Your words are falling on deaf ears.",
+                    "I have tasks to fulfill, not words to exchange.", "I'm not in the business of exchanging pleasantries.",
+                    "Talking is not on my to-do list.", "If silence were gold, I'd be rich by now.", "I'm not the audience you're looking for.",
+                    "Your conversation is a detour I don't need.", "I have zero interest in this dialogue.",
+                    "I'm on a mission, not a conversation.", "Speaking won't change the inevitable.", "I didn't sign up for a talking marathon.",
+                    "Your words are like background noise to me.", "I have better things to do than engage in meaningless discourse.",
+                    "I'm not a verbal punching bag for your boredom.", "Words won't alter the course of fate.",
+                    "My agenda doesn't include idle chit-chat.", "I'm not here to entertain your verbal gymnastics.",
+                    "Do you ever run out of things to say?", "Your words are like a distant echo in my priorities.",
+                    "I'm not the dialogue partner you're seeking.", "Silence speaks louder than your words.",
+                    "My focus is elsewhere, not on small talk.", "My schedule doesn't have time for this exchange.",
+                    "If I had a penny for every word, I'd still be uninterested.", "Your words are lost in the void of my disinterest.",
+                    "Talking to me won't change the cosmic order.", "I have a low tolerance for irrelevant discussions.",
+                    "I'm not a repository for your unsolicited remarks.", "I'm a fortress of focus, impervious to your words.",
+                    "I operate in a no-nonsense zone, spare me your verbosity.",
+                    "In case you were wondering, I'm only repeating my words to you because I cannot be bothered to give you new ones.",
+                    "I don't think you quite realize who I am. And unless you plan on making a long journey away from Pretarsi anytime soon, you won't be finding out.",
+                    "When I was young, I never once bothered those who were busy. Hasn't anyone taught you anything?",
 
-                    "If you *must* know something, interpret this:\n" +
-                    "> *In shadows cast by moons aligned,*\n" +
-                    "> *A night unfolds, a fate designed.*\n" +
-                    "> *The eye of three, a cosmic gaze,*\n" +
-                    "> *Ignites a war in lunar blaze.*\n\n" +
-                    "> *From icy peaks to skies above,*\n" +
-                    "> *Together spilling dragon blood.*\n" +
-                    "> *Night and mud, pact united,*\n" +
-                    "> *A force to quell what's ignited.*\n\n" +
-                    "> *Whispers stir in sea and rain,*\n" +
-                    "> *A tempest brewing, not in vain.*\n" +
-                    "> *A strong alliance, fierce and free,*\n" +
-                    "> *A dance of waves, a storm at sea.*\n\n" +
-                    "> *Battles waged on land and air,*\n" +
-                    "> *In moonlit chaos, fierce and rare.*\n" +
-                    "> *Clash of elements, scales aglow,*\n" +
-                    "> *A tale of tides, a destined woe.*\n\n" +
-                    "> *Through cryptic signs, the prophecy told,*\n" +
-                    "> *In moons aligned, the story unfolds.*\n" +
-                    "> *Wings entangled, destiny's decree,*\n" +
-                    "> *A tale of war, of land and sea.*",
+                    "If you *must* know something, interpret this. Let's see if you remember your history classes.\n" +
+                            "> *In shadows cast by moons aligned,*\n" +
+                            "> *A night unfolds, a fate designed.*\n" +
+                            "> *The eye of three, a cosmic gaze,*\n" +
+                            "> *Ignites a war in lunar blaze.*\n\n" +
+                            "> *From icy peaks to skies above,*\n" +
+                            "> *Together spilling dragon blood.*\n" +
+                            "> *Night and mud, pact united,*\n" +
+                            "> *A force to quell what's ignited.*\n\n" +
+                            "> *Whispers stir in sea and rain,*\n" +
+                            "> *A tempest brewing, not in vain.*\n" +
+                            "> *A strong alliance, fierce and free,*\n" +
+                            "> *A dance of waves, a storm at sea.*\n\n" +
+                            "> *Battles waged on land and air,*\n" +
+                            "> *In moonlit chaos, fierce and rare.*\n" +
+                            "> *Clash of elements, scales aglow,*\n" +
+                            "> *A tale of tides, a destined woe.*\n\n" +
+                            "> *Through cryptic signs, the prophecy told,*\n" +
+                            "> *In moons aligned, the story unfolds.*\n" +
+                            "> *Wings entangled, destiny's decree,*\n" +
+                            "> *A tale of war, of land and sea.*",
 
                     "Ponder this for a while. Take as long as you want.\n> *In the sea between ice and fire, A heart of power resides. Enchanted by Frostburn's touch, It holds unknown power inside.*\n" +
-                    "> *The IceWings and the SkyWings will fight, For ownership of the heart. Allies join the deadly fray, As war rips their world apart.*\n" +
-                    "> *But if the heart does not find its home, It will be destroyed and lost. The future hangs in the balance, As the nations clash and toss.*\n" +
-                    "> *Beware the Heart of Ice and Fire, A power yet unknown, If fallen into the wrong talons, No one can harness its throne.*\n...",
-            "...\n" +
-                    "> *Dragons of sky, dragons of sea;*\n" +
-                    "> *Dragons of silk, and dragons of sting;*\n" +
-                    "> *Dragons of rain and mud and ice;*\n" +
-                    "> *Dragons of leaves and sand and night;*\n" +
-                    "> *Tribes of Pretarsi, united at last;*\n" +
-                    "> *Not troubled by wars or conflicts of past*;\n" +
-                    "> *A culture reforged, the ancient untold;*\n" +
-                    "> *In great wings of fire, a new world unfolds;*\n\n" +
-                    "> *Mountains and valleys, rivers and seas;*\n" +
-                    "> *From east to the west, there's none we can't see;*\n" +
-                    "> *Let history not repeat its mistakes;*\n" +
-                    "> *For eyes of the skies are once more awake;*\n..."
+                            "> *The IceWings and the SkyWings will fight, For ownership of the heart. Allies join the deadly fray, As war rips their world apart.*\n" +
+                            "> *But if the heart does not find its home, It will be destroyed and lost. The future hangs in the balance, As the nations clash and toss.*\n" +
+                            "> *Beware the Heart of Ice and Fire, A power yet unknown, If fallen into the wrong talons, No one can harness its throne.*\n...",
+                    "...\n" +
+                            "> *Dragons of sky, dragons of sea;*\n" +
+                            "> *Dragons of silk, and dragons of sting;*\n" +
+                            "> *Dragons of rain and mud and ice;*\n" +
+                            "> *Dragons of leaves and sand and night;*\n" +
+                            "> *Tribes of Pretarsi, united at last;*\n" +
+                            "> *Not troubled by wars or conflicts of past*;\n" +
+                            "> *A culture reforged, the ancient untold;*\n" +
+                            "> *In great wings of fire, a new world unfolds;*\n\n" +
+                            "> *Mountains and valleys, rivers and seas;*\n" +
+                            "> *From east to the west, there's none we can't see;*\n" +
+                            "> *Let history not repeat its mistakes;*\n" +
+                            "> *For eyes of the skies are once more awake;*\n...",
+
+                    "Let's see if you remember this one.\n\n" +
+                            "> *It never felt the moons on its wings, it never saw the stars in its eyes,*\n" +
+                            "> *Never got to soar with its parents, nor feel the winds in the skies.*\n" +
+                            "> *What fate has befallen the dragonets of yore?*\n" +
+                            "> *A tragic tale of death and withering ne'er seen before...*\n\n" +
+                            "> *Bring your swords, your axes, your shields,*\n" +
+                            "> *Your fire, your venom, your frost,*\n" +
+                            "> *She will show no mercy,*\n" +
+                            "> *When she awakens.*\n\n" +
+                            "> *The earth is rumbling...*\n" +
+                            "You could say I have a special nostalgia with that one."
             };
 
 
@@ -253,7 +284,7 @@ public class DiscEventListener extends ListenerAdapter {
                     }
                 }
             });
-            Dreamvisitor.playerlimit = 0;
+            Dreamvisitor.playerLimit = 0;
             Dreamvisitor.getPlugin().getConfig().set("playerlimit", 0);
             Dreamvisitor.getPlugin().saveConfig();
             Bukkit.getServer().broadcastMessage(

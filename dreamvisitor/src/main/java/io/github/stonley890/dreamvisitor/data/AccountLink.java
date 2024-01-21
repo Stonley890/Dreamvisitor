@@ -21,57 +21,67 @@ public class AccountLink {
     static Map<UUID, Long> uuidToDiscordIdMap = new HashMap<>();
     static Map<Long, UUID> discordIdToUuidMap = new HashMap<>();
 
-    public static void init() {
-        // If file does not exist, create one
+    public static void init() throws IOException {
+        // If the file does not exist, create one
         if (!accountFile.exists()) {
             debug("accountLink.txt does not exist. Creating one now...");
-            try {
-                if (!accountFile.createNewFile()) {
-                    Bukkit.getLogger().warning("Unable to create accountLink.txt!");
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (!accountFile.createNewFile()) {
+                Bukkit.getLogger().warning("Unable to create accountLink.txt!");
             }
         }
         loadFromFile();
     }
 
-    private static void loadFromFile() {
+    private static void loadFromFile() throws IOException {
         debug("Loading accountLink.txt");
-        try (BufferedReader reader = new BufferedReader(new FileReader(accountFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(":");
-                if (parts.length == 2) {
-                    UUID uuid = UUID.fromString(Utils.formatUuid(parts[0]));
-                    long discordID = Long.parseLong(parts[1]);
-                    uuidToDiscordIdMap.put(uuid, discordID);
-                    discordIdToUuidMap.put(discordID, uuid);
-                }
+        BufferedReader reader = new BufferedReader(new FileReader(accountFile));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(":");
+            if (parts.length == 2) {
+                UUID uuid = UUID.fromString(Utils.formatUuid(parts[0]));
+                long discordID = Long.parseLong(parts[1]);
+                uuidToDiscordIdMap.put(uuid, discordID);
+                discordIdToUuidMap.put(discordID, uuid);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
     }
 
-    private static void saveFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(accountFile))) {
-            for (Map.Entry<UUID, Long> entry : uuidToDiscordIdMap.entrySet()) {
-                UUID uuid = entry.getKey();
-                long discordId = entry.getValue();
-                writer.write(uuid.toString().replaceAll("-","") + ":" + discordId);
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public static void saveFile() throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(accountFile));
+        for (Map.Entry<UUID, Long> entry : uuidToDiscordIdMap.entrySet()) {
+            UUID uuid = entry.getKey();
+            long discordId = entry.getValue();
+            writer.write(uuid.toString().replaceAll("-","") + ":" + discordId);
+            writer.newLine();
         }
     }
 
     public static void linkAccounts(@NotNull UUID minecraftUUID, @NotNull Long discordId) {
+
+        // remove existing values
+        for (UUID uuid : uuidToDiscordIdMap.keySet()) {
+            if (uuidToDiscordIdMap.get(uuid).equals(discordId)) {
+                uuidToDiscordIdMap.remove(uuid);
+            }
+        }
+        for (Long id : discordIdToUuidMap.keySet()) {
+            if (discordIdToUuidMap.get(id).equals(minecraftUUID)) {
+                discordIdToUuidMap.remove(discordId);
+            }
+        }
+
+        // set values
         uuidToDiscordIdMap.put(minecraftUUID, discordId);
         discordIdToUuidMap.put(discordId, minecraftUUID);
-        Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), AccountLink::saveFile);
+        Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
+            try {
+                AccountLink.saveFile();
+            } catch (IOException e) {
+                Bukkit.getLogger().severe("Unable to save accountLink.txt!");
+            }
+        });
     }
 
     /**

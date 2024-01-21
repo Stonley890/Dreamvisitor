@@ -36,7 +36,7 @@ public class CmdPanic implements CommandExecutor {
                     player.kickPlayer("Panic!");
                 }
             }
-            Dreamvisitor.playerlimit = 0;
+            Dreamvisitor.playerLimit = 0;
             plugin.getConfig().set("playerlimit", 0);
             plugin.saveConfig();
             Bukkit.getServer().broadcastMessage(

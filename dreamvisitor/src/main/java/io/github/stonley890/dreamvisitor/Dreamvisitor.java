@@ -10,7 +10,6 @@ import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.listeners.*;
-import net.dv8tion.jda.api.JDA;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -37,23 +36,23 @@ import java.util.logging.Level;
 @SuppressWarnings({ "null" })
 public class Dreamvisitor extends JavaPlugin {
 
+    // public
+    public static Dreamvisitor plugin;
     public static String MOTD = null;
     public final String VERSION = getDescription().getVersion();
     public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
-
-    public static Dreamvisitor plugin;
-    private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
-    private static ConsoleLogger appender;
     public static boolean chatPaused;
-    public static int playerlimit;
+    public static int playerLimit;
     public static Location hubLocation;
     public static String resourcePackHash;
-    public static boolean webWhitelist;
+    public static boolean webWhitelistEnabled;
     public static boolean debug;
     public static boolean restartScheduled;
     public static boolean botFailed = false;
 
-    JDA jda;
+    // private
+    private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
+    private static ConsoleLogger appender;
 
     @Override
     public void onEnable() {
@@ -101,6 +100,7 @@ public class Dreamvisitor extends JavaPlugin {
             Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
             Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
             Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
+            Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
 
             debug("Initializing tab completers...");
             // Initialize command tab completers
@@ -111,9 +111,12 @@ public class Dreamvisitor extends JavaPlugin {
 
             debug("Creating data folder...");
             // Create config if needed
-            getDataFolder().mkdir();
+            if (!getDataFolder().mkdir()) {
+                Bukkit.getLogger().warning("Dreamvisitor could not create a data folder!");
+            }
             saveDefaultConfig();
 
+            // Initialize account link
             debug("Initializing accountLink.txt");
             AccountLink.init();
 
@@ -123,7 +126,6 @@ public class Dreamvisitor extends JavaPlugin {
             // Bot
             debug("Starting Dreamvisitor bot...");
             Bot.startBot();
-            jda = Bot.getJda();
 
             if (!botFailed) {
                 // Get saved data
@@ -144,9 +146,9 @@ public class Dreamvisitor extends JavaPlugin {
 
             // Restore player limit override
             debug("Restoring player limit override...");
-            playerlimit = getConfig().getInt("playerlimit");
+            playerLimit = getConfig().getInt("playerlimit");
             getServer().getLogger().info(PREFIX +
-                    "Player limit override is currently set to " + playerlimit);
+                    "Player limit override is currently set to " + playerLimit);
             // getServer().setMaxPlayers(playerlimit);
 
             // Create item blacklist if empty
@@ -175,8 +177,8 @@ public class Dreamvisitor extends JavaPlugin {
             logger.addAppender(appender);
 
             // Set up web whitelist if enabled
-            webWhitelist = getConfig().getBoolean("web-whitelist");
-            if (webWhitelist) Whitelist.startWeb();
+            webWhitelistEnabled = getConfig().getBoolean("web-whitelist");
+            if (webWhitelistEnabled) Whitelist.startWeb();
 
             Runnable pushConsole = new BukkitRunnable() {
                 // Push console log to Discord every 2 seconds
@@ -301,6 +303,12 @@ public class Dreamvisitor extends JavaPlugin {
                 Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access?");
                 if (Dreamvisitor.debug) e.printStackTrace();
             }
+        }
+
+        try {
+            AccountLink.saveFile();
+        } catch (IOException e) {
+            Bukkit.getLogger().severe("Unable to save accountLink.txt!");
         }
 
         logger.removeAppender(appender);

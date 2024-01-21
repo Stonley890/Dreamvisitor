@@ -282,7 +282,7 @@ public class CmdDvset implements CommandExecutor {
             builder.append("\n\nPlayer Limit Override: ").color(ChatColor.WHITE)
                     .append("\nOverride server player limit. Set to -1 to use default.").color(ChatColor.DARK_AQUA)
                     .append("\n[").color(ChatColor.DARK_GRAY);
-            TextComponent value = intToggle(Dreamvisitor.playerlimit, true, "autoinvswap");
+            TextComponent value = intToggle(Dreamvisitor.playerLimit, true, "autoinvswap");
             value.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/playerlimit "));
             builder.append(value)
                     .append("").reset().append("]").color(ChatColor.DARK_GRAY).underlined(false);

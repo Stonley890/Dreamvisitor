@@ -28,7 +28,7 @@ public class CmdPlayerlimit implements CommandExecutor {
                     }
                 }
 
-                Dreamvisitor.playerlimit = result;
+                Dreamvisitor.playerLimit = result;
                 plugin.getConfig().set("playerlimit", result);
                 plugin.saveConfig();
 

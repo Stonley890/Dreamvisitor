@@ -1,6 +1,6 @@
 main: io.github.stonley890.dreamvisitor.Dreamvisitor
 name: Dreamvisitor
-version: 2.9.4
+version: 2.9.5
 api-version: 1.20
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -95,6 +95,10 @@ commands:
     description: Sync time across worlds.
     usage: /<command> [world name]
     permission: dreamvisitor.synctime
+  sandbox:
+    description: Manage creative mod sandboxing.
+    usage: /<command> [player] [on|off]
+    permission: dreamvisitor.sandbox
 
 permissions:
   
@@ -171,4 +175,7 @@ permissions:
     default: op
   dreamvisitor.synctime:
     description: Allows the synctime command.
+    default: op
+  dreamvisitor.sandbox:
+    description: Allows for sandbox management.
     default: op

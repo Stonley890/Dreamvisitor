@@ -41,19 +41,25 @@ public class Bot {
         // Try to create a bot
         debug("Attempting to create a bot...");
         try {
+
             jda = JDABuilder.createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                     .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER)
                     .build();
             debug("Bot created.");
+
         } catch (LoginException e) {
+
             Bukkit.getLogger().severe(
                     "BOT LOGIN FAILED: You need a valid bot token in dreamvisitor/config.yml. Dreamvisitor will not work properly unless there is a valid bot token.");
             Dreamvisitor.botFailed = true;
+
         } catch (ErrorResponseException e) {
+
             if (e.getErrorCode() == -1) {
                 Bukkit.getLogger().severe("BOT LOGIN FAILED: Dreamvisitor is unable to connect to the Discord server. Dreamvisitor functionality will not work properly.");
                 Dreamvisitor.botFailed = true;
             }
+
         }
 
         if (!Dreamvisitor.botFailed) {
@@ -63,7 +69,7 @@ public class Bot {
             try {
                 jda.awaitReady();
                 debug("Bot is ready.");
-                
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();

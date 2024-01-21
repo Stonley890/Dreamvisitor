@@ -179,7 +179,7 @@ public class DiscCommandsManager extends ListenerAdapter {
                             isAreForm = "is";
                         }
                         // Send list
-                        event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Dreamvisitor.playerlimit + " " + playerForm + " online:** `" + list + "`")
+                        event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Dreamvisitor.playerLimit + " " + playerForm + " online:** `" + list + "`")
                                 .queue();
                     }
 
@@ -434,17 +434,17 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         } else if (command.equals("toggleweb")) {
 
-            if (!Dreamvisitor.webWhitelist) {
+            if (!Dreamvisitor.webWhitelistEnabled) {
                 Whitelist.startWeb();
-                Dreamvisitor.webWhitelist = true;
+                Dreamvisitor.webWhitelistEnabled = true;
                 event.reply("Web whitelist enabled.").queue();
             } else {
                 Whitelist.stopWeb();
-                Dreamvisitor.webWhitelist = false;
+                Dreamvisitor.webWhitelistEnabled = false;
                 event.reply("Web whitelist disabled.").queue();
             }
 
-            Dreamvisitor.getPlugin().getConfig().set("web-whitelist", Dreamvisitor.webWhitelist);
+            Dreamvisitor.getPlugin().getConfig().set("web-whitelist", Dreamvisitor.webWhitelistEnabled);
 
         } else if (command.equals("schedulerestart")) {
 

@@ -19,6 +19,7 @@ public class PlayerMemory {
         fileConfig.set("creativeInv", creativeInv);
         fileConfig.set("autoinvswap", autoinvswap);
         fileConfig.set("autoRadio", autoRadio);
+        fileConfig.set("sandbox", sandbox);
 
         return fileConfig;
     }
@@ -38,6 +39,8 @@ public class PlayerMemory {
 
         memory.survivalInv = survivalInvList.toArray(ItemStack[]::new);
         memory.creativeInv = creativeInvList.toArray(ItemStack[]::new);
+
+        memory.sandbox = fileConfig.getBoolean("sandbox");
 
         return memory;
     }
@@ -64,4 +67,5 @@ public class PlayerMemory {
     public boolean autoRadio;
     public ItemStack[] survivalInv;
     public ItemStack[] creativeInv;
+    public boolean sandbox;
 }

@@ -48,14 +48,14 @@ public class ListenPlayerLogin implements Listener {
             // Always deny non-whitelisted
             event.disallow(Result.KICK_WHITELIST, "You are not whitelisted.");
 
-        } else if (Dreamvisitor.playerlimit != -1) {
+        } else if (Dreamvisitor.playerLimit != -1) {
             // If player limit has been overridden
 
             // If server is full
-            if (Bukkit.getOnlinePlayers().size() >= Dreamvisitor.playerlimit) {
+            if (Bukkit.getOnlinePlayers().size() >= Dreamvisitor.playerLimit) {
 
                 // Kick for server full
-                event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + Dreamvisitor.playerlimit);
+                event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + Dreamvisitor.playerLimit);
 
             } else if (plugin.getConfig().getBoolean("softwhitelist")) {
                 
