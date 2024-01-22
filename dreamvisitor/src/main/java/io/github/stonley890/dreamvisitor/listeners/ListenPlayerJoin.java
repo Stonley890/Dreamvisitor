@@ -5,6 +5,7 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.Utils;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,10 +26,15 @@ public class ListenPlayerJoin implements Listener {
         PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
 
         if (memory.sandbox) {
+            boolean sandboxerOnline = false;
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer() + " is currently in sandbox mode.");
+                    sandboxerOnline = true;
+                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer().getName() + " is currently in sandbox mode.");
                 }
+            }
+            if (!sandboxerOnline) {
+                Sandbox.disableSandbox(event.getPlayer());
             }
         }
 

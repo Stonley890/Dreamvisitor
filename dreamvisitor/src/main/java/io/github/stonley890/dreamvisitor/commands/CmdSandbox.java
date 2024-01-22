@@ -48,7 +48,7 @@ public class CmdSandbox implements CommandExecutor {
                 messageBuilder.append("[").color(ChatColor.WHITE)
                         .append(player.getName()).color(ChatColor.YELLOW)
                         .event(tooltop).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sandbox " + player.getName() + " off"))
-                        .append("] ").color(ChatColor.YELLOW);
+                        .append("] ").color(ChatColor.WHITE).event((ClickEvent) null);
             }
 
             sender.spigot().sendMessage(messageBuilder.create());
@@ -88,7 +88,7 @@ public class CmdSandbox implements CommandExecutor {
                 // Toggle
                 targetedPlayers.forEach(player -> {
                     if (PlayerUtility.getPlayerMemory(player.getUniqueId()).sandbox) Sandbox.disableSandbox(player);
-                    else Sandbox.disableSandbox(player);
+                    else Sandbox.enableSandbox(player);
                 });
                 sender.sendMessage(Dreamvisitor.PREFIX + "Toggled sandbox mode for " + targetedPlayers.size() + " players.");
             }

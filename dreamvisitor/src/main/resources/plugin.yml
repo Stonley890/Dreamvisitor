@@ -96,7 +96,7 @@ commands:
     usage: /<command> [world name]
     permission: dreamvisitor.synctime
   sandbox:
-    description: Manage creative mod sandboxing.
+    description: Manage Creative Mode sandboxing.
     usage: /<command> [player] [on|off]
     permission: dreamvisitor.sandbox
 

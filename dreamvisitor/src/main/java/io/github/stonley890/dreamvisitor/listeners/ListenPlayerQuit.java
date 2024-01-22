@@ -47,18 +47,36 @@ public class ListenPlayerQuit implements Listener {
             if (Dreamvisitor.debug) e.printStackTrace();
         }
 
-        // Check for sandboxed players
-        boolean moderatorOnline = false;
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                moderatorOnline = true;
-                break;
+        Dreamvisitor.debug("Checking sandbox.");
+
+        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
+
+            Dreamvisitor.debug("Task start.");
+
+            // Check for sandboxed players
+            boolean moderatorOnline = false;
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                Dreamvisitor.debug("Is " + onlinePlayer.getName() + " moderator?");
+                if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
+                    Dreamvisitor.debug("Yes! ALl good.");
+                    moderatorOnline = true;
+                    break;
+                }
             }
-        }
-        if (!moderatorOnline) {
-            Sandbox.disableSandbox(player);
-            player.sendMessage("There are no sandbox managers available.");
-        }
+            if (!moderatorOnline) {
+                Dreamvisitor.debug("No mods online! Gotta disable sandboxed.");
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    Dreamvisitor.debug("Is " + onlinePlayer + " sandboxed?");
+                    if (PlayerUtility.getPlayerMemory(onlinePlayer.getUniqueId()).sandbox) {
+                        Dreamvisitor.debug("Yes. Disabling.");
+                        Sandbox.disableSandbox(onlinePlayer);
+                        onlinePlayer.sendMessage("There are no sandbox managers available.");
+                    }
+                }
+            }
+        });
+
+
 
     }
 

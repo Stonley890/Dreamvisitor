@@ -9,6 +9,7 @@ import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
@@ -75,6 +76,7 @@ public class Dreamvisitor extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new ListenInventoryClose(), this);
             getServer().getPluginManager().registerEvents(new ListenPlayerGameModeChange(), this);
             getServer().getPluginManager().registerEvents(new ListenServerPing(), this);
+            getServer().getPluginManager().registerEvents(new Sandbox(), this);
 
             debug("Initializing command executors...");
             // Initialize command executors
@@ -101,6 +103,7 @@ public class Dreamvisitor extends JavaPlugin {
             Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
             Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
             Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
+            Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
 
             debug("Initializing tab completers...");
             // Initialize command tab completers

@@ -13,10 +13,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Sandbox implements Listener {
 
@@ -77,7 +79,7 @@ public class Sandbox implements Listener {
         Player player = event.getPlayer();
         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
         if (memory.sandbox && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            if (event.getClickedBlock() instanceof Container || (event.getItem() != null && event.getItem().getItemMeta() instanceof SpawnEggMeta))
+            if (Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Container || (event.getItem() != null && event.getItem().getItemMeta() instanceof SpawnEggMeta))
                 event.setCancelled(true);
         }
     }

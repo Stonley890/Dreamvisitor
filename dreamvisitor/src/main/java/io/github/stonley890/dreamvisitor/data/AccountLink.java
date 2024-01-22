@@ -49,13 +49,19 @@ public class AccountLink {
     }
 
     public static void saveFile() throws IOException {
+        Dreamvisitor.debug("Saving...");
         BufferedWriter writer = new BufferedWriter(new FileWriter(accountFile));
         for (Map.Entry<UUID, Long> entry : uuidToDiscordIdMap.entrySet()) {
             UUID uuid = entry.getKey();
+            Dreamvisitor.debug("UUID for this entry: " + uuid.toString());
             long discordId = entry.getValue();
+            Dreamvisitor.debug("Discord ID for this entry: " + discordId);
+
             writer.write(uuid.toString().replaceAll("-","") + ":" + discordId);
             writer.newLine();
+            Dreamvisitor.debug("Line written");
         }
+        writer.close();
     }
 
     public static void linkAccounts(@NotNull UUID minecraftUUID, @NotNull Long discordId) {
