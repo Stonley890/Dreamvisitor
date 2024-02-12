@@ -261,7 +261,9 @@ public class DiscCommandsManager extends ListenerAdapter {
             assert message != null;
             if (message.length() < 351) {
                 // Send message
-                Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.BLUE + message);
+                Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
+                    Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.BLUE + message);
+                });
 
                 EmbedBuilder builder = new EmbedBuilder();
 

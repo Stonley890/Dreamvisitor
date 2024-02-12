@@ -236,6 +236,15 @@ public class Dreamvisitor extends JavaPlugin {
 
                     // also check for missing channels
                     if (Bot.gameLogChannel == null || Bot.gameChatChannel == null || Bot.whitelistChannel == null) DiscCommandsManager.initChannelsRoles(getConfig());
+
+                    // also check if memory usage is high and schedule restart
+                    long maxMemory = Runtime.getRuntime().maxMemory();
+                    long freeMemory = Runtime.getRuntime().freeMemory();
+                    double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
+                    if (freeMemoryPercent <= 10) {
+                        restartScheduled = true;
+                        Bukkit.getLogger().info("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
+                    }
                 }
             };
 
