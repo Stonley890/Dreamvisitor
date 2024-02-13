@@ -99,6 +99,10 @@ commands:
     description: Manage Creative Mode sandboxing.
     usage: /<command> [player] [on|off]
     permission: dreamvisitor.sandbox
+  moonglobe:
+    description: Manage moon globes.
+    usage: /<command> [subcommand]
+    permission: dreamvisitor.moonglobes
 
 permissions:
   
@@ -178,4 +182,7 @@ permissions:
     default: op
   dreamvisitor.sandbox:
     description: Allows for sandbox management.
+    default: op
+  dreamvisitor.moonglobes:
+    description: Allows using the moonglobes command.
     default: op

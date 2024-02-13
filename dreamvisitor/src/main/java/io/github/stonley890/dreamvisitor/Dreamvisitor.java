@@ -9,6 +9,7 @@ import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.functions.Moonglobe;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import org.apache.logging.log4j.LogManager;
@@ -104,6 +105,7 @@ public class Dreamvisitor extends JavaPlugin {
             Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
             Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
             Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
+            Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
 
             debug("Initializing tab completers...");
             // Initialize command tab completers
@@ -238,6 +240,15 @@ public class Dreamvisitor extends JavaPlugin {
                     if (Bot.gameLogChannel == null || Bot.gameChatChannel == null || Bot.whitelistChannel == null) DiscCommandsManager.initChannelsRoles(getConfig());
                 }
             };
+
+            Runnable tick = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Moonglobe.tick();
+                }
+            };
+
+            Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 
             if (!botFailed) {
                 // Push console every two seconds
