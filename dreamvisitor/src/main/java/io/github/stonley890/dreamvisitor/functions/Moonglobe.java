@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
@@ -28,9 +27,9 @@ public class Moonglobe {
     public static final List<Moonglobe> activeMoonglobes = new ArrayList<>();
     private final static double momentumMultiplier = 0.1;
 
-    private UUID player = null;
+    private UUID player;
     private final Location origin;
-    private Location currentLocation = null;
+    private Location currentLocation;
     private final double allowedDistance;
     private boolean shown = false;
     private ItemDisplay glowEntity = null;
@@ -75,7 +74,10 @@ public class Moonglobe {
 
                     Block oldBlock = activeMoonglobe.currentLocation.getBlock();
                     Block newBlock = newLocation.getBlock();
-                    
+
+                    if (oldBlock.getType().equals(Material.LIGHT)) oldBlock.setType(Material.AIR);
+                    if (newBlock.getType().equals(Material.AIR)) oldBlock.setType(Material.LIGHT);
+
                 }
 
                 activeMoonglobe.currentLocation = newLocation;
@@ -102,6 +104,8 @@ public class Moonglobe {
     }
 
     private void hideGlobe() {
+
+        if (currentLocation.getBlock().getType().equals(Material.LIGHT)) currentLocation.getBlock().setType(Material.AIR);
         glowEntity.remove();
         shown = false;
     }
