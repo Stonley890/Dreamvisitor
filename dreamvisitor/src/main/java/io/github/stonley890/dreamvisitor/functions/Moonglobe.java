@@ -70,7 +70,7 @@ public class Moonglobe {
 
                 Location newLocation = activeMoonglobe.currentLocation.add(momentum);
 
-                if (!Objects.equals(activeMoonglobe.currentLocation.getBlock(), newLocation.getBlock())) {
+                if (!Objects.equals(activeMoonglobe.currentLocation, newLocation)) {
 
                     Block oldBlock = activeMoonglobe.currentLocation.getBlock();
                     Block newBlock = newLocation.getBlock();
@@ -109,5 +109,7 @@ public class Moonglobe {
         glowEntity.remove();
         shown = false;
     }
+
+    public UUID getPlayer() {return player;}
 
 }
