@@ -118,4 +118,6 @@ public class Moonglobe {
         shown = false;
     }
 
+    public UUID getPlayer() { return player; }
+
 }
