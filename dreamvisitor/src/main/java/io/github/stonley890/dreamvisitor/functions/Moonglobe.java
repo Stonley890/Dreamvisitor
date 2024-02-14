@@ -68,21 +68,29 @@ public class Moonglobe {
                 Vector posDifference = targetPosition.subtract(activeMoonglobe.currentLocation).toVector();
                 Vector momentum = posDifference.multiply(momentumMultiplier);
 
-                Location newLocation = activeMoonglobe.currentLocation.add(momentum);
+                Location newLocation = activeMoonglobe.currentLocation.clone().add(momentum);
 
-                if (!Objects.equals(activeMoonglobe.currentLocation.getBlock(), newLocation.getBlock())) {
+                Dreamvisitor.debug("OLD LOC: " + activeMoonglobe.currentLocation.getX() + activeMoonglobe.currentLocation.getY() + activeMoonglobe.currentLocation.getZ() + "NEW LOC: " + newLocation.getX() + newLocation.getY() + newLocation.getZ());
 
-                    Block oldBlock = activeMoonglobe.currentLocation.getBlock();
-                    Block newBlock = newLocation.getBlock();
+                Block oldBlock = activeMoonglobe.currentLocation.getBlock();
+                Block newBlock = newLocation.getBlock();
 
-                    if (oldBlock.getType().equals(Material.LIGHT)) oldBlock.setType(Material.AIR);
-                    if (newBlock.getType().equals(Material.AIR)) oldBlock.setType(Material.LIGHT);
+                boolean sameBlock = Objects.deepEquals(newBlock.getLocation(), oldBlock.getLocation());
 
+                Dreamvisitor.debug("OLD BLOCK: " + oldBlock.getX() + oldBlock.getY() + oldBlock.getZ() + "NEW BLOCK: " + newBlock.getX() + newBlock.getY() + newBlock.getZ());
+
+                if (!sameBlock) {
+                    if (newBlock.getType().equals(Material.AIR)) {
+                        newBlock.setType(Material.LIGHT);
+                        Dreamvisitor.debug("Changed from air to light: " + newBlock.getX() + " " + newBlock.getY() + " " + newBlock.getZ() + " ");
+                    }
+                    if (oldBlock.getType().equals(Material.LIGHT)) {
+                        oldBlock.setType(Material.AIR);
+                        Dreamvisitor.debug("Changed form light to air: " + oldBlock.getX() + " " + oldBlock.getY() + " " + oldBlock.getZ() + " ");
+                    }
                 }
 
                 activeMoonglobe.currentLocation = newLocation;
-
-                Dreamvisitor.debug("GLOW MOMENTUM: " + momentum.getX() + momentum.getY() + momentum.getZ());
 
                 activeMoonglobe.glowEntity.teleport(activeMoonglobe.currentLocation);
 
