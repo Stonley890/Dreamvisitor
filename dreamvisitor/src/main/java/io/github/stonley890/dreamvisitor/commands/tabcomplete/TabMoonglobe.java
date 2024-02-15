@@ -30,9 +30,7 @@ public class TabMoonglobe implements TabCompleter {
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     suggestions.add(onlinePlayer.getName());
                 }
-            }
-
-            if (args[0].equals("create")) {
+            } else if (args[0].equals("create")) {
                 suggestions.add("@a");
                 suggestions.add("@e");
                 suggestions.add("@p");

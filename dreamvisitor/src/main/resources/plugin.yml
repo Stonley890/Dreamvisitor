@@ -101,7 +101,7 @@ commands:
     permission: dreamvisitor.sandbox
   moonglobe:
     description: Manage moon globes.
-    usage: /<command> [remove | create [<x> <y> <z> [max-distance]]]
+    usage: /<command> [remove | create <targets> [<x> <y> <z> [max-distance]]]
     permission: dreamvisitor.moonglobes
 
 permissions:

@@ -25,17 +25,17 @@ import java.util.UUID;
 public class Moonglobe {
 
     public static final List<Moonglobe> activeMoonglobes = new ArrayList<>();
-    private final static double momentumMultiplier = 0.1;
+    private final static float momentumMultiplier = 0.1f;
 
     private UUID player;
     private final Location origin;
     private Location currentLocation;
-    private final double allowedDistance;
+    private final float allowedDistance;
     private boolean shown = false;
     private ItemDisplay glowEntity = null;
 
 
-    public Moonglobe(@NotNull UUID owner, @NotNull Location originLocation, double allowedOriginDistance) {
+    public Moonglobe(@NotNull UUID owner, @NotNull Location originLocation, float allowedOriginDistance) {
 
         player = owner;
         origin = originLocation;
