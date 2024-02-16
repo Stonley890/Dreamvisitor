@@ -1,14 +1,12 @@
 package io.github.stonley890.dreamvisitor;
 
 import io.github.stonley890.dreamvisitor.commands.*;
-import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabHub;
-import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabPauseBypass;
-import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabSoftWhitelist;
-import io.github.stonley890.dreamvisitor.commands.tabcomplete.TabTribeUpdate;
+import io.github.stonley890.dreamvisitor.commands.tabcomplete.*;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.functions.Moonglobe;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import org.apache.logging.log4j.LogManager;
@@ -104,6 +102,7 @@ public class Dreamvisitor extends JavaPlugin {
             Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
             Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
             Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
+            Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
 
             debug("Initializing tab completers...");
             // Initialize command tab completers
@@ -111,6 +110,7 @@ public class Dreamvisitor extends JavaPlugin {
             Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
             Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
             Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
+            Objects.requireNonNull(getCommand("moonglobe")).setTabCompleter(new TabMoonglobe());
 
             debug("Creating data folder...");
             // Create config if needed
@@ -248,6 +248,15 @@ public class Dreamvisitor extends JavaPlugin {
                 }
             };
 
+            Runnable tick = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Moonglobe.tick();
+                }
+            };
+
+            Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
+
             if (!botFailed) {
                 // Push console every two seconds
                 Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
@@ -305,6 +314,11 @@ public class Dreamvisitor extends JavaPlugin {
             if (requestsCanceled > 0) getLogger().info(requestsCanceled + " queued bot requests were canceled for shutdown.");
             Bot.gameLogChannel.sendMessage("*Server has been shut down.*").complete();
             Bot.getJda().shutdownNow();
+        }
+
+        // remove moon globes
+        for (Moonglobe moonglobe : Moonglobe.activeMoonglobes) {
+            moonglobe.remove(null);
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
