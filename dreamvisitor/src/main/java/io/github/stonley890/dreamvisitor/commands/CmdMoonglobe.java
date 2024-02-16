@@ -49,6 +49,7 @@ public class CmdMoonglobe implements CommandExecutor {
 
         } else if (args[0].equals("create")) create(sender, args);
         else if (args[0].equals("remove")) remove(sender, args);
+        else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments! /moonglobe [remove | create <targets> [<x> <y> <z> [max-distance]]]");
 
         return true;
     }
@@ -144,6 +145,8 @@ public class CmdMoonglobe implements CommandExecutor {
             if (!alreadyHasGlobe) new Moonglobe(player.getUniqueId(), location, maxDistance);
         }
 
+        sender.sendMessage(Dreamvisitor.PREFIX + "Created moon globes for " + players.size() + " players.");
+
     }
 
     @Contract(pure = true)
@@ -173,6 +176,8 @@ public class CmdMoonglobe implements CommandExecutor {
                 if (Objects.equals(activeMoonglobe.getPlayer(), player.getUniqueId())) activeMoonglobe.remove(null);
             }
         }
+
+        sender.sendMessage(Dreamvisitor.PREFIX + "Removed moon globes of " + players.size() + " players.");
 
     }
 }
