@@ -33,6 +33,7 @@ public class Moonglobe {
     private final float allowedDistance;
     private boolean shown = false;
     private ItemDisplay glowEntity = null;
+    private boolean remove = false;
 
 
     public Moonglobe(@NotNull UUID owner, @NotNull Location originLocation, float allowedOriginDistance) {
@@ -47,9 +48,9 @@ public class Moonglobe {
     }
 
     public void remove(@Nullable String reason) {
-        activeMoonglobes.remove(this);
+        remove = true;
 
-        if (shown) glowEntity.remove();
+        hideGlobe();
 
         Player onlinePlayer = Bukkit.getPlayer(player);
         if (onlinePlayer != null && reason != null) onlinePlayer.sendMessage(ChatColor.RED + "You moon globe was removed: " + reason);
@@ -58,6 +59,11 @@ public class Moonglobe {
 
     public static void tick() {
         for (Moonglobe activeMoonglobe : activeMoonglobes) {
+
+            if (activeMoonglobe.remove) {
+                activeMoonglobes.remove(activeMoonglobe);
+                continue;
+            }
 
             Player onlinePlayer = Bukkit.getPlayer(activeMoonglobe.player);
             if (onlinePlayer != null) {
@@ -70,14 +76,10 @@ public class Moonglobe {
 
                 Location newLocation = activeMoonglobe.currentLocation.clone().add(momentum);
 
-                Dreamvisitor.debug("OLD LOC: " + activeMoonglobe.currentLocation.getX() + activeMoonglobe.currentLocation.getY() + activeMoonglobe.currentLocation.getZ() + "NEW LOC: " + newLocation.getX() + newLocation.getY() + newLocation.getZ());
-
                 Block oldBlock = activeMoonglobe.currentLocation.getBlock();
                 Block newBlock = newLocation.getBlock();
 
                 boolean sameBlock = Objects.deepEquals(newBlock.getLocation(), oldBlock.getLocation());
-
-                Dreamvisitor.debug("OLD BLOCK: " + oldBlock.getX() + oldBlock.getY() + oldBlock.getZ() + "NEW BLOCK: " + newBlock.getX() + newBlock.getY() + newBlock.getZ());
 
                 if (!sameBlock) {
                     if (newBlock.getType().equals(Material.AIR)) {
