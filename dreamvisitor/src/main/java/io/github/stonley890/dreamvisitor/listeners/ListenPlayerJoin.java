@@ -1,8 +1,7 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.Utils;
+import io.github.stonley890.dreamvisitor.Main;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
@@ -19,7 +18,7 @@ public class ListenPlayerJoin implements Listener {
     public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
 
         // Send join messages
-        String chatMessage = "**" + Utils.escapeMarkdownFormatting(event.getPlayer().getName()) + " joined the game**";
+        String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + " joined the game**";
         Bot.sendMessage(Bot.gameChatChannel, chatMessage);
         Bot.sendMessage(Bot.gameLogChannel, chatMessage);
 
@@ -30,7 +29,7 @@ public class ListenPlayerJoin implements Listener {
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
                     sandboxerOnline = true;
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer().getName() + " is currently in sandbox mode.");
+                    onlinePlayer.sendMessage(Main.PREFIX + event.getPlayer().getName() + " is currently in sandbox mode.");
                 }
             }
             if (!sandboxerOnline) {

@@ -6,6 +6,7 @@ import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.functions.ItemBanList;
 import io.github.stonley890.dreamvisitor.functions.Moonglobe;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import io.github.stonley890.dreamvisitor.listeners.*;
@@ -33,10 +34,10 @@ import java.util.logging.Level;
 */
 
 @SuppressWarnings({ "null" })
-public class Dreamvisitor extends JavaPlugin {
+public class Main extends JavaPlugin {
 
     // public
-    public static Dreamvisitor plugin;
+    public static Main PLUGIN;
     public static String MOTD = null;
     public final String VERSION = getDescription().getVersion();
     public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
@@ -45,8 +46,8 @@ public class Dreamvisitor extends JavaPlugin {
     public static Location hubLocation;
     public static String resourcePackHash;
     public static boolean webWhitelistEnabled;
-    public static boolean debug;
-    public static boolean restartScheduled;
+    public static boolean debugMode;
+    public static boolean restartScheduled = false;
     public static boolean botFailed = false;
 
     // private
@@ -54,67 +55,28 @@ public class Dreamvisitor extends JavaPlugin {
     private static ConsoleLogger appender;
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onEnable() {
 
         try {
             // Initialize variables
-            plugin = this;
+            PLUGIN = this;
 
-            debug = getConfig().getBoolean("debug");
+            debugMode = getConfig().getBoolean("debug");
 
             debug("Registering listeners...");
-            // Register listeners
-            getServer().getPluginManager().registerEvents(new ListenEntityDamage(), this);
-            getServer().getPluginManager().registerEvents(new ListenPlayerChat(), this);
-            getServer().getPluginManager().registerEvents(new ListenPlayerCmdPreprocess(), this);
-            getServer().getPluginManager().registerEvents(new ListenPlayerDeath(), this);
-            getServer().getPluginManager().registerEvents(new ListenPlayerJoin(), this);
-            getServer().getPluginManager().registerEvents(new ListenPlayerLogin(), this);
-            getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
-            getServer().getPluginManager().registerEvents(new ListenInventoryClose(), this);
-            getServer().getPluginManager().registerEvents(new ListenPlayerGameModeChange(), this);
-            getServer().getPluginManager().registerEvents(new ListenServerPing(), this);
-            getServer().getPluginManager().registerEvents(new Sandbox(), this);
+            registerListeners();
 
             debug("Initializing command executors...");
-            // Initialize command executors
-            Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdRadio());
-            Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
-            Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
-            Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
-            Objects.requireNonNull(getCommand("pausebypass")).setExecutor(new CmdPauseBypass());
-            Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
-            Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
-            Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
-            Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
-            Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
-            Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdRadio());
-            Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
-            Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
-            Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBlacklist());
-            Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
-            Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
-            Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
-            Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
-            Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
-            Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
-            Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
-            Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
-            Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
-            Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
-            Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
+            registerCommands();
 
             debug("Initializing tab completers...");
-            // Initialize command tab completers
-            Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
-            Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
-            Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
-            Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
-            Objects.requireNonNull(getCommand("moonglobe")).setTabCompleter(new TabMoonglobe());
+            registerTabCompletion();
 
             debug("Creating data folder...");
             // Create config if needed
-            if (!getDataFolder().mkdir()) {
+            boolean directoryCreated = getDataFolder().mkdir();
+            if (!directoryCreated) {
                 Bukkit.getLogger().warning("Dreamvisitor could not create a data folder!");
             }
             saveDefaultConfig();
@@ -152,26 +114,25 @@ public class Dreamvisitor extends JavaPlugin {
             playerLimit = getConfig().getInt("playerlimit");
             getServer().getLogger().info(PREFIX +
                     "Player limit override is currently set to " + playerLimit);
-            // getServer().setMaxPlayers(playerlimit);
 
-            // Create item blacklist if empty
-            debug("Restoring item blacklist...");
-            if (plugin.getConfig().get("itemBlacklist") != null ) {
-                ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) plugin.getConfig().get("itemBlacklist");
+            // Create item banlist if empty
+            debug("Restoring item banlist...");
+            if (PLUGIN.getConfig().get("itemBlacklist") != null ) {
+                ArrayList<ItemStack> itemList = (ArrayList<ItemStack>) PLUGIN.getConfig().getList("itemBlacklist");
                 if (itemList != null) {
-                    debug("Item blacklist is null. Creating an empty blacklist...");
-                    CmdItemBlacklist.badItems = itemList.toArray(new ItemStack[0]);
+                    debug("Item banlist is null. Creating an empty banlist...");
+                    ItemBanList.badItems = itemList.toArray(new ItemStack[0]);
                 }
             }
 
             // Get resource pack hash
             debug("Getting resource pack hash...");
-            try (InputStream input = Files.newInputStream(Paths.get("server.properties"))) {
-                java.util.Properties prop = new java.util.Properties();
-                prop.load(input);
-                resourcePackHash = prop.getProperty("resource-pack-sha1");
+            try (InputStream serverProperties = Files.newInputStream(Paths.get("server.properties"))) {
+                java.util.Properties properties = new java.util.Properties();
+                properties.load(serverProperties);
+                resourcePackHash = properties.getProperty("resource-pack-sha1");
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException();
             }
 
             // Console logging
@@ -187,39 +148,35 @@ public class Dreamvisitor extends JavaPlugin {
                 // Push console log to Discord every 2 seconds
                 @Override
                 public void run() {
-                    if (Dreamvisitor.getPlugin().getConfig().getBoolean("log-console")) {
+                    if (Main.getPlugin().getConfig().getBoolean("log-console")) {
 
-                        // If there are messages in the queue, send them!
-                        if (ConsoleLogger.messageBuilder != null && !ConsoleLogger.messageBuilder.isEmpty()) {
+                        // If there are no messages in the queue, return
+                        if (ConsoleLogger.messageBuilder == null || ConsoleLogger.messageBuilder.isEmpty()) return;
 
-                            Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString()).queue();
-                            ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length());
+                        Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString()).queue(); // send message
+                        ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length()); // delete queued messages
 
-                            // If there are overflow messages, build and send those too
-                            if (ConsoleLogger.overFlowMessages != null && !ConsoleLogger.overFlowMessages.isEmpty()) {
+                        // If there are no overflow messages, return
+                        if (ConsoleLogger.overFlowMessages == null || ConsoleLogger.overFlowMessages.isEmpty()) return;
 
-                                StringBuilder overFlowMessageBuilder = new StringBuilder();
-                                // First is safe, so add now
-                                overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(0));
+                        StringBuilder overFlowMessageBuilder = new StringBuilder();
+                        // First is safe, so add now
+                        overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(0));
 
-                                // For each message in overflow
-                                for (int i = 1; i < ConsoleLogger.overFlowMessages.size(); i++) {
+                        // For each message in overflow
+                        for (int i = 1; i < ConsoleLogger.overFlowMessages.size(); i++) {
 
-                                    // Check that it fits
-                                    if (overFlowMessageBuilder.length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length() >= 2000) {
-                                        // if not, queue current message and clear string builder
-                                        Bot.gameLogChannel.sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\_")).queue();
-                                        overFlowMessageBuilder = new StringBuilder();
+                            // Check that it fits
+                            if (overFlowMessageBuilder.length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length() >= 2000) {
+                                // if not, queue current message and clear string builder
+                                Bot.gameLogChannel.sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\\\_")).queue();
+                                overFlowMessageBuilder = new StringBuilder();
 
-                                    } else {
-                                        overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(i)).append("\n");
-                                    }
-                                }
-
-                                ConsoleLogger.overFlowMessages.clear();
-
-                            }
+                            } else overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(i)).append("\n");
                         }
+
+                        ConsoleLogger.overFlowMessages.clear();
+
                     }
                 }
             };
@@ -257,10 +214,8 @@ public class Dreamvisitor extends JavaPlugin {
 
             Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 
-            if (!botFailed) {
-                // Push console every two seconds
-                Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
-            }
+            // Push console every two seconds
+            if (!botFailed) Bukkit.getScheduler().runTaskTimer(this,pushConsole,0,40);
 
             // Check for scheduled restart every minute
             Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
@@ -269,7 +224,6 @@ public class Dreamvisitor extends JavaPlugin {
         } catch (Exception e) {
 
             Bukkit.getLogger().severe("Dreamvisitor was unable to start :(\nPlease notify Bog with the following stack trace:");
-            e.printStackTrace();
 
             if (!botFailed) {
                 // Send startup crashes.
@@ -282,20 +236,72 @@ public class Dreamvisitor extends JavaPlugin {
                 }
 
                 Bot.getJda().retrieveUserById(505833634134228992L).complete().openPrivateChannel().complete().sendMessage(builder.toString()).complete();
-                Bukkit.getPluginManager().disablePlugin(this);
             }
+
+            Bukkit.getPluginManager().disablePlugin(this);
+            throw new RuntimeException();
 
         }
 
 
     }
 
-    public static Dreamvisitor getPlugin() {
-        return plugin;
+    private void registerListeners() {
+        getServer().getPluginManager().registerEvents(new ListenEntityDamage(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerChat(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerCmdPreprocess(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerDeath(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerJoin(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerLogin(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
+        getServer().getPluginManager().registerEvents(new ItemBanList(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerGameModeChange(), this);
+        getServer().getPluginManager().registerEvents(new ListenServerPing(), this);
+        getServer().getPluginManager().registerEvents(new Sandbox(), this);
     }
 
-    public static @NotNull String getPlayerPath(UUID uuid) {
-        return plugin.getDataFolder().getAbsolutePath() + "/player/" + uuid + ".yml";
+    private void registerCommands() {
+        Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdRadio());
+        Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
+        Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
+        Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
+        Objects.requireNonNull(getCommand("pausebypass")).setExecutor(new CmdPauseBypass());
+        Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
+        Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
+        Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
+        Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
+        Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
+        Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdRadio());
+        Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
+        Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
+        Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBanList());
+        Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
+        Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
+        Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
+        Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
+        Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
+        Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
+        Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
+        Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
+        Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
+        Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
+        Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
+    }
+
+    private void registerTabCompletion() {
+        Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
+        Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
+        Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
+        Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
+        Objects.requireNonNull(getCommand("moonglobe")).setTabCompleter(new TabMoonglobe());
+    }
+
+    public static Main getPlugin() {
+        return PLUGIN;
+    }
+
+    public static @NotNull String getPlayerPath(@NotNull UUID uuid) {
+        return PLUGIN.getDataFolder().getAbsolutePath() + "/player/" + uuid + ".yml";
     }
 
     public static void debug(String message) {
@@ -327,7 +333,7 @@ public class Dreamvisitor extends JavaPlugin {
                 PlayerUtility.clearPlayerMemory(player.getUniqueId());
             } catch (IOException e) {
                 Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access?");
-                if (Dreamvisitor.debug) e.printStackTrace();
+                if (Main.debugMode) throw new RuntimeException();
             }
         }
 

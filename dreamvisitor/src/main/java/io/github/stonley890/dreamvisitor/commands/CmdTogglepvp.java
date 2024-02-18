@@ -6,12 +6,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdTogglepvp implements CommandExecutor {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
     String pvpDisabled = "disablepvp";
 
     @Override

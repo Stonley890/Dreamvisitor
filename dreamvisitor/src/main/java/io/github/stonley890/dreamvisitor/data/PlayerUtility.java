@@ -6,10 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.shanerx.mojang.Mojang;
 
 public class PlayerUtility {
     private static final Map<String, PlayerMemory> MEMORY_MAP = new HashMap<>();
@@ -25,7 +28,7 @@ public class PlayerUtility {
      * @return The {@link PlayerMemory} of the given player.
      */
     private static @NotNull PlayerMemory fetchPlayerMemory(@NotNull UUID uuid) {
-        File file = new File(Dreamvisitor.getPlayerPath(uuid));
+        File file = new File(Main.getPlayerPath(uuid));
         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
         return PlayerMemory.getFromFileConfig(fileConfig);
     }
@@ -37,7 +40,7 @@ public class PlayerUtility {
     public static void savePlayerMemory(@NotNull UUID uuid) throws IOException {
         if(MEMORY_MAP.containsKey(uuid.toString())) {
             PlayerMemory memory = getPlayerMemory(uuid);
-            memory.toFileConfig().save(Dreamvisitor.getPlayerPath(uuid));
+            memory.toFileConfig().save(Main.getPlayerPath(uuid));
         }
     }
 
@@ -71,5 +74,39 @@ public class PlayerUtility {
      */
     public static void setPlayerMemory(@NotNull UUID uuid, @NotNull PlayerMemory memory) {
         MEMORY_MAP.put(uuid.toString(), memory);
+    }
+
+    /**
+     * Adds the hyphens back into a String UUID.
+     * @param uuid the UUID as a {@link String} without hyphens.
+     * @return a UUID as a string with hyphens.
+     */
+    @Contract(pure = true)
+    public static @NotNull String formatUuid(@NotNull String uuid) throws NullPointerException {
+
+        return uuid.replaceFirst(
+                "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+                "$1-$2-$3-$4-$5");
+    }
+
+    public static String getUsernameOfUuid(@NotNull UUID uuid) {
+        Mojang mojang = new Mojang().connect();
+        return mojang.getPlayerProfile(uuid.toString()).getUsername();
+    }
+
+    public static String getUsernameOfUuid(@NotNull String uuid) {
+        Mojang mojang = new Mojang().connect();
+        return mojang.getPlayerProfile(uuid).getUsername();
+    }
+
+    public static @Nullable UUID getUUIDOfUsername(@NotNull String username) {
+        Mojang mojang = new Mojang().connect();
+        String uuid = mojang.getUUIDOfUsername(username);
+        if (uuid == null) return null;
+        try {
+            return UUID.fromString(formatUuid(uuid));
+        } catch (IllegalArgumentException NullPointerException) {
+            return null;
+        }
     }
 }

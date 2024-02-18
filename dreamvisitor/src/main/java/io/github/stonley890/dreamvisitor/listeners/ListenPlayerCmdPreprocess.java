@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import io.github.stonley890.dreamvisitor.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -15,17 +14,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import net.md_5.bungee.api.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerCmdPreprocess implements Listener {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
     String[] msgAliases = {"/msg ","/tell ","/whisper ","/reply ","/t ","/w ","/r ", "/mail send "};
 
     @EventHandler
-    @SuppressWarnings({ "unchecked"})
     public void onPlayerCommandPreprocess(@NotNull PlayerCommandPreprocessEvent event) {
 
         String cmd = event.getMessage();
@@ -35,7 +33,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
         if ((cmd.startsWith("/me " ) || cmd.startsWith("/rp" )) && !event.isCancelled()) {
 
             // IF chatPaused stop /me unless bypassing
-            if (Dreamvisitor.chatPaused) {
+            if (Main.chatPaused) {
 
                 // Init bypassed players file
                 File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
@@ -47,7 +45,6 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     fileConfig.load(file);
                 } catch (IOException | InvalidConfigurationException e1) {
                     Bukkit.getLogger().warning("Could not load 'pauseBypass.yml' file! Restart to reinitialize.");
-                    if (Dreamvisitor.debug) e1.printStackTrace();
                 }
 
                 // Remember bypassed players
@@ -59,7 +56,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     int spaceIndex = cmd.indexOf(' ');
                     if (spaceIndex == -1) return;
                     String action = cmd.substring(spaceIndex + 1);
-                    String message = "**[" + Utils.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
+                    String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
                             + ")**]** " + ChatColor.stripColor(action);
                     // Send message
                     Bot.sendMessage(Bot.gameChatChannel, message);
@@ -76,7 +73,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 int spaceIndex = cmd.indexOf(' ');
                 if (spaceIndex == -1) return;
                 String action = cmd.substring(spaceIndex + 1);
-                String message = "**[" + Utils.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
+                String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
                         + ")**]** " + ChatColor.stripColor(action);
                 // Send message
                 Bot.sendMessage(Bot.gameChatChannel, message);
@@ -92,7 +89,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
             }
 
             if (isMsg) {
-                String message = "**" + Utils.escapeMarkdownFormatting(player.getName()) + "** sent command: `" + cmd + "`";
+                String message = "**" + Bot.escapeMarkdownFormatting(player.getName()) + "** sent command: `" + cmd + "`";
                 Bot.sendMessage(Bot.gameLogChannel, message);
             }
         }

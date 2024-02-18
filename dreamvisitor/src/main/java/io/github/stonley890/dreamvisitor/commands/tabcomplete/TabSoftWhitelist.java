@@ -1,11 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands.tabcomplete;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import io.github.stonley890.dreamvisitor.Utils;
+import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -14,13 +10,15 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.shanerx.mojang.Mojang;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class TabSoftWhitelist implements TabCompleter {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
@@ -49,8 +47,6 @@ public class TabSoftWhitelist implements TabCompleter {
 
                 //pausebypass remove <player>
 
-                Mojang mojang = new Mojang().connect();
-
                 // Load pauseBypass.yml
                 File file = new File(plugin.getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
                 FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
@@ -59,8 +55,8 @@ public class TabSoftWhitelist implements TabCompleter {
                 if (file.exists() && fileConfig.get("players") != null) {
 
                     // Get names and add them to tab suggestions
-                    for (String player : ((List<String>) Objects.requireNonNull(fileConfig.get("players")))) {
-                        suggestions.add(Utils.getUsernameOfUuid(player));
+                    for (String player : (Objects.requireNonNull(fileConfig.getStringList("players")))) {
+                        suggestions.add(PlayerUtility.getUsernameOfUuid(player));
                     }
 
                 }

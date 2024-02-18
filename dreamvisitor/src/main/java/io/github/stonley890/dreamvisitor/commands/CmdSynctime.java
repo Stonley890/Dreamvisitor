@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -17,14 +17,14 @@ public class CmdSynctime implements CommandExecutor {
         if (args.length == 0) {
             if (sender instanceof Player player) {
                 for (World world : Bukkit.getWorlds()) world.setFullTime(player.getWorld().getFullTime());
-                sender.sendMessage(Dreamvisitor.PREFIX + "Set all worlds to match " + player.getWorld().getName() + ": " + player.getWorld().getFullTime());
+                sender.sendMessage(Main.PREFIX + "Set all worlds to match " + player.getWorld().getName() + ": " + player.getWorld().getFullTime());
             } else {
                 for (World world : Bukkit.getWorlds()) world.setFullTime(Bukkit.getWorlds().get(0).getFullTime());
-                sender.sendMessage(Dreamvisitor.PREFIX + "Set all worlds to match " + Bukkit.getWorlds().get(0).getName() + ": " + Bukkit.getWorlds().get(0).getFullTime());
+                sender.sendMessage(Main.PREFIX + "Set all worlds to match " + Bukkit.getWorlds().get(0).getName() + ": " + Bukkit.getWorlds().get(0).getFullTime());
             }
         } else {
             World world = Bukkit.getWorld(args[0]);
-            if (world == null) sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid world name!");
+            if (world == null) sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid world name!");
             else {
                 for (World worlds : Bukkit.getWorlds()) worlds.setFullTime(world.getFullTime());
             }

@@ -7,23 +7,23 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdSethub implements CommandExecutor {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (sender instanceof Player player) {
-            Dreamvisitor.hubLocation = player.getLocation().getBlock().getLocation()
+            Main.hubLocation = player.getLocation().getBlock().getLocation()
                     .add(new Location(player.getLocation().getWorld(), 0.5, 0, 0.5));
-                    plugin.getConfig().set("hubLocation", Dreamvisitor.hubLocation);
+                    plugin.getConfig().set("hubLocation", Main.hubLocation);
                     plugin.saveConfig();
-            player.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Hub location set.");
+            player.sendMessage(Main.PREFIX + ChatColor.WHITE + "Hub location set.");
         } else {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be executed by a player!");
+            sender.sendMessage(Main.PREFIX + ChatColor.RED + "This command must be executed by a player!");
         }
         return true;
     }

@@ -1,15 +1,12 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.data.PlayerMemory;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.Main;
 import io.github.stonley890.dreamvisitor.functions.InvSwap;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdInvSwap implements CommandExecutor {
@@ -21,7 +18,7 @@ public class CmdInvSwap implements CommandExecutor {
             InvSwap.swapInventories(player);
 
         } else {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be run by a player!");
+            sender.sendMessage(Main.PREFIX + ChatColor.RED + "This command must be run by a player!");
         }
 
         return true;

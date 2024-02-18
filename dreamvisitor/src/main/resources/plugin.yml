@@ -1,6 +1,6 @@
-main: io.github.stonley890.dreamvisitor.Dreamvisitor
+main: io.github.stonley890.dreamvisitor.Main
 name: Dreamvisitor
-version: 2.11.0
+version: '${project.version}'
 api-version: 1.20
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -63,10 +63,10 @@ commands:
     description: Kicks all players and sets the player limit override to 0. You must run the command twice within 3 seconds to initiate the panic.
     usage: /<command>
     permission: dreamvisitor.panic
-  itemblacklist:
-    description: Access the item blacklist GUI. Items added to the blacklist will be removed from player inventories.
+  itembanlist:
+    description: Access the item ban list GUI. Items added to the blacklist will be removed from player inventories.
     usage: /<command>
-    permission: dreamvisitor.itemblacklist
+    permission: dreamvisitor.itembanlist
   user:
     description: Get the details of a player, even if they are offline.
     usage: /<command> <username>
@@ -153,7 +153,7 @@ permissions:
   dreamvisitor.panic:
     description: Allows the panic command.
     default: op
-  dreamvisitor.itemblacklist:
+  dreamvisitor.itembanlist:
     description: Allows the itemblacklist command.
     default: op
   dreamvisitor.user:

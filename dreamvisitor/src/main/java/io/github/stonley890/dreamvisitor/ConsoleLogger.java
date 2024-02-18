@@ -1,12 +1,9 @@
 package io.github.stonley890.dreamvisitor;
 
-import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,13 +15,8 @@ public class ConsoleLogger extends AbstractAppender {
     public static List<String> overFlowMessages = new ArrayList<>();
 
     public ConsoleLogger() {
-        // do your calculations here before starting to capture
         super("MyLogAppender", null, null, false, null);
         start();
-    }
-
-    protected ConsoleLogger(String name, Filter filter, Layout<? extends Serializable> layout) {
-        super(name, filter, layout, false, null);
     }
 
     @Override
@@ -46,7 +38,7 @@ public class ConsoleLogger extends AbstractAppender {
 
         // Remove Minecraft formatting codes
         message = message.replaceAll("\u001B?(\\W1B)?\\[([0-9,;]+)m", "");
-        message = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " " + event.getLevel().toString() + "] " + Utils.escapeMarkdownFormatting(message);
+        message = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " " + event.getLevel().toString() + "] " + Bot.escapeMarkdownFormatting(message);
 
         // Truncate messages over 2000 characters
         if (message.length() >= 2000) {

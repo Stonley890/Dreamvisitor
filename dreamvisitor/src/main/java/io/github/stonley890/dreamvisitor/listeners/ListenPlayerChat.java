@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import io.github.stonley890.dreamvisitor.Utils;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
@@ -17,15 +16,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerChat implements Listener {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
     
     @EventHandler
-    @SuppressWarnings({"unchecked","null"})
+    @SuppressWarnings({"null"})
     public void onPlayerChatEvent(@NotNull AsyncPlayerChatEvent event) {
 
         if (event.getPlayer().hasPermission("dreamvisitor.set.autoradio")) {
@@ -33,7 +32,7 @@ public class ListenPlayerChat implements Listener {
 
             if (memory.autoRadio) {
                 event.setCancelled(true);
-                Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Bukkit.dispatchCommand(event.getPlayer(), "radio " + event.getMessage()));
+                Bukkit.getScheduler().runTask(Main.getPlugin(), () -> Bukkit.dispatchCommand(event.getPlayer(), "radio " + event.getMessage()));
                 return;
             }
         }
@@ -44,9 +43,9 @@ public class ListenPlayerChat implements Listener {
         operator, send message
         */
 
-        String chatMessage = "**" + Utils.escapeMarkdownFormatting(event.getPlayer().getName()) + "**: " + event.getMessage();
+        String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + "**: " + event.getMessage();
 
-        if (Dreamvisitor.chatPaused && !event.isCancelled()) {
+        if (Main.chatPaused && !event.isCancelled()) {
 
             // Load pauseBypass file
             File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
@@ -56,8 +55,7 @@ public class ListenPlayerChat implements Listener {
 			// Load file
             try {
                 fileConfig.load(file);
-            } catch (IOException | InvalidConfigurationException e1) {
-                e1.printStackTrace();
+            } catch (IOException | InvalidConfigurationException ignored) {
             }
 
 			// Fetch bypassed players

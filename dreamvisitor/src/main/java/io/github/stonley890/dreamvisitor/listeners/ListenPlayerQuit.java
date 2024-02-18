@@ -1,7 +1,6 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.Utils;
+import io.github.stonley890.dreamvisitor.Main;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import org.bukkit.Bukkit;
@@ -25,7 +24,7 @@ public class ListenPlayerQuit implements Listener {
         Player player = event.getPlayer();
 
         // Send player quits to Discord
-        String chatMessage = "**" + Utils.escapeMarkdownFormatting(player.getName()) + " left the game**";
+        String chatMessage = "**" + Bot.escapeMarkdownFormatting(player.getName()) + " left the game**";
         Bot.sendMessage(Bot.gameChatChannel, chatMessage);
         Bot.sendMessage(Bot.gameLogChannel, chatMessage);
 
@@ -34,7 +33,7 @@ public class ListenPlayerQuit implements Listener {
         if (memory.sandbox) {
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer() + " left while in sandbox mode.");
+                    onlinePlayer.sendMessage(Main.PREFIX + event.getPlayer() + " left while in sandbox mode.");
                 }
             }
         }
@@ -44,31 +43,30 @@ public class ListenPlayerQuit implements Listener {
             PlayerUtility.clearPlayerMemory(player.getUniqueId());
         } catch (IOException e) {
             Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access? Player memory will remain in memory.");
-            if (Dreamvisitor.debug) e.printStackTrace();
         }
 
-        Dreamvisitor.debug("Checking sandbox.");
+        Main.debug("Checking sandbox.");
 
-        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
+        Bukkit.getScheduler().runTask(Main.getPlugin(), () -> {
 
-            Dreamvisitor.debug("Task start.");
+            Main.debug("Task start.");
 
             // Check for sandboxed players
             boolean moderatorOnline = false;
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                Dreamvisitor.debug("Is " + onlinePlayer.getName() + " moderator?");
+                Main.debug("Is " + onlinePlayer.getName() + " moderator?");
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    Dreamvisitor.debug("Yes! ALl good.");
+                    Main.debug("Yes! ALl good.");
                     moderatorOnline = true;
                     break;
                 }
             }
             if (!moderatorOnline) {
-                Dreamvisitor.debug("No mods online! Gotta disable sandboxed.");
+                Main.debug("No mods online! Gotta disable sandboxed.");
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                    Dreamvisitor.debug("Is " + onlinePlayer + " sandboxed?");
+                    Main.debug("Is " + onlinePlayer + " sandboxed?");
                     if (PlayerUtility.getPlayerMemory(onlinePlayer.getUniqueId()).sandbox) {
-                        Dreamvisitor.debug("Yes. Disabling.");
+                        Main.debug("Yes. Disabling.");
                         Sandbox.disableSandbox(onlinePlayer);
                         onlinePlayer.sendMessage("There are no sandbox managers available.");
                     }

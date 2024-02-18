@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands.tabcomplete;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.Utils;
+import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public class TabPauseBypass implements TabCompleter {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
@@ -53,8 +53,8 @@ public class TabPauseBypass implements TabCompleter {
                 if (file.exists() && fileConfig.get("players") != null) {
 
                     // Get names and add them to tab suggestions
-                    for (String player : ((List<String>) Objects.requireNonNull(fileConfig.get("players")))) {
-                        suggestions.add(Utils.getUsernameOfUuid(player));
+                    for (String player : (Objects.requireNonNull(fileConfig.getStringList("players")))) {
+                        suggestions.add(PlayerUtility.getUsernameOfUuid(player));
                     }
 
                 }

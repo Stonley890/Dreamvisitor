@@ -15,12 +15,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerLogin implements Listener {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
 
     @EventHandler
     public void onPlayerLoginEvent(@NotNull PlayerLoginEvent event) {
@@ -32,8 +32,8 @@ public class ListenPlayerLogin implements Listener {
             // Always allow ops
 
             // Remind bot login failure to ops
-            if (Dreamvisitor.botFailed && player.isOp()) {
-                player.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED +
+            if (Main.botFailed && player.isOp()) {
+                player.sendMessage(Main.PREFIX + ChatColor.RED +
                         "Bot login failed on server start! You may need a new login token.");
             }
             event.allow();
@@ -48,14 +48,14 @@ public class ListenPlayerLogin implements Listener {
             // Always deny non-whitelisted
             event.disallow(Result.KICK_WHITELIST, "You are not whitelisted.");
 
-        } else if (Dreamvisitor.playerLimit != -1) {
+        } else if (Main.playerLimit != -1) {
             // If player limit has been overridden
 
             // If server is full
-            if (Bukkit.getOnlinePlayers().size() >= Dreamvisitor.playerLimit) {
+            if (Bukkit.getOnlinePlayers().size() >= Main.playerLimit) {
 
                 // Kick for server full
-                event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + Dreamvisitor.playerLimit);
+                event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + Main.playerLimit);
 
             } else if (plugin.getConfig().getBoolean("softwhitelist")) {
                 
@@ -92,13 +92,14 @@ public class ListenPlayerLogin implements Listener {
         try {
             fileConfig.load(file);
         } catch (IOException | InvalidConfigurationException e1) {
-            e1.printStackTrace();
+            throw new RuntimeException();
         }
 
         // Fetch soft-whitelisted players
         List<String> whitelistedPlayers = (List<String>) fileConfig.get("players");
 
         // If a player is on soft whitelist, allow. If not, kick player.
+        assert whitelistedPlayers != null;
         if ((whitelistedPlayers.contains(player.getUniqueId().toString()))) {
             event.allow();
 

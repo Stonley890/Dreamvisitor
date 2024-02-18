@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.Utils;
+import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Moonglobe;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -31,13 +31,13 @@ public class CmdMoonglobe implements CommandExecutor {
         if (args.length == 0) {
 
             int activeMoonGlobeCount = Moonglobe.activeMoonglobes.size();
-            sender.sendMessage(Dreamvisitor.PREFIX + "Number of active moon globes: " + activeMoonGlobeCount);
+            sender.sendMessage(Main.PREFIX + "Number of active moon globes: " + activeMoonGlobeCount);
 
             if (activeMoonGlobeCount != 0) {
                 ComponentBuilder message = new ComponentBuilder("Existing moon globes:\n");
                 for (Moonglobe moonglobe : Moonglobe.activeMoonglobes) {
 
-                    String playerName = Utils.getUsernameOfUuid(moonglobe.getPlayer());
+                    String playerName = PlayerUtility.getUsernameOfUuid(moonglobe.getPlayer());
 
                     message.append("[ ").color(ChatColor.GRAY)
                             .append(playerName).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to remove"))).event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/dreamvisitor:moonglobe remove " + playerName)).color(ChatColor.YELLOW)
@@ -49,7 +49,7 @@ public class CmdMoonglobe implements CommandExecutor {
 
         } else if (args[0].equals("create")) create(sender, args);
         else if (args[0].equals("remove")) remove(sender, args);
-        else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments! /moonglobe [remove | create <targets> [<x> <y> <z> [max-distance]]]");
+        else sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments! /moonglobe [remove | create <targets> [<x> <y> <z> [max-distance]]]");
 
         return true;
     }
@@ -58,7 +58,7 @@ public class CmdMoonglobe implements CommandExecutor {
     private static void create(CommandSender sender, String @NotNull [] args) {
 
         if (args.length < 2) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must specify at least one player!");
+            sender.sendMessage(Main.PREFIX + ChatColor.RED + "You must specify at least one player!");
             return;
         }
 
@@ -71,7 +71,7 @@ public class CmdMoonglobe implements CommandExecutor {
         for (Entity entity : entities) {
             if (entity instanceof Player player) players.add(player);
             else {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You cannot specify non-players!");
+                sender.sendMessage(Main.PREFIX + ChatColor.RED + "You cannot specify non-players!");
                 return;
             }
         }
@@ -90,7 +90,7 @@ public class CmdMoonglobe implements CommandExecutor {
 
         if (args.length > 2) {
             if (args.length < 5) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Incomplete arguments! /moonglobe create <targets> [<x> <y> <z> [max-distance]]");
+                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Incomplete arguments! /moonglobe create <targets> [<x> <y> <z> [max-distance]]");
                 return;
             }
             // Get location
@@ -103,7 +103,7 @@ public class CmdMoonglobe implements CommandExecutor {
                 y = Double.parseDouble(yString);
                 z = Double.parseDouble(zString);
             } catch (NumberFormatException e) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Error parsing double.");
+                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Error parsing double.");
             }
 
 
@@ -118,7 +118,7 @@ public class CmdMoonglobe implements CommandExecutor {
                 z = block.getBlock().getZ();
             }
             else {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must specify a location!");
+                sender.sendMessage(Main.PREFIX + ChatColor.RED + "You must specify a location!");
                 return;
             }
         }
@@ -133,7 +133,7 @@ public class CmdMoonglobe implements CommandExecutor {
             try {
                 maxDistance = Float.parseFloat(maxDistanceString);
             } catch (NumberFormatException e) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Error parsing float.");
+                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Error parsing float.");
             }
         }
 
@@ -145,7 +145,7 @@ public class CmdMoonglobe implements CommandExecutor {
             if (!alreadyHasGlobe) new Moonglobe(player.getUniqueId(), location, maxDistance);
         }
 
-        sender.sendMessage(Dreamvisitor.PREFIX + "Created moon globes for " + players.size() + " players.");
+        sender.sendMessage(Main.PREFIX + "Created moon globes for " + players.size() + " players.");
 
     }
 
@@ -153,7 +153,7 @@ public class CmdMoonglobe implements CommandExecutor {
     private static void remove(CommandSender sender, String @NotNull [] args) {
 
         if (args.length < 2) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must specify at least one player!");
+            sender.sendMessage(Main.PREFIX + ChatColor.RED + "You must specify at least one player!");
             return;
         }
 
@@ -166,7 +166,7 @@ public class CmdMoonglobe implements CommandExecutor {
         for (Entity entity : entities) {
             if (entity instanceof Player player) players.add(player);
             else {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You cannot specify non-players!");
+                sender.sendMessage(Main.PREFIX + ChatColor.RED + "You cannot specify non-players!");
                 return;
             }
         }
@@ -177,7 +177,7 @@ public class CmdMoonglobe implements CommandExecutor {
             }
         }
 
-        sender.sendMessage(Dreamvisitor.PREFIX + "Removed moon globes of " + players.size() + " players.");
+        sender.sendMessage(Main.PREFIX + "Removed moon globes of " + players.size() + " players.");
 
     }
 }

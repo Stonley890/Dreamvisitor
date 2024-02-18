@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.Utils;
+import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class CmdSoftwhitelist implements CommandExecutor {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
     String playerList = "players";
 
     @Override
@@ -41,11 +41,13 @@ public class CmdSoftwhitelist implements CommandExecutor {
         // If file does not exist, create one
         if (!file.exists()) {
             try {
-                file.createNewFile();
+                boolean fileCreated = file.createNewFile();
+                if (!fileCreated) sender.sendMessage(Main.PREFIX +
+                        ChatColor.RED + "There was a problem creating the file. Check console for stacktrace.");
             } catch (IOException e) {
-                sender.sendMessage(Dreamvisitor.PREFIX +
+                sender.sendMessage(Main.PREFIX +
                         ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
-                e.printStackTrace();
+                throw new RuntimeException();
             }
         }
 
@@ -69,8 +71,8 @@ public class CmdSoftwhitelist implements CommandExecutor {
         try {
             fileConfig.load(file);
         } catch (IOException | InvalidConfigurationException e1) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "There was a problem accessing the file. Check logs for error.");
-            e1.printStackTrace();
+            sender.sendMessage(Main.PREFIX + ChatColor.RED + "There was a problem accessing the file.");
+            throw new RuntimeException();
         }
 
         // Get soft-whitelisted players
@@ -79,41 +81,41 @@ public class CmdSoftwhitelist implements CommandExecutor {
         try {
             if (args[0].equalsIgnoreCase("add")) {
                 // Get player from UUID
-                if (Utils.getUUIDOfUsername(args[1]) != null) {
+                if (PlayerUtility.getUUIDOfUsername(args[1]) != null) {
                     OfflinePlayer player = Bukkit
-                            .getOfflinePlayer(UUID.fromString(Utils.formatUuid(args[1])));
+                            .getOfflinePlayer(UUID.fromString(PlayerUtility.formatUuid(args[1])));
                     // Add
                     assert whitelistedPlayers != null;
                     if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
-                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That player is already on the whitelist.");
+                        sender.sendMessage(Main.PREFIX + ChatColor.RED + "That player is already on the whitelist.");
                     } else {
                         whitelistedPlayers.add(player.getUniqueId().toString());
-                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Added "
-                                + Utils.getUsernameOfUuid(player.getUniqueId())
+                        sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Added "
+                                + PlayerUtility.getUsernameOfUuid(player.getUniqueId())
                                 + " to the whitelist.");
                     }
                 } else {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + args[1] + " could not be found!");
+                    sender.sendMessage(Main.PREFIX + ChatColor.RED + args[1] + " could not be found!");
                 }
 
             } else if (args[0].equalsIgnoreCase("remove")) {
                 // Get player from UUID
 
-                if (Utils.getUUIDOfUsername(args[1]) != null) {
+                if (PlayerUtility.getUUIDOfUsername(args[1]) != null) {
                     OfflinePlayer player = Bukkit
-                            .getOfflinePlayer(UUID.fromString(Utils.formatUuid(args[1])));
+                            .getOfflinePlayer(UUID.fromString(PlayerUtility.formatUuid(args[1])));
                     // Remove
                     assert whitelistedPlayers != null;
                     if (whitelistedPlayers.contains(player.getUniqueId().toString())) {
                         whitelistedPlayers.remove(player.getUniqueId().toString());
-                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Removed "
-                                + Utils.getUsernameOfUuid(player.getUniqueId())
+                        sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Removed "
+                                + PlayerUtility.getUsernameOfUuid(player.getUniqueId())
                                 + " from the whitelist.");
                     } else {
-                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That player is not on the whitelist.");
+                        sender.sendMessage(Main.PREFIX + ChatColor.RED + "That player is not on the whitelist.");
                     }
                 } else {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + args[1] + " could not be found!");
+                    sender.sendMessage(Main.PREFIX + ChatColor.RED + args[1] + " could not be found!");
                 }
 
             } else if (args[0].equalsIgnoreCase("list")) {
@@ -126,28 +128,27 @@ public class CmdSoftwhitelist implements CommandExecutor {
                     if (!list.isEmpty()) {
                         list.append(", ");
                     }
-                    list.append(Utils.getUsernameOfUuid(players));
+                    list.append(PlayerUtility.getUsernameOfUuid(players));
                 }
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Players soft-whitelisted: " + list);
+                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Players soft-whitelisted: " + list);
 
             } else if (args[0].equalsIgnoreCase("on")) {
                 // Set config
                 plugin.getConfig().set("softwhitelist", true);
                 plugin.saveConfig();
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Soft whitelist enabled.");
+                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Soft whitelist enabled.");
             } else if (args[0].equalsIgnoreCase("off")) {
                 // Set config
                 plugin.getConfig().set("softwhitelist", false);
                 plugin.saveConfig();
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Soft whitelist disabled.");
+                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Soft whitelist disabled.");
             } else {
-                sender.sendMessage(Dreamvisitor.PREFIX +
+                sender.sendMessage(Main.PREFIX +
                         ChatColor.RED + "Incorrect arguements! /softwhitelist <add|remove|list|on|off> <player>");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            sender.sendMessage(Dreamvisitor.PREFIX +
+            sender.sendMessage(Main.PREFIX +
                     ChatColor.RED + "Missing arguments! /softwhitelist <add|remove|list|on|off> <player>");
         }
 
@@ -162,7 +163,7 @@ public class CmdSoftwhitelist implements CommandExecutor {
         try {
             fileConfig.save(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException();
         }
     }
 

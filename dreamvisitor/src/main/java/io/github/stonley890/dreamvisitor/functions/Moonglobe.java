@@ -1,6 +1,5 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,7 +26,7 @@ public class Moonglobe {
     public static final List<Moonglobe> activeMoonglobes = new ArrayList<>();
     private final static float momentumMultiplier = 0.1f;
 
-    private UUID player;
+    private final UUID player;
     private final Location origin;
     private Location currentLocation;
     private final float allowedDistance;
@@ -49,9 +48,7 @@ public class Moonglobe {
 
     public void remove(@Nullable String reason) {
         remove = true;
-
         hideGlobe();
-
         Player onlinePlayer = Bukkit.getPlayer(player);
         if (onlinePlayer != null && reason != null) onlinePlayer.sendMessage(ChatColor.RED + "You moon globe was removed: " + reason);
 
@@ -66,7 +63,9 @@ public class Moonglobe {
             }
 
             Player onlinePlayer = Bukkit.getPlayer(activeMoonglobe.player);
-            if (onlinePlayer != null) {
+            if (onlinePlayer == null) {
+                if (activeMoonglobe.shown) activeMoonglobe.hideGlobe();
+            } else {
 
                 if (!activeMoonglobe.shown) activeMoonglobe.showGlobe();
 
@@ -82,21 +81,14 @@ public class Moonglobe {
                 boolean sameBlock = Objects.deepEquals(newBlock.getLocation(), oldBlock.getLocation());
 
                 if (!sameBlock) {
-                    if (newBlock.getType().equals(Material.AIR)) {
-                        newBlock.setType(Material.LIGHT);
-                        Dreamvisitor.debug("Changed from air to light: " + newBlock.getX() + " " + newBlock.getY() + " " + newBlock.getZ() + " ");
-                    }
-                    if (oldBlock.getType().equals(Material.LIGHT)) {
-                        oldBlock.setType(Material.AIR);
-                        Dreamvisitor.debug("Changed form light to air: " + oldBlock.getX() + " " + oldBlock.getY() + " " + oldBlock.getZ() + " ");
-                    }
+                    if (newBlock.getType().equals(Material.AIR)) newBlock.setType(Material.LIGHT);
+                    if (oldBlock.getType().equals(Material.LIGHT)) oldBlock.setType(Material.AIR);
                 }
 
                 activeMoonglobe.currentLocation = newLocation;
-
                 activeMoonglobe.glowEntity.teleport(activeMoonglobe.currentLocation);
 
-            } else if (activeMoonglobe.shown) activeMoonglobe.hideGlobe();
+            }
 
             if ((!Objects.equals(activeMoonglobe.origin.getWorld(), activeMoonglobe.currentLocation.getWorld())) || (activeMoonglobe.origin.distance(activeMoonglobe.currentLocation) > activeMoonglobe.allowedDistance))
                 activeMoonglobe.remove("Too far away from origin.");

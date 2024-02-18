@@ -7,22 +7,22 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdPausechat implements CommandExecutor {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         // If chat is paused, unpause. If not, pause
-        if (Dreamvisitor.chatPaused) {
+        if (Main.chatPaused) {
 
             // Change settings
-            Dreamvisitor.chatPaused = false;
-            plugin.getConfig().set("chatPaused", Dreamvisitor.chatPaused);
+            Main.chatPaused = false;
+            plugin.getConfig().set("chatPaused", Main.chatPaused);
 
             // Broadcast to server
             Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been unpaused.");
@@ -33,8 +33,8 @@ public class CmdPausechat implements CommandExecutor {
         } else {
 
             // Change settings
-            Dreamvisitor.chatPaused = true;
-            plugin.getConfig().set("chatPaused", Dreamvisitor.chatPaused);
+            Main.chatPaused = true;
+            plugin.getConfig().set("chatPaused", Main.chatPaused);
 
             // Broadcast to server
             Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been paused.");

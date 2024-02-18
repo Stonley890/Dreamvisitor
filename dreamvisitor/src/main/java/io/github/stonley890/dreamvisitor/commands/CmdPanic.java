@@ -10,19 +10,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.Main;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdPanic implements CommandExecutor {
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
     boolean panicAsked = false;
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!panicAsked) {
             panicAsked = true;
-            sender.sendMessage(Dreamvisitor.PREFIX +
+            sender.sendMessage(Main.PREFIX +
                     ChatColor.RED + "Are you sure you want to kick all players? Run /panic again to confirm.");
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
@@ -36,7 +36,7 @@ public class CmdPanic implements CommandExecutor {
                     player.kickPlayer("Panic!");
                 }
             }
-            Dreamvisitor.playerLimit = 0;
+            Main.playerLimit = 0;
             plugin.getConfig().set("playerlimit", 0);
             plugin.saveConfig();
             Bukkit.getServer().broadcastMessage(

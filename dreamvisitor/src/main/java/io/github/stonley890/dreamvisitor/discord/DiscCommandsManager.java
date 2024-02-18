@@ -1,8 +1,7 @@
 package io.github.stonley890.dreamvisitor.discord;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.Utils;
+import io.github.stonley890.dreamvisitor.Main;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
@@ -49,7 +48,7 @@ public class DiscCommandsManager extends ListenerAdapter {
 
     static JDA jda = Bot.getJda();
 
-    Dreamvisitor plugin = Dreamvisitor.getPlugin();
+    Main plugin = Main.getPlugin();
 
     // Get channels and roles from config
     @SuppressWarnings({"null"})
@@ -59,9 +58,9 @@ public class DiscCommandsManager extends ListenerAdapter {
         long logChannelID = config.getLong("logChannelID");
         long whitelistChannelID = config.getLong("whitelistChannelID");
 
-        Dreamvisitor.debug(String.valueOf(chatChannelID));
-        Dreamvisitor.debug(String.valueOf(logChannelID));
-        Dreamvisitor.debug(String.valueOf(whitelistChannelID));
+        Main.debug(String.valueOf(chatChannelID));
+        Main.debug(String.valueOf(logChannelID));
+        Main.debug(String.valueOf(whitelistChannelID));
 
         Bot.gameChatChannel = jda.getTextChannelById(chatChannelID);
         Bot.gameLogChannel = jda.getTextChannelById(logChannelID);
@@ -90,7 +89,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Reply success
             event.reply("Game chat channel set to " + Bot.gameChatChannel.getAsMention()).queue();
             // Update config
-            Dreamvisitor.getPlugin().getConfig().set("chatChannelID", Bot.gameChatChannel.getIdLong());
+            Main.getPlugin().getConfig().set("chatChannelID", Bot.gameChatChannel.getIdLong());
 
         } else if (command.equals("setlogchat")) {
 
@@ -99,7 +98,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Reply success
             event.reply("Log chat channel set to " + Bot.gameLogChannel.getAsMention()).queue();
             // Update config
-            Dreamvisitor.getPlugin().getConfig().set("logChannelID", Bot.gameLogChannel.getIdLong());
+            Main.getPlugin().getConfig().set("logChannelID", Bot.gameLogChannel.getIdLong());
 
         } else if (command.equals("setwhitelist")) {
 
@@ -108,7 +107,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             // Reply success
             event.reply("Whitelist channel set to " + Bot.whitelistChannel.getAsMention()).queue();
             // Update config
-            Dreamvisitor.getPlugin().getConfig().set("whitelistChannelID", Bot.whitelistChannel.getIdLong());
+            Main.getPlugin().getConfig().set("whitelistChannelID", Bot.whitelistChannel.getIdLong());
 
         } else if (command.equals("setrole")) {
 
@@ -179,7 +178,7 @@ public class DiscCommandsManager extends ListenerAdapter {
                             isAreForm = "is";
                         }
                         // Send list
-                        event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Dreamvisitor.playerLimit + " " + playerForm + " online:** `" + list + "`")
+                        event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Main.playerLimit + " " + playerForm + " online:** `" + list + "`")
                                 .queue();
                     }
 
@@ -261,9 +260,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             assert message != null;
             if (message.length() < 351) {
                 // Send message
-                Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
-                    Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.BLUE + message);
-                });
+                Bukkit.getScheduler().runTask(Main.getPlugin(), () -> Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.BLUE + message));
 
                 EmbedBuilder builder = new EmbedBuilder();
 
@@ -289,14 +286,14 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         } else if (command.equals("link")) {
 
-            Dreamvisitor.debug("Command requested.");
+            Main.debug("Command requested.");
             User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
-            Dreamvisitor.debug("Got user.");
+            Main.debug("Got user.");
             String username = Objects.requireNonNull(event.getOption("username")).getAsString();
-            Dreamvisitor.debug("Got username.");
+            Main.debug("Got username.");
 
-            UUID uuid = Utils.getUUIDOfUsername(username);
-            Dreamvisitor.debug("Command requested.");
+            UUID uuid = PlayerUtility.getUUIDOfUsername(username);
+            Main.debug("Command requested.");
 
             if (uuid == null) {
                 event.reply("`" + username + "` could not be found!").queue();
@@ -309,9 +306,9 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         } else if (command.equals("user")) {
 
-            Dreamvisitor.debug("Command requested.");
+            Main.debug("Command requested.");
             User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
-            Dreamvisitor.debug("Target user: " + targetUser.getId());
+            Main.debug("Target user: " + targetUser.getId());
 
             // UUID from AccountLink.yml
             UUID uuid = AccountLink.getUuid(targetUser.getIdLong());
@@ -319,7 +316,7 @@ public class DiscCommandsManager extends ListenerAdapter {
             String username = "N/A";
 
             if (uuid != null) {
-                username = Utils.getUsernameOfUuid(uuid);
+                username = PlayerUtility.getUsernameOfUuid(uuid);
                 stringUuid = uuid.toString();
             }
 
@@ -344,7 +341,7 @@ public class DiscCommandsManager extends ListenerAdapter {
                 prop.load(input);
                 resourcePackURL = prop.getProperty("resource-pack");
             } catch (IOException e) {
-                if (Dreamvisitor.debug) e.printStackTrace();
+                if (Main.debugMode) throw new RuntimeException();
             }
 
             if (resourcePackURL != null) {
@@ -386,14 +383,14 @@ public class DiscCommandsManager extends ListenerAdapter {
                             try (OutputStream output = new FileOutputStream("server.properties")) {
                                 prop.store(output, null);
                                 event.getHook().editOriginal("Hash updated to " + newHash + "!").queue();
-                                Dreamvisitor.resourcePackHash = newHash;
+                                Main.resourcePackHash = newHash;
                             }
                         } catch (IOException e) {
-                            if (Dreamvisitor.debug) e.printStackTrace();
+                            if (Main.debugMode) throw new RuntimeException();
                         }
                     }
                 } catch (Exception e) {
-                    if (Dreamvisitor.debug) e.printStackTrace();
+                    if (Main.debugMode) throw new RuntimeException();
                 }
 
 
@@ -418,7 +415,7 @@ public class DiscCommandsManager extends ListenerAdapter {
                 return;
             }
 
-            UUID uuid = Utils.getUUIDOfUsername(username);
+            UUID uuid = PlayerUtility.getUUIDOfUsername(username);
 
             if (uuid == null) {
                 event.reply("`" + username + "` could not be found!").queue();
@@ -436,27 +433,27 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         } else if (command.equals("toggleweb")) {
 
-            if (!Dreamvisitor.webWhitelistEnabled) {
+            if (!Main.webWhitelistEnabled) {
                 Whitelist.startWeb();
-                Dreamvisitor.webWhitelistEnabled = true;
+                Main.webWhitelistEnabled = true;
                 event.reply("Web whitelist enabled.").queue();
             } else {
                 Whitelist.stopWeb();
-                Dreamvisitor.webWhitelistEnabled = false;
+                Main.webWhitelistEnabled = false;
                 event.reply("Web whitelist disabled.").queue();
             }
 
-            Dreamvisitor.getPlugin().getConfig().set("web-whitelist", Dreamvisitor.webWhitelistEnabled);
+            Main.getPlugin().getConfig().set("web-whitelist", Main.webWhitelistEnabled);
 
         } else if (command.equals("schedulerestart")) {
 
             ActionRow button = ActionRow.of(Button.primary("schedulerestart", "Undo"));
 
-            if (Dreamvisitor.restartScheduled) {
-                Dreamvisitor.restartScheduled = false;
+            if (Main.restartScheduled) {
+                Main.restartScheduled = false;
                 event.reply("✅ Canceled server restart.").addActionRows(button).queue();
             } else {
-                Dreamvisitor.restartScheduled = true;
+                Main.restartScheduled = true;
                 event.reply("✅ The server will restart when there are no players online").addActionRows(button).queue();
             }
 
@@ -464,7 +461,7 @@ public class DiscCommandsManager extends ListenerAdapter {
         }
 
         // Save configuration
-        Dreamvisitor.getPlugin().saveConfig();
+        Main.getPlugin().saveConfig();
     }
 
     // Register commands on ready

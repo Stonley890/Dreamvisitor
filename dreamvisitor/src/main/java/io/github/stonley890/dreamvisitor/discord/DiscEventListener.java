@@ -1,8 +1,7 @@
 package io.github.stonley890.dreamvisitor.discord;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.Utils;
+import io.github.stonley890.dreamvisitor.Main;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.data.Whitelist;
@@ -22,12 +21,14 @@ import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.profile.PlayerProfile;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
@@ -44,13 +45,13 @@ public class DiscEventListener extends ListenerAdapter {
             return;
         }
 
-        Dreamvisitor.debug("MessageReceivedEvent (not bot)");
+        Main.debug("MessageReceivedEvent (not bot)");
 
         User user = event.getAuthor();
         Channel channel = event.getChannel();
         String username = event.getMessage().getContentRaw();
 
-        Dreamvisitor plugin = Dreamvisitor.getPlugin();
+        Main plugin = Main.getPlugin();
 
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
@@ -60,11 +61,11 @@ public class DiscEventListener extends ListenerAdapter {
             EmbedBuilder builder = new EmbedBuilder();
 
             // Check for valid UUID
-            Dreamvisitor.debug("Checking for valid UUID");
-            UUID uuid = Utils.getUUIDOfUsername(username);
+            Main.debug("Checking for valid UUID");
+            UUID uuid = PlayerUtility.getUUIDOfUsername(username);
             if (uuid == null) {
                 // username does not exist alert
-                Dreamvisitor.debug("Username does not exist.");
+                Main.debug("Username does not exist.");
 
                 builder.setTitle("❌ `" + username + "` could not be found!")
                         .setDescription("Make sure you type your username exactly as shown in the bottom-left corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
@@ -72,22 +73,22 @@ public class DiscEventListener extends ListenerAdapter {
                 event.getMessage().replyEmbeds(builder.build()).queue();
 
                 event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
-                Dreamvisitor.debug("Failed whitelist.");
+                Main.debug("Failed whitelist.");
             } else {
 
-                Dreamvisitor.debug("Got UUID");
+                Main.debug("Got UUID");
 
                 // Link accounts if not already linked
-                Dreamvisitor.debug("Do accounts need to be linked?");
+                Main.debug("Do accounts need to be linked?");
                 if (AccountLink.getUuid(user.getIdLong()) == null) {
-                    Dreamvisitor.debug("Yes, linking account.");
+                    Main.debug("Yes, linking account.");
                     AccountLink.linkAccounts(uuid, user.getIdLong());
-                    Dreamvisitor.debug("Linked.");
+                    Main.debug("Linked.");
                 }
 
                 try {
                     if (Whitelist.isUserWhitelisted(uuid)) {
-                        Dreamvisitor.debug("Already whitelisted.");
+                        Main.debug("Already whitelisted.");
 
                         builder.setTitle("☑️ `" + username + "` is already whitelisted!")
                                 .setDescription("Check <#914620824332435456> for the server address and version.")
@@ -95,14 +96,14 @@ public class DiscEventListener extends ListenerAdapter {
                         event.getMessage().replyEmbeds(builder.build()).queue();
 
                         event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
-                        Dreamvisitor.debug("Resolved.");
+                        Main.debug("Resolved.");
                     } else {
-                        Dreamvisitor.debug("Player is not whitelisted.");
+                        Main.debug("Player is not whitelisted.");
 
                         Whitelist.add(username, uuid);
 
                         // success message
-                        Dreamvisitor.debug("Success.");
+                        Main.debug("Success.");
 
                         builder.setTitle("✅ `" + username + "` has been whitelisted!")
                                 .setDescription("Check <#914620824332435456> for the server address and version.")
@@ -116,7 +117,7 @@ public class DiscEventListener extends ListenerAdapter {
                     }
                 } catch (IOException e) {
                     Bot.sendMessage((TextChannel) channel, "There was a problem accessing the whitelist file. Please try again later.");
-                    if (Dreamvisitor.debug) e.printStackTrace();
+                    if (Main.debugMode) throw new RuntimeException();
                 }
             }
 
@@ -135,7 +136,7 @@ public class DiscEventListener extends ListenerAdapter {
 
         // If in the chat channel and the chat is not paused, send to Minecraft
         else if (channel.equals(Bot.gameChatChannel) && !user.isBot()
-                && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
+                && !Main.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             // Build message
             String discName = user.getName();
@@ -160,7 +161,7 @@ public class DiscEventListener extends ListenerAdapter {
 
             if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
 
-                Dreamvisitor.debug("Sending console command from log channel...");
+                Main.debug("Sending console command from log channel...");
 
                 String message = event.getMessage().getContentRaw();
 
@@ -212,57 +213,72 @@ public class DiscEventListener extends ListenerAdapter {
                     "I don't think you quite realize who I am. And unless you plan on making a long journey away from Pretarsi anytime soon, you won't be finding out.",
                     "When I was young, I never once bothered those who were busy. Hasn't anyone taught you anything?",
 
-                    "If you *must* know something, interpret this. Let's see if you remember your history classes.\n" +
-                            "> *In shadows cast by moons aligned,*\n" +
-                            "> *A night unfolds, a fate designed.*\n" +
-                            "> *The eye of three, a cosmic gaze,*\n" +
-                            "> *Ignites a war in lunar blaze.*\n\n" +
-                            "> *From icy peaks to skies above,*\n" +
-                            "> *Together spilling dragon blood.*\n" +
-                            "> *Night and mud, pact united,*\n" +
-                            "> *A force to quell what's ignited.*\n\n" +
-                            "> *Whispers stir in sea and rain,*\n" +
-                            "> *A tempest brewing, not in vain.*\n" +
-                            "> *A strong alliance, fierce and free,*\n" +
-                            "> *A dance of waves, a storm at sea.*\n\n" +
-                            "> *Battles waged on land and air,*\n" +
-                            "> *In moonlit chaos, fierce and rare.*\n" +
-                            "> *Clash of elements, scales aglow,*\n" +
-                            "> *A tale of tides, a destined woe.*\n\n" +
-                            "> *Through cryptic signs, the prophecy told,*\n" +
-                            "> *In moons aligned, the story unfolds.*\n" +
-                            "> *Wings entangled, destiny's decree,*\n" +
-                            "> *A tale of war, of land and sea.*",
+                    """
+If you *must* know something, interpret this. Let's see if you remember your history classes.
+> *In shadows cast by moons aligned,*
+> *A night unfolds, a fate designed.*
+> *The eye of three, a cosmic gaze,*
+> *Ignites a war in lunar blaze.*
 
-                    "Ponder this for a while. Take as long as you want.\n> *In the sea between ice and fire, A heart of power resides. Enchanted by Frostburn's touch, It holds unknown power inside.*\n" +
-                            "> *The IceWings and the SkyWings will fight, For ownership of the heart. Allies join the deadly fray, As war rips their world apart.*\n" +
-                            "> *But if the heart does not find its home, It will be destroyed and lost. The future hangs in the balance, As the nations clash and toss.*\n" +
-                            "> *Beware the Heart of Ice and Fire, A power yet unknown, If fallen into the wrong talons, No one can harness its throne.*\n...",
-                    "...\n" +
-                            "> *Dragons of sky, dragons of sea;*\n" +
-                            "> *Dragons of silk, and dragons of sting;*\n" +
-                            "> *Dragons of rain and mud and ice;*\n" +
-                            "> *Dragons of leaves and sand and night;*\n" +
-                            "> *Tribes of Pretarsi, united at last;*\n" +
-                            "> *Not troubled by wars or conflicts of past*;\n" +
-                            "> *A culture reforged, the ancient untold;*\n" +
-                            "> *In great wings of fire, a new world unfolds;*\n\n" +
-                            "> *Mountains and valleys, rivers and seas;*\n" +
-                            "> *From east to the west, there's none we can't see;*\n" +
-                            "> *Let history not repeat its mistakes;*\n" +
-                            "> *For eyes of the skies are once more awake;*\n...",
+> *From icy peaks to skies above,*
+> *Together spilling dragon blood.*
+> *Night and mud, pact united,*
+> *A force to quell what's ignited.*
 
-                    "Let's see if you remember this one.\n\n" +
-                            "> *It never felt the moons on its wings, it never saw the stars in its eyes,*\n" +
-                            "> *Never got to soar with its parents, nor feel the winds in the skies.*\n" +
-                            "> *What fate has befallen the dragonets of yore?*\n" +
-                            "> *A tragic tale of death and withering ne'er seen before...*\n\n" +
-                            "> *Bring your swords, your axes, your shields,*\n" +
-                            "> *Your fire, your venom, your frost,*\n" +
-                            "> *She will show no mercy,*\n" +
-                            "> *When she awakens.*\n\n" +
-                            "> *The earth is rumbling...*\n" +
-                            "You could say I have a special nostalgia with that one."
+> *Whispers stir in sea and rain,*
+> *A tempest brewing, not in vain.*
+> *A strong alliance, fierce and free,*
+> *A dance of waves, a storm at sea.*
+
+> *Battles waged on land and air,*
+> *In moonlit chaos, fierce and rare.*
+> *Clash of elements, scales aglow,*
+> *A tale of tides, a destined woe.*
+
+> *Through cryptic signs, the prophecy told,*
+> *In moons aligned, the story unfolds.*
+> *Wings entangled, destiny's decree,*
+> *A tale of war, of land and sea.*""",
+
+                    """
+Ponder this for a while. Take as long as you want.
+> *In the sea between ice and fire, A heart of power resides. Enchanted by Frostburn's touch, It holds unknown power inside.*
+> *The IceWings and the SkyWings will fight, For ownership of the heart. Allies join the deadly fray, As war rips their world apart.*
+> *But if the heart does not find its home, It will be destroyed and lost. The future hangs in the balance, As the nations clash and toss.*
+> *Beware the Heart of Ice and Fire, A power yet unknown, If fallen into the wrong talons, No one can harness its throne.*
+...""",
+                    """
+...
+> *Dragons of sky, dragons of sea;*
+> *Dragons of silk, and dragons of sting;*
+> *Dragons of rain and mud and ice;*
+> *Dragons of leaves and sand and night;*
+> *Tribes of Pretarsi, united at last;*
+> *Not troubled by wars or conflicts of past*;
+> *A culture reforged, the ancient untold;*
+> *In great wings of fire, a new world unfolds;*
+
+> *Mountains and valleys, rivers and seas;*
+> *From east to the west, there's none we can't see;*
+> *Let history not repeat its mistakes;*
+> *For eyes of the skies are once more awake;*
+...""",
+
+                    """
+Let's see if you remember this one.
+
+> *It never felt the moons on its wings, it never saw the stars in its eyes,*
+> *Never got to soar with its parents, nor feel the winds in the skies.*
+> *What fate has befallen the dragonets of yore?*
+> *A tragic tale of death and withering ne'er seen before...*
+
+> *Bring your swords, your axes, your shields,*
+> *Your fire, your venom, your frost,*
+> *She will show no mercy,*
+> *When she awakens.*
+
+> *The earth is rumbling...*
+You could say I have a special nostalgia with that one."""
             };
 
 
@@ -276,17 +292,17 @@ public class DiscEventListener extends ListenerAdapter {
         Button button = event.getButton();
         ButtonInteraction interaction = event.getInteraction();
 
-        if (button.getId().equals("panic")) {
-            Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
+        if (Objects.equals(button.getId(), "panic")) {
+            Bukkit.getScheduler().runTask(Main.getPlugin(), () -> {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                     if (!player.isOp()) {
                         player.kickPlayer("Panic!");
                     }
                 }
             });
-            Dreamvisitor.playerLimit = 0;
-            Dreamvisitor.getPlugin().getConfig().set("playerlimit", 0);
-            Dreamvisitor.getPlugin().saveConfig();
+            Main.playerLimit = 0;
+            Main.getPlugin().getConfig().set("playerlimit", 0);
+            Main.getPlugin().saveConfig();
             Bukkit.getServer().broadcastMessage(
                     ChatColor.RED + "Panicked by " + interaction.getUser().getName() + ".\nPlayer limit override set to 0.");
             Bot.sendMessage(Bot.gameLogChannel, "**Panicked by " + interaction.getUser().getName());
@@ -294,10 +310,10 @@ public class DiscEventListener extends ListenerAdapter {
 
             // Disable button after use
             interaction.editButton(button.asDisabled()).queue();
-        } else if (button.getId().startsWith("unwhitelist-")) {
+        } else if (Objects.requireNonNull(button.getId()).startsWith("unwhitelist-")) {
 
             String uuid = button.getId().substring("unwhitelist-".length());
-            String username = Utils.getUsernameOfUuid(uuid);
+            String username = PlayerUtility.getUsernameOfUuid(uuid);
 
             try {
                 if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
@@ -316,14 +332,15 @@ public class DiscEventListener extends ListenerAdapter {
         } else if (button.getId().startsWith("ban-")) {
 
             String uuid = button.getId().substring("ban-".length());
-            String username = Utils.getUsernameOfUuid(uuid);
+            String username = PlayerUtility.getUsernameOfUuid(uuid);
 
             try {
 
                 if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
                     Whitelist.remove(username, UUID.fromString(uuid));
                 }
-                Bukkit.getBanList(BanList.Type.NAME).addBan(username, "Banned by Dreamvistitor.", null, null);
+                BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
+                banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
                 event.reply("Banned `" + username + "`.").queue();
 
             } catch (IOException e) {
@@ -336,11 +353,11 @@ public class DiscEventListener extends ListenerAdapter {
 
             ActionRow undoButton = ActionRow.of(Button.primary("schedulerestart", "Undo"));
 
-            if (Dreamvisitor.restartScheduled) {
-                Dreamvisitor.restartScheduled = false;
+            if (Main.restartScheduled) {
+                Main.restartScheduled = false;
                 event.reply("✅ Canceled server restart.").addActionRows(undoButton).queue();
             } else {
-                Dreamvisitor.restartScheduled = true;
+                Main.restartScheduled = true;
                 event.reply("✅ The server will restart when there are no players online").addActionRows(undoButton).queue();
             }
 
