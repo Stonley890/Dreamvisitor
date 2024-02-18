@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CmdPlayerlimit implements CommandExecutor {
 
-    Main plugin = Main.getPlugin();
+    final Main plugin = Main.getPlugin();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
@@ -32,25 +32,6 @@ public class CmdPlayerlimit implements CommandExecutor {
                 plugin.getConfig().set("playerlimit", result);
                 plugin.saveConfig();
 
-                /*
-                if (args[0].equals("-1")) {
-                    for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                        if (player.isOp()) {
-                            player.sendMessage(ChatColor.BLUE + "Player limit override disabled");
-                        }
-                    }
-                } else if (result > -1) {
-                    for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                        if (player.isOp()) {
-                            player.sendMessage(ChatColor.BLUE + "Player limit override set to " + args[0]);
-                        }
-                    }
-                } else {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED
-                            + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");
-                    return false;
-                }
-                 */
             } catch (NumberFormatException e) {
                 sender.sendMessage(Main.PREFIX +
                         ChatColor.RED + "Incorrect arguments! /playerlimit <number of players (set -1 to disable)>");

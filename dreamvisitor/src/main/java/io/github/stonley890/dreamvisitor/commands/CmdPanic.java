@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CmdPanic implements CommandExecutor {
 
-    Main plugin = Main.getPlugin();
+    final Main plugin = Main.getPlugin();
     boolean panicAsked = false;
 
     @Override

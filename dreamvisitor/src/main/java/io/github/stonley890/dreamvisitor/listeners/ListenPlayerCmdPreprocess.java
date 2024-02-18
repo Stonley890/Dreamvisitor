@@ -20,8 +20,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerCmdPreprocess implements Listener {
 
-    Main plugin = Main.getPlugin();
-    String[] msgAliases = {"/msg ","/tell ","/whisper ","/reply ","/t ","/w ","/r ", "/mail send "};
+    final Main plugin = Main.getPlugin();
+    final String[] msgAliases = {"/msg ","/tell ","/whisper ","/reply ","/t ","/w ","/r ", "/mail send "};
 
     @EventHandler
     public void onPlayerCommandPreprocess(@NotNull PlayerCommandPreprocessEvent event) {

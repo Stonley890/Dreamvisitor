@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public class TabPauseBypass implements TabCompleter {
 
-    Main plugin = Main.getPlugin();
+    final Main plugin = Main.getPlugin();
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {

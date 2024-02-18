@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ListenEntityDamage implements Listener {
     
-    Main plugin = Main.getPlugin();
+    final Main plugin = Main.getPlugin();
 
     @EventHandler
     public void onEntityDamageEvent(@NotNull EntityDamageByEntityEvent event) {

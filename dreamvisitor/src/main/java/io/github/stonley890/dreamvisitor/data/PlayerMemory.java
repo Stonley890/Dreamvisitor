@@ -24,6 +24,7 @@ public class PlayerMemory {
         return fileConfig;
     }
 
+    @SuppressWarnings("unchecked")
     public static @NotNull PlayerMemory getFromFileConfig(@NotNull FileConfiguration fileConfig) {
         PlayerMemory memory = new PlayerMemory();
         memory.discordToggled = fileConfig.getBoolean("discordToggled");

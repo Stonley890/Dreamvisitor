@@ -21,9 +21,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
@@ -44,7 +41,6 @@ public class Main extends JavaPlugin {
     public static boolean chatPaused;
     public static int playerLimit;
     public static Location hubLocation;
-    public static String resourcePackHash;
     public static boolean webWhitelistEnabled;
     public static boolean debugMode;
     public static boolean restartScheduled = false;
@@ -125,16 +121,6 @@ public class Main extends JavaPlugin {
                 }
             }
 
-            // Get resource pack hash
-            debug("Getting resource pack hash...");
-            try (InputStream serverProperties = Files.newInputStream(Paths.get("server.properties"))) {
-                java.util.Properties properties = new java.util.Properties();
-                properties.load(serverProperties);
-                resourcePackHash = properties.getProperty("resource-pack-sha1");
-            } catch (IOException e) {
-                throw new RuntimeException();
-            }
-
             // Console logging
             debug("Setting up console logging...");
             appender = new ConsoleLogger();
@@ -151,13 +137,13 @@ public class Main extends JavaPlugin {
                     if (Main.getPlugin().getConfig().getBoolean("log-console")) {
 
                         // If there are no messages in the queue, return
-                        if (ConsoleLogger.messageBuilder == null || ConsoleLogger.messageBuilder.isEmpty()) return;
+                        if (ConsoleLogger.messageBuilder.isEmpty()) return;
 
                         Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString()).queue(); // send message
                         ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length()); // delete queued messages
 
                         // If there are no overflow messages, return
-                        if (ConsoleLogger.overFlowMessages == null || ConsoleLogger.overFlowMessages.isEmpty()) return;
+                        if (ConsoleLogger.overFlowMessages.isEmpty()) return;
 
                         StringBuilder overFlowMessageBuilder = new StringBuilder();
                         // First is safe, so add now

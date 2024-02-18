@@ -21,8 +21,8 @@ import java.util.UUID;
 
 public class CmdPauseBypass implements CommandExecutor {
 
-    Main plugin = Main.getPlugin();
-    String playerList = "players";
+    final Main plugin = Main.getPlugin();
+    final String playerList = "players";
     List<String> bypassedPlayers = new ArrayList<>(100);
 
     @Override
@@ -46,14 +46,6 @@ public class CmdPauseBypass implements CommandExecutor {
                 throw new RuntimeException();
             }
         }
-
-        /*// If file is empty, add a player to initialize
-        if (fileConfig.get(playerList) == null) {
-
-            bypassedPlayers.add(getCleanUUID("BogTheMudWing"));
-            fileConfig.set(playerList, bypassedPlayers);
-            saveFile(fileConfig, file);
-        }*/
 
         // Load the file
         try {

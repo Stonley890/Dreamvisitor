@@ -42,13 +42,13 @@ import java.util.regex.Pattern;
 
 public class DiscCommandsManager extends ListenerAdapter {
 
-    String channelOption = "channel";
-    String usernameOption = "username";
-    String activityOption = "activity";
+    final String channelOption = "channel";
+    final String usernameOption = "username";
+    final String activityOption = "activity";
 
-    static JDA jda = Bot.getJda();
+    static final JDA jda = Bot.getJda();
 
-    Main plugin = Main.getPlugin();
+    final Main plugin = Main.getPlugin();
 
     // Get channels and roles from config
     @SuppressWarnings({"null"})
@@ -82,382 +82,386 @@ public class DiscCommandsManager extends ListenerAdapter {
         String command = event.getName();
         User user = event.getUser();
 
-        if (command.equals("setgamechat")) {
+        switch (command) {
+            case "setgamechat" -> {
 
-            // Get channel from args
-            Bot.gameChatChannel = (TextChannel) event.getOption(channelOption, event.getChannel(), OptionMapping::getAsChannel);
-            // Reply success
-            event.reply("Game chat channel set to " + Bot.gameChatChannel.getAsMention()).queue();
-            // Update config
-            Main.getPlugin().getConfig().set("chatChannelID", Bot.gameChatChannel.getIdLong());
-
-        } else if (command.equals("setlogchat")) {
-
-            // Get channel from args
-            Bot.gameLogChannel = (TextChannel) event.getOption(channelOption, event.getChannel(), OptionMapping::getAsChannel);
-            // Reply success
-            event.reply("Log chat channel set to " + Bot.gameLogChannel.getAsMention()).queue();
-            // Update config
-            Main.getPlugin().getConfig().set("logChannelID", Bot.gameLogChannel.getIdLong());
-
-        } else if (command.equals("setwhitelist")) {
-
-            // Get channel from args
-            Bot.whitelistChannel = (TextChannel) event.getOption(channelOption, event.getChannel(), OptionMapping::getAsChannel);
-            // Reply success
-            event.reply("Whitelist channel set to " + Bot.whitelistChannel.getAsMention()).queue();
-            // Update config
-            Main.getPlugin().getConfig().set("whitelistChannelID", Bot.whitelistChannel.getIdLong());
-
-        } else if (command.equals("setrole")) {
-
-            // Get role to set
-            String targetRole = Objects.requireNonNull(event.getOption("type")).getAsString();
-            Role role = Objects.requireNonNull(event.getOption("role")).getAsRole();
-
-            if (Arrays.stream(Bot.TRIBE_NAMES).anyMatch(Predicate.isEqual(targetRole))) {
-
-                // If one of the tribe names, find the index, get the list from config, and set the specified item
-                int index = Arrays.binarySearch(Bot.TRIBE_NAMES, targetRole);
-                List<Long> tribeRoles = plugin.getConfig().getLongList("tribeRoles");
-
-                if (tribeRoles.isEmpty()) {
-                    for (int i = 0; i < 10; i++) {
-                        tribeRoles.add(0L);
-                    }
-                }
-
-                tribeRoles.set(index, role.getIdLong());
-                plugin.getConfig().set("tribeRoles", tribeRoles);
-
-            } else {
-                event.reply("The target role must match a specified name!").setEphemeral(true).queue();
+                // Get channel from args
+                Bot.gameChatChannel = (TextChannel) event.getOption(channelOption, event.getChannel(), OptionMapping::getAsChannel);
+                // Reply success
+                event.reply("Game chat channel set to " + Bot.gameChatChannel.getAsMention()).queue();
+                // Update config
+                Main.getPlugin().getConfig().set("chatChannelID", Bot.gameChatChannel.getIdLong());
             }
-            event.reply("**" + targetRole + " set to " + role.getName() + "**").queue();
+            case "setlogchat" -> {
 
-        } else if (command.equals("list")) {
+                // Get channel from args
+                Bot.gameLogChannel = (TextChannel) event.getOption(channelOption, event.getChannel(), OptionMapping::getAsChannel);
+                // Reply success
+                event.reply("Log chat channel set to " + Bot.gameLogChannel.getAsMention()).queue();
+                // Update config
+                Main.getPlugin().getConfig().set("logChannelID", Bot.gameLogChannel.getIdLong());
+            }
+            case "setwhitelist" -> {
 
-            // Compile players to list unless no players online
-            if (event.getChannel() == Bot.gameChatChannel) {
+                // Get channel from args
+                Bot.whitelistChannel = (TextChannel) event.getOption(channelOption, event.getChannel(), OptionMapping::getAsChannel);
+                // Reply success
+                event.reply("Whitelist channel set to " + Bot.whitelistChannel.getAsMention()).queue();
+                // Update config
+                Main.getPlugin().getConfig().set("whitelistChannelID", Bot.whitelistChannel.getIdLong());
+            }
+            case "setrole" -> {
 
-                // Create a string builder
-                StringBuilder list = new StringBuilder();
+                // Get role to set
+                String targetRole = Objects.requireNonNull(event.getOption("type")).getAsString();
+                Role role = Objects.requireNonNull(event.getOption("role")).getAsRole();
 
-                // If there are players online
-                if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
+                if (Arrays.stream(Bot.TRIBE_NAMES).anyMatch(Predicate.isEqual(targetRole))) {
 
-                    Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
+                    // If one of the tribe names, find the index, get the list from config, and set the specified item
+                    int index = Arrays.binarySearch(Bot.TRIBE_NAMES, targetRole);
+                    List<Long> tribeRoles = plugin.getConfig().getLongList("tribeRoles");
 
-                    List<Player> countedPlayers = new ArrayList<>();
-
-                    // Iterate through each player
-                    for (Player player : players) {
-                        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-
-                        // If player is not vanished, add to list
-                        if (!memory.vanished) {
-                            countedPlayers.add(player);
+                    if (tribeRoles.isEmpty()) {
+                        for (int i = 0; i < 10; i++) {
+                            tribeRoles.add(0L);
                         }
                     }
 
-                    // If there are no listed players (may occur with vanished players), report none
-                    if (countedPlayers.isEmpty()) {
-                        event.reply("**There are no players online.**").queue();
-                    } else {
-                        // Create string of list
-                        for (Player player : countedPlayers) {
-                            if (!list.isEmpty()) {
-                                list.append("`, `");
+                    tribeRoles.set(index, role.getIdLong());
+                    plugin.getConfig().set("tribeRoles", tribeRoles);
+
+                } else {
+                    event.reply("The target role must match a specified name!").setEphemeral(true).queue();
+                }
+                event.reply("**" + targetRole + " set to " + role.getName() + "**").queue();
+            }
+            case "list" -> {
+
+                // Compile players to list unless no players online
+                if (event.getChannel() == Bot.gameChatChannel) {
+
+                    // Create a string builder
+                    StringBuilder list = new StringBuilder();
+
+                    // If there are players online
+                    if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
+
+                        Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
+
+                        List<Player> countedPlayers = new ArrayList<>();
+
+                        // Iterate through each player
+                        for (Player player : players) {
+                            PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+
+                            // If player is not vanished, add to list
+                            if (!memory.vanished) {
+                                countedPlayers.add(player);
                             }
-                            list.append(player.getName());
                         }
-                        String playerForm = "players";
-                        String isAreForm = "are";
-                        if (players.size() == 1) {
-                            playerForm = "player";
-                            isAreForm = "is";
+
+                        // If there are no listed players (may occur with vanished players), report none
+                        if (countedPlayers.isEmpty()) {
+                            event.reply("**There are no players online.**").queue();
+                        } else {
+                            // Create string of list
+                            for (Player player : countedPlayers) {
+                                if (!list.isEmpty()) {
+                                    list.append("`, `");
+                                }
+                                list.append(player.getName());
+                            }
+                            String playerForm = "players";
+                            String isAreForm = "are";
+                            if (players.size() == 1) {
+                                playerForm = "player";
+                                isAreForm = "is";
+                            }
+                            // Send list
+                            event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Main.playerLimit + " " + playerForm + " online:** `" + list + "`")
+                                    .queue();
                         }
-                        // Send list
-                        event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Main.playerLimit + " " + playerForm + " online:** `" + list + "`")
-                                .queue();
+
+                    } else {
+                        event.reply("**There are no players online.**").queue();
                     }
 
                 } else {
-                    event.reply("**There are no players online.**").queue();
+                    event.reply("This command must be executed in " + Bot.gameChatChannel.getAsMention()).setEphemeral(true)
+                            .queue();
                 }
-
-            } else {
-                event.reply("This command must be executed in " + Bot.gameChatChannel.getAsMention()).setEphemeral(true)
-                        .queue();
             }
+            case "msg" -> {
 
-        } else if (command.equals("msg")) {
+                // args
+                String username = event.getOption(usernameOption, OptionMapping::getAsString);
+                String msg = event.getOption("message", OptionMapping::getAsString);
 
-            // args
-            String username = event.getOption(usernameOption, OptionMapping::getAsString);
-            String msg = event.getOption("message", OptionMapping::getAsString);
+                // Check for correct channel
+                if (event.getChannel() == Bot.gameChatChannel) {
+                    // Check for player online
+                    assert username != null;
+                    if (Bukkit.getServer().getPlayer(username) != null) {
 
-            // Check for correct channel
-            if (event.getChannel() == Bot.gameChatChannel) {
-                // Check for player online
-                assert username != null;
-                if (Bukkit.getServer().getPlayer(username) != null) {
+                        // Send message
+                        Objects.requireNonNull(Bukkit.getServer().getPlayer(username)).sendMessage(
+                                ChatColor.GRAY + "[" + ChatColor.DARK_AQUA + user.getName() + ChatColor.GRAY + " -> "
+                                        + ChatColor.DARK_AQUA + "me" + ChatColor.GRAY + "] " + ChatColor.WHITE + msg);
 
-                    // Send message
-                    Objects.requireNonNull(Bukkit.getServer().getPlayer(username)).sendMessage(
-                            ChatColor.GRAY + "[" + ChatColor.DARK_AQUA + user.getName() + ChatColor.GRAY + " -> "
-                                    + ChatColor.DARK_AQUA + "me" + ChatColor.GRAY + "] " + ChatColor.WHITE + msg);
+                        // Log message
+                        Objects.requireNonNull(jda.getTextChannelById(Bot.gameLogChannel.getId())).sendMessage(
+                                "**Message from " + user.getAsMention() + " to **`" + username + "`**:** " + msg).queue();
 
-                    // Log message
-                    Objects.requireNonNull(jda.getTextChannelById(Bot.gameLogChannel.getId())).sendMessage(
-                            "**Message from " + user.getAsMention() + " to **`" + username + "`**:** " + msg).queue();
+                        // Reply success
+                        event.reply("Message sent!").setEphemeral(true).queue();
 
-                    // Reply success
-                    event.reply("Message sent!").setEphemeral(true).queue();
-
+                    } else {
+                        event.reply("`" + username + "` is not online!").setEphemeral(true).queue();
+                    }
                 } else {
-                    event.reply("`" + username + "` is not online!").setEphemeral(true).queue();
+                    event.reply("This command must be executed in " + Bot.gameChatChannel.getAsMention()).setEphemeral(true)
+                            .queue();
                 }
-            } else {
-                event.reply("This command must be executed in " + Bot.gameChatChannel.getAsMention()).setEphemeral(true)
-                        .queue();
+
             }
+            case activityOption -> {
 
-        } else if (command.equals(activityOption)) {
+                // Get args
+                String activity = event.getOption(activityOption, OptionMapping::getAsString);
+                String activityType = event.getOption("type", OptionMapping::getAsString);
 
-            // Get args
-            String activity = event.getOption(activityOption, OptionMapping::getAsString);
-            String activityType = event.getOption("type", OptionMapping::getAsString);
+                // Set activity
+                ActivityType type = ActivityType.CUSTOM_STATUS;
 
-            // Set activity
-            ActivityType type = ActivityType.CUSTOM_STATUS;
+                assert activityType != null;
+                if (activityType.equalsIgnoreCase("COMPETING"))
+                    type = ActivityType.COMPETING;
+                else if (activityType.equalsIgnoreCase("LISTENING"))
+                    type = ActivityType.LISTENING;
+                else if (activityType.equalsIgnoreCase("PLAYING"))
+                    type = ActivityType.PLAYING;
+                else if (activityType.equalsIgnoreCase("WATCHING"))
+                    type = ActivityType.WATCHING;
+                else {
+                    event.reply("Invalid activity type.").queue();
+                }
 
-            assert activityType != null;
-            if (activityType.equalsIgnoreCase("COMPETING"))
-                type = ActivityType.COMPETING;
-            else if (activityType.equalsIgnoreCase("LISTENING"))
-                type = ActivityType.LISTENING;
-            else if (activityType.equalsIgnoreCase("PLAYING"))
-                type = ActivityType.PLAYING;
-            else if (activityType.equalsIgnoreCase("WATCHING"))
-                type = ActivityType.WATCHING;
-            else {
-                event.reply("Invalid activity type.").queue();
+                // Set presence
+                if (type != ActivityType.CUSTOM_STATUS) {
+                    assert activity != null;
+                    jda.getPresence().setActivity(Activity.of(type, activity));
+                    event.reply("Activity set!").setEphemeral(true).queue();
+                }
             }
+            case "broadcast" -> {
 
-            // Set presence
-            if (type != ActivityType.CUSTOM_STATUS) {
-                assert activity != null;
-                jda.getPresence().setActivity(Activity.of(type, activity));
-                event.reply("Activity set!").setEphemeral(true).queue();
+                // Get args
+                String message = event.getOption("message", OptionMapping::getAsString);
+
+                assert message != null;
+                if (message.length() < 351) {
+                    // Send message
+                    Bukkit.getScheduler().runTask(Main.getPlugin(), () -> Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.BLUE + message));
+
+                    EmbedBuilder builder = new EmbedBuilder();
+
+                    builder.setAuthor("Staff Broadcast");
+                    builder.setTitle(message);
+
+                    Bot.gameChatChannel.sendMessageEmbeds(builder.build()).queue();
+                    Bot.gameLogChannel.sendMessageEmbeds(builder.build()).queue();
+
+                    // Reply
+                    event.reply("Broadcast sent.").queue();
+                } else {
+                    event.reply("Message too long! " + message.length() + " > 350").setEphemeral(true).queue();
+                }
             }
+            case "panic" -> {
 
-        } else if (command.equals("broadcast")) {
+                EmbedBuilder replyEmbed = new EmbedBuilder();
+                replyEmbed.setTitle("Are you sure?").setDescription("This will kick all players and set the player limit to 0. Click the button to confirm.");
 
-            // Get args
-            String message = event.getOption("message", OptionMapping::getAsString);
+                ActionRow actionRow = ActionRow.of(Button.danger("panic", "Yes, I'm sure."));
 
-            assert message != null;
-            if (message.length() < 351) {
-                // Send message
-                Bukkit.getScheduler().runTask(Main.getPlugin(), () -> Bukkit.broadcastMessage(ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "Broadcast" + ChatColor.DARK_BLUE + "] " + ChatColor.BLUE + message));
+                event.replyEmbeds(replyEmbed.build()).addActionRows(actionRow).queue();
+            }
+            case "link" -> {
 
+                Main.debug("Command requested.");
+                User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
+                Main.debug("Got user.");
+                String username = Objects.requireNonNull(event.getOption("username")).getAsString();
+                Main.debug("Got username.");
+
+                UUID uuid = PlayerUtility.getUUIDOfUsername(username);
+                Main.debug("Command requested.");
+
+                if (uuid == null) {
+                    event.reply("`" + username + "` could not be found!").queue();
+                    return;
+                }
+
+                AccountLink.linkAccounts(uuid, targetUser.getIdLong());
+                event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
+
+
+            }
+            case "user" -> {
+
+                Main.debug("Command requested.");
+                User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
+                Main.debug("Target user: " + targetUser.getId());
+
+                // UUID from AccountLink.yml
+                UUID uuid = AccountLink.getUuid(targetUser.getIdLong());
+                String stringUuid = "N/A";
+                String username = "N/A";
+
+                if (uuid != null) {
+                    username = PlayerUtility.getUsernameOfUuid(uuid);
+                    stringUuid = uuid.toString();
+                }
+
+                // Send data
                 EmbedBuilder builder = new EmbedBuilder();
 
-                builder.setAuthor("Staff Broadcast");
-                builder.setTitle(message);
+                builder.setColor(Color.BLUE);
+                builder.setAuthor(targetUser.getName(), targetUser.getAvatarUrl(), targetUser.getAvatarUrl());
 
-                Bot.gameChatChannel.sendMessageEmbeds(builder.build()).queue();
-                Bot.gameLogChannel.sendMessageEmbeds(builder.build()).queue();
+                builder.addField("ID", targetUser.getId(), false);
+                builder.addField("Minecraft Username", username, false);
+                builder.addField("UUID", stringUuid, false);
 
-                // Reply
-                event.reply("Broadcast sent.").queue();
-            } else {
-                event.reply("Message too long! " + message.length() + " > 350").setEphemeral(true).queue();
+                event.replyEmbeds(builder.build()).queue();
+
             }
-        } else if (command.equals("panic")) {
+            case "resourcepackupdate" -> {
 
-            EmbedBuilder replyEmbed = new EmbedBuilder();
-            replyEmbed.setTitle("Are you sure?").setDescription("This will kick all players and set the player limit to 0. Click the button to confirm.");
+                String resourcePackURL = null;
 
-            ActionRow actionRow = ActionRow.of(Button.danger("panic", "Yes, I'm sure."));
-
-            event.replyEmbeds(replyEmbed.build()).addActionRows(actionRow).queue();
-
-        } else if (command.equals("link")) {
-
-            Main.debug("Command requested.");
-            User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
-            Main.debug("Got user.");
-            String username = Objects.requireNonNull(event.getOption("username")).getAsString();
-            Main.debug("Got username.");
-
-            UUID uuid = PlayerUtility.getUUIDOfUsername(username);
-            Main.debug("Command requested.");
-
-            if (uuid == null) {
-                event.reply("`" + username + "` could not be found!").queue();
-                return;
-            }
-
-            AccountLink.linkAccounts(uuid, targetUser.getIdLong());
-            event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
-
-
-        } else if (command.equals("user")) {
-
-            Main.debug("Command requested.");
-            User targetUser = Objects.requireNonNull(event.getOption("user")).getAsUser();
-            Main.debug("Target user: " + targetUser.getId());
-
-            // UUID from AccountLink.yml
-            UUID uuid = AccountLink.getUuid(targetUser.getIdLong());
-            String stringUuid = "N/A";
-            String username = "N/A";
-
-            if (uuid != null) {
-                username = PlayerUtility.getUsernameOfUuid(uuid);
-                stringUuid = uuid.toString();
-            }
-
-            // Send data
-            EmbedBuilder builder = new EmbedBuilder();
-
-            builder.setColor(Color.BLUE);
-            builder.setAuthor(targetUser.getName(), targetUser.getAvatarUrl(), targetUser.getAvatarUrl());
-
-            builder.addField("ID", targetUser.getId(), false);
-            builder.addField("Minecraft Username", username, false);
-            builder.addField("UUID", stringUuid, false);
-
-            event.replyEmbeds(builder.build()).queue();
-
-        } else if (command.equals("resourcepackupdate")) {
-
-            String resourcePackURL = null;
-
-            try (InputStream input = new FileInputStream("server.properties")) {
-                java.util.Properties prop = new java.util.Properties();
-                prop.load(input);
-                resourcePackURL = prop.getProperty("resource-pack");
-            } catch (IOException e) {
-                if (Main.debugMode) throw new RuntimeException();
-            }
-
-            if (resourcePackURL != null) {
-
-                event.deferReply().queue();
-
-                try {
-                    URL url = new URL(resourcePackURL);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setReadTimeout(10000); // timeout
-                    connection.connect();
-
-                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        InputStream is = connection.getInputStream();
-                        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
-                        byte[] buffer = new byte[1024];
-                        int bytesRead;
-
-                        while ((bytesRead = is.read(buffer)) != -1) {
-                            sha1.update(buffer, 0, bytesRead);
-                        }
-
-                        byte[] hashBytes = sha1.digest();
-                        StringBuilder hash = new StringBuilder();
-
-                        for (byte hashByte : hashBytes) {
-                            hash.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
-                        }
-
-                        String newHash = hash.toString();
-
-                        try (InputStream input = new FileInputStream("server.properties")) {
-                            java.util.Properties prop = new java.util.Properties();
-                            prop.load(input);
-
-                            prop.setProperty("resource-pack-sha1", newHash); // Update the hash property
-
-                            try (OutputStream output = new FileOutputStream("server.properties")) {
-                                prop.store(output, null);
-                                event.getHook().editOriginal("Hash updated to " + newHash + "!").queue();
-                                Main.resourcePackHash = newHash;
-                            }
-                        } catch (IOException e) {
-                            if (Main.debugMode) throw new RuntimeException();
-                        }
-                    }
-                } catch (Exception e) {
+                try (InputStream input = new FileInputStream("server.properties")) {
+                    Properties prop = new Properties();
+                    prop.load(input);
+                    resourcePackURL = prop.getProperty("resource-pack");
+                } catch (IOException e) {
                     if (Main.debugMode) throw new RuntimeException();
                 }
 
+                if (resourcePackURL != null) {
 
-            } else {
-                event.reply("Could not get URL of resource pack.").queue();
+                    event.deferReply().queue();
+
+                    try {
+                        URL url = new URL(resourcePackURL);
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection.setRequestMethod("GET");
+                        connection.setReadTimeout(10000); // timeout
+                        connection.connect();
+
+                        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                            InputStream is = connection.getInputStream();
+                            MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+                            byte[] buffer = new byte[1024];
+                            int bytesRead;
+
+                            while ((bytesRead = is.read(buffer)) != -1) {
+                                sha1.update(buffer, 0, bytesRead);
+                            }
+
+                            byte[] hashBytes = sha1.digest();
+                            StringBuilder hash = new StringBuilder();
+
+                            for (byte hashByte : hashBytes) {
+                                hash.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
+                            }
+
+                            String newHash = hash.toString();
+
+                            try (InputStream input = new FileInputStream("server.properties")) {
+                                Properties prop = new Properties();
+                                prop.load(input);
+
+                                prop.setProperty("resource-pack-sha1", newHash); // Update the hash property
+
+                                try (OutputStream output = new FileOutputStream("server.properties")) {
+                                    prop.store(output, null);
+                                    event.getHook().editOriginal("Hash updated to " + newHash + "!").queue();
+                                }
+                            } catch (IOException e) {
+                                if (Main.debugMode) throw new RuntimeException();
+                            }
+                        }
+                    } catch (Exception e) {
+                        if (Main.debugMode) throw new RuntimeException();
+                    }
+
+
+                } else {
+                    event.reply("Could not get URL of resource pack.").queue();
+                }
             }
+            case "unwhitelist" -> {
 
-        } else if (command.equals("unwhitelist")) {
+                OptionMapping usernameOption = event.getOption("username");
+                String username;
+                if (usernameOption != null) username = usernameOption.getAsString();
+                else {
+                    event.reply("Option `username` could not be found.").queue();
+                    return;
+                }
 
-            OptionMapping usernameOption = event.getOption("username");
-            String username;
-            if (usernameOption != null) username = usernameOption.getAsString();
-            else {
-                event.reply("Option `username` could not be found.").queue();
-                return;
+                Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
+
+                if (p.matcher(username).find()) {
+                    event.reply("`" + username + "` contains illegal characters!").queue();
+                    return;
+                }
+
+                UUID uuid = PlayerUtility.getUUIDOfUsername(username);
+
+                if (uuid == null) {
+                    event.reply("`" + username + "` could not be found!").queue();
+                    return;
+                }
+
+                try {
+                    Whitelist.remove(username, uuid);
+                } catch (IOException e) {
+                    event.reply("There was a problem accessing the whitelist file.").queue();
+                    return;
+                }
+
+                event.reply("Removed " + username + " from the whitelist.").queue();
+
             }
+            case "toggleweb" -> {
 
-            Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
+                if (!Main.webWhitelistEnabled) {
+                    Whitelist.startWeb();
+                    Main.webWhitelistEnabled = true;
+                    event.reply("Web whitelist enabled.").queue();
+                } else {
+                    Whitelist.stopWeb();
+                    Main.webWhitelistEnabled = false;
+                    event.reply("Web whitelist disabled.").queue();
+                }
 
-            if (p.matcher(username).find()) {
-                event.reply("`" + username + "` contains illegal characters!").queue();
-                return;
+                Main.getPlugin().getConfig().set("web-whitelist", Main.webWhitelistEnabled);
             }
+            case "schedulerestart" -> {
 
-            UUID uuid = PlayerUtility.getUUIDOfUsername(username);
+                ActionRow button = ActionRow.of(Button.primary("schedulerestart", "Undo"));
 
-            if (uuid == null) {
-                event.reply("`" + username + "` could not be found!").queue();
-                return;
+                if (Main.restartScheduled) {
+                    Main.restartScheduled = false;
+                    event.reply("✅ Canceled server restart.").addActionRows(button).queue();
+                } else {
+                    Main.restartScheduled = true;
+                    event.reply("✅ The server will restart when there are no players online").addActionRows(button).queue();
+                }
             }
-
-            try {
-                Whitelist.remove(username, uuid);
-            } catch (IOException e) {
-                event.reply("There was a problem accessing the whitelist file.").queue();
-                return;
-            }
-
-            event.reply("Removed " + username + " from the whitelist.").queue();
-
-        } else if (command.equals("toggleweb")) {
-
-            if (!Main.webWhitelistEnabled) {
-                Whitelist.startWeb();
-                Main.webWhitelistEnabled = true;
-                event.reply("Web whitelist enabled.").queue();
-            } else {
-                Whitelist.stopWeb();
-                Main.webWhitelistEnabled = false;
-                event.reply("Web whitelist disabled.").queue();
-            }
-
-            Main.getPlugin().getConfig().set("web-whitelist", Main.webWhitelistEnabled);
-
-        } else if (command.equals("schedulerestart")) {
-
-            ActionRow button = ActionRow.of(Button.primary("schedulerestart", "Undo"));
-
-            if (Main.restartScheduled) {
-                Main.restartScheduled = false;
-                event.reply("✅ Canceled server restart.").addActionRows(button).queue();
-            } else {
-                Main.restartScheduled = true;
-                event.reply("✅ The server will restart when there are no players online").addActionRows(button).queue();
-            }
-
-
         }
 
         // Save configuration

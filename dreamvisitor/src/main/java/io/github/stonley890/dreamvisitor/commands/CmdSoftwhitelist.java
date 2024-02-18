@@ -20,8 +20,8 @@ import java.util.UUID;
 
 public class CmdSoftwhitelist implements CommandExecutor {
 
-    Main plugin = Main.getPlugin();
-    String playerList = "players";
+    final Main plugin = Main.getPlugin();
+    final String playerList = "players";
 
     @Override
     @SuppressWarnings({"unchecked"})
@@ -50,22 +50,6 @@ public class CmdSoftwhitelist implements CommandExecutor {
                 throw new RuntimeException();
             }
         }
-
-        /*// If file is empty, add a player to initialize
-        if (fileConfig.get(playerList) == null) {
-            Mojang mojang = new Mojang();
-            mojang.connect();
-
-            whitelistedPlayers.add(getCleanUUID("BogTheMudWing"));
-            fileConfig.set(playerList, whitelistedPlayers);
-            try {
-                fileConfig.save(file);
-            } catch (IOException e) {
-                sender.sendMessage(Dreamvisitor.PREFIX +
-                        ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
-                e.printStackTrace();
-            }
-        }*/
 
         // Load the file
         try {

@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerLogin implements Listener {
 
-    Main plugin = Main.getPlugin();
+    final Main plugin = Main.getPlugin();
 
     @EventHandler
     public void onPlayerLoginEvent(@NotNull PlayerLoginEvent event) {

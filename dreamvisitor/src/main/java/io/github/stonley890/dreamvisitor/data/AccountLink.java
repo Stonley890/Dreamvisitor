@@ -12,11 +12,11 @@ import java.util.UUID;
 
 public class AccountLink {
 
-    static Main plugin = Main.getPlugin();
-    static File accountFile = new File(plugin.getDataFolder().getPath() + "/accountLink.txt");
+    static final Main plugin = Main.getPlugin();
+    static final File accountFile = new File(plugin.getDataFolder().getPath() + "/accountLink.txt");
 
-    static Map<UUID, Long> uuidToDiscordIdMap = new HashMap<>();
-    static Map<Long, UUID> discordIdToUuidMap = new HashMap<>();
+    static final Map<UUID, Long> uuidToDiscordIdMap = new HashMap<>();
+    static final Map<Long, UUID> discordIdToUuidMap = new HashMap<>();
 
     public static void init() throws IOException {
         // If the file does not exist, create one

@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class CmdTogglepvp implements CommandExecutor {
 
-    Main plugin = Main.getPlugin();
-    String pvpDisabled = "disablepvp";
+    final Main plugin = Main.getPlugin();
+    final String pvpDisabled = "disablepvp";
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {

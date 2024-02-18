@@ -27,7 +27,7 @@ public class Bot {
     public static TextChannel gameChatChannel;
     public static TextChannel gameLogChannel;
     public static TextChannel whitelistChannel;
-    public static List<Role> tribeRole = new ArrayList<>();
+    public static final List<Role> tribeRole = new ArrayList<>();
     static JDA jda;
 
     private Bot() {

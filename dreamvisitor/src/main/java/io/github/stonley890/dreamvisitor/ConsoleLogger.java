@@ -11,8 +11,8 @@ import java.util.List;
 
 public class ConsoleLogger extends AbstractAppender {
 
-    public static StringBuilder messageBuilder = new StringBuilder();
-    public static List<String> overFlowMessages = new ArrayList<>();
+    public static final StringBuilder messageBuilder = new StringBuilder();
+    public static final List<String> overFlowMessages = new ArrayList<>();
 
     public ConsoleLogger() {
         super("MyLogAppender", null, null, false, null);

@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerChat implements Listener {
 
-    Main plugin = Main.getPlugin();
+    final Main plugin = Main.getPlugin();
     
     @EventHandler
     @SuppressWarnings({"null"})

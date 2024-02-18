@@ -17,7 +17,7 @@ import java.util.List;
 
 public class CmdHub implements CommandExecutor {
 
-    Main plugin = Main.getPlugin();
+    final Main plugin = Main.getPlugin();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
