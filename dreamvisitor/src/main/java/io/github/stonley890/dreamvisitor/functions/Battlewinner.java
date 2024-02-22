@@ -98,9 +98,24 @@ public class Battlewinner {
             ticksUntilNextFireball = ticksBetweenFireballs;
         }
     }
+    
+    private static void bigFireballStart() {
+        dragon.setPhase(EnderDragon.Phase.HOVER);
+        ticksUntilNextFireball = ticksBetweenFireballs;
+    }
 
     private static void cloudTick() {
         if (ticksUntilCloudSpinEnd > 0) ticksUntilCloudSpinEnd--;
+        else {
+            dragon.setRotation(dragon.getLocation().getYaw() + 2, dragon.getLocation().getPitch());
+        }
+    }
+
+    private static void cloudStart() {
+        dragon.setPhase(EnderDragon.Phase.HOVER);
+        ticksUntilNextFireball = ticksBetweenFireballs;
+        Objects.requireNonNull(dragon.getLocation().getWorld()).playSound(dragon.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
+        
     }
 
     private static void explosionTick() {
