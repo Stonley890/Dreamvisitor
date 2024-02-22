@@ -46,6 +46,7 @@ public class Bot {
                     .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER)
                     .build();
             Main.debug("Bot created.");
+            Main.botFailed = false;
 
         } catch (LoginException e) {
 

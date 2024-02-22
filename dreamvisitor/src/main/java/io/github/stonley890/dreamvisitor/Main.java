@@ -44,7 +44,7 @@ public class Main extends JavaPlugin {
     public static boolean webWhitelistEnabled;
     public static boolean debugMode;
     public static boolean restartScheduled = false;
-    public static boolean botFailed = false;
+    public static boolean botFailed = true;
 
     // private
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
@@ -73,7 +73,7 @@ public class Main extends JavaPlugin {
             // Create config if needed
             boolean directoryCreated = getDataFolder().mkdir();
             if (!directoryCreated) {
-                Bukkit.getLogger().warning("Dreamvisitor could not create a data folder!");
+                debug("Dreamvisitor did not create a data folder.");
             }
             saveDefaultConfig();
 
@@ -210,6 +210,7 @@ public class Main extends JavaPlugin {
         } catch (Exception e) {
 
             Bukkit.getLogger().severe("Dreamvisitor was unable to start :(\nPlease notify Bog with the following stack trace:");
+            e.printStackTrace();
 
             if (!botFailed) {
                 // Send startup crashes.
@@ -260,7 +261,7 @@ public class Main extends JavaPlugin {
         Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdRadio());
         Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
         Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
-        Objects.requireNonNull(getCommand("itemblacklist")).setExecutor(new CmdItemBanList());
+        Objects.requireNonNull(getCommand("itembanlist")).setExecutor(new CmdItemBanList());
         Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
         Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
         Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
