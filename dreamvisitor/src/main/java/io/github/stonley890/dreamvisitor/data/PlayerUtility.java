@@ -90,17 +90,17 @@ public class PlayerUtility {
     }
 
     public static String getUsernameOfUuid(@NotNull UUID uuid) {
-        Mojang mojang = new Mojang().connect();
+        Mojang mojang = new Mojang();
         return mojang.getPlayerProfile(uuid.toString()).getUsername();
     }
 
     public static String getUsernameOfUuid(@NotNull String uuid) {
-        Mojang mojang = new Mojang().connect();
+        Mojang mojang = new Mojang();
         return mojang.getPlayerProfile(uuid).getUsername();
     }
 
     public static @Nullable UUID getUUIDOfUsername(@NotNull String username) {
-        Mojang mojang = new Mojang().connect();
+        Mojang mojang = new Mojang();
         String uuid = mojang.getUUIDOfUsername(username);
         if (uuid == null) return null;
         try {

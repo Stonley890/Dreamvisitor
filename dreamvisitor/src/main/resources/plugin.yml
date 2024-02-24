@@ -1,6 +1,6 @@
 main: io.github.stonley890.dreamvisitor.Main
 name: Dreamvisitor
-version: '${project.version}'
+version: 2.11.2
 api-version: 1.20
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -170,6 +170,9 @@ permissions:
     default: op
   dreamvisitor.hub:
     description: Allows the hub command.
+    default: true
+  dreamvisitor.hub.leash:
+    description: Allows bringing entities on leashes to the hub.
     default: true
   dreamvisitor.hub.select:
     description: Allows using selectors with the hub command.

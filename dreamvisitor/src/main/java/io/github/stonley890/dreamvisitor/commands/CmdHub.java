@@ -9,10 +9,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CmdHub implements CommandExecutor {
@@ -85,10 +87,30 @@ public class CmdHub implements CommandExecutor {
                         user.setLastLocation(player.getLocation());
                     }
 
-                    player.teleport(Main.hubLocation);
-                    player.spawnParticle(Particle.FIREWORKS_SPARK, Main.hubLocation, 100);
-                    player.playSound(Main.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
-                            1f);
+                    List<LivingEntity> leashed = new ArrayList<>();
+
+                    for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
+                        if (entity instanceof LivingEntity livingEntity && livingEntity.isLeashed() && livingEntity.getLeashHolder().equals(player))
+                            leashed.add(livingEntity);
+                    }
+
+                    if (leashed.isEmpty() || !player.hasPermission("dreamvisitor.hub.leash")) {
+                        player.teleport(Main.hubLocation);
+                        player.spawnParticle(Particle.FIREWORKS_SPARK, Main.hubLocation, 100);
+                        player.playSound(Main.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
+                                1f);
+                    } else {
+
+                        Location tpLocation = Main.hubLocation.clone().subtract(0, 14, 0);
+
+                        player.teleport(tpLocation);
+                        player.spawnParticle(Particle.FIREWORKS_SPARK, tpLocation, 100);
+                        player.playSound(tpLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
+                                1f);
+                        for (LivingEntity entity : leashed) {
+                            entity.teleport(tpLocation);
+                        }
+                    }
                 }
 
             } else if (sender instanceof BlockCommandSender cmdblock) {
