@@ -14,6 +14,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Battlewinner {
@@ -21,6 +23,7 @@ public class Battlewinner {
     static EnderDragon dragon = null;
     static BukkitTask battlewinnerTickingTask = null;
     static float arenaRadius = 16.0f;
+    static Location arenaOrigin = null;
     static Phase currentPhase = Phase.NO_ATTACK;
     static int ticksUntilNextPhase = 20*20;
 
@@ -34,6 +37,7 @@ public class Battlewinner {
     static int ticksUntilExplosion = ticksSpinBeforeExplosion;
     static final int ticksSpinAfterExplosion = 2*20;
     static int ticksUntilExplosionSpinEnd = ticksSpinAfterExplosion;
+    static List<Location> explosionLocations = new ArrayList<>();
 
     enum Phase {
         NO_ATTACK,
@@ -45,12 +49,12 @@ public class Battlewinner {
         LAVA_SPLASH
     }
 
-    public static void spawn(@NotNull Location spawnLocation, float arenaRadius) {
+    public static void spawn(@NotNull Location arenaOrigin, float arenaRadius) {
 
-        dragon = Objects.requireNonNull(spawnLocation.getWorld()).spawn(spawnLocation, EnderDragon.class);
+        dragon = Objects.requireNonNull(arenaOrigin.getWorld()).spawn(arenaOrigin.clone().add(0,5,0), EnderDragon.class);
         dragon.setPhase(EnderDragon.Phase.HOVER);
-        spawnLocation.getWorld().playSound(dragon.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.HOSTILE, 1, 1);
-
+        arenaOrigin.getWorld().playSound(dragon.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.HOSTILE, 1, 1);
+        Battlewinner.arenaOrigin = arenaOrigin;
         battlewinnerTickingTask = Bukkit.getScheduler().runTaskTimer(Main.getPlugin(), new Runnable() {
             @Override
             public void run() {
@@ -118,9 +122,26 @@ public class Battlewinner {
         
     }
 
+    private static void explosionStart() {
+        int subDivisions = 8;
+
+        for (int i = 0; i < subDivisions; i++) {
+            Location explosionLocation = arenaOrigin.clone();
+            explosionLocation.setYaw((float) (360 / subDivisions) * i);
+            explosionLocations.add(explosionLocation);  
+        }
+    }
+
     private static void explosionTick() {
         if (ticksUntilExplosion > 0) ticksUntilExplosion--;
-        else if (ticksUntilExplosionSpinEnd > 0) ticksUntilExplosionSpinEnd--;
+        else if (ticksUntilExplosionSpinEnd > 0) {
+
+
+
+            ticksUntilExplosionSpinEnd--;
+        }
+
+        dragon.setRotation(dragon.getLocation().getYaw() + 2, dragon.getLocation().getPitch());
     }
 
 
