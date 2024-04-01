@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
@@ -25,6 +25,8 @@ public class CmdTribeUpdate implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
 
+        // tribeupdate [<playerTargets>]
+
         List<Player> targets = new ArrayList<>();
 
         if (args.length == 0) {
@@ -32,7 +34,7 @@ public class CmdTribeUpdate implements CommandExecutor {
             if (sender instanceof Player player) {
                 targets.add(player);
             } else {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Missing arguments! /tribeupdate <targets>");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments! /tribeupdate <targets>");
                 return true;
             }
         } else if (args.length == 1) {
@@ -42,13 +44,13 @@ public class CmdTribeUpdate implements CommandExecutor {
             try {
                 entities = Bukkit.selectEntities(sender, args[0]);
             } catch (IllegalArgumentException e) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Incorrect arguments! /tribeupdate <targets>");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Incorrect arguments! /tribeupdate <targets>");
                 return true;
             }
 
             // Check if empty
             if (entities.isEmpty()) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "No players were selected.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No players were selected.");
                 return true;
             }
 
@@ -57,27 +59,27 @@ public class CmdTribeUpdate implements CommandExecutor {
                 if (entity instanceof Player player) {
                     targets.add(player);
                 } else {
-                    sender.sendMessage(Main.PREFIX + ChatColor.RED + "This command is only applicable to players.");
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command is only applicable to players.");
                     return true;
                 }
             }
 
         } else {
-            sender.sendMessage(Main.PREFIX + ChatColor.RED + "Too many arguments! /tribeupdate <targets>");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Too many arguments! /tribeupdate <targets>");
             return true;
         }
 
         // Target selection is good
 
         // This may take some time
-        sender.sendMessage(Main.PREFIX + "Please wait...");
+        sender.sendMessage(Dreamvisitor.PREFIX + "Please wait...");
 
         Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
 
         // Run async
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
 
-            List<String> tribeRoles = Main.getPlugin().getConfig().getStringList("tribeRoles");
+            List<String> tribeRoles = Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles");
 
             for (Player player : targets) {
 
@@ -88,12 +90,12 @@ public class CmdTribeUpdate implements CommandExecutor {
                 try {
                     discordId = AccountLink.getDiscordId(uuid);
                 } catch (NullPointerException e) {
-                    sender.sendMessage(Main.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
+                    sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
                     continue;
                 }
 
-                Main.debug(player.getUniqueId().toString());
-                Main.debug(String.valueOf(discordId));
+                Dreamvisitor.debug(player.getUniqueId().toString());
+                Dreamvisitor.debug(String.valueOf(discordId));
 
                 // Retrieve user from JDA
                 User user = Bot.getJda().retrieveUserById(discordId).complete();
@@ -115,7 +117,7 @@ public class CmdTribeUpdate implements CommandExecutor {
                             Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(i));
 
                             if (targetRole == null) {
-                                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
+                                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
                                 break;
                             }
 
@@ -130,7 +132,7 @@ public class CmdTribeUpdate implements CommandExecutor {
 
             }
 
-            Bukkit.getScheduler().runTask(Main.getPlugin(), () -> sender.sendMessage(Main.PREFIX + "Updated " + targets.size() + " players."));
+            Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + targets.size() + " players."));
 
         });
 

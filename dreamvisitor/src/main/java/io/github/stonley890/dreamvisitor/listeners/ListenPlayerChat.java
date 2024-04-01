@@ -16,12 +16,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerChat implements Listener {
 
-    final Main plugin = Main.getPlugin();
+    final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     
     @EventHandler
     @SuppressWarnings({"null"})
@@ -32,7 +32,7 @@ public class ListenPlayerChat implements Listener {
 
             if (memory.autoRadio) {
                 event.setCancelled(true);
-                Bukkit.getScheduler().runTask(Main.getPlugin(), () -> Bukkit.dispatchCommand(event.getPlayer(), "radio " + event.getMessage()));
+                Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Bukkit.dispatchCommand(event.getPlayer(), "radio " + event.getMessage()));
                 return;
             }
         }
@@ -45,7 +45,7 @@ public class ListenPlayerChat implements Listener {
 
         String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + "**: " + event.getMessage();
 
-        if (Main.chatPaused && !event.isCancelled()) {
+        if (Dreamvisitor.chatPaused && !event.isCancelled()) {
 
             // Load pauseBypass file
             File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");

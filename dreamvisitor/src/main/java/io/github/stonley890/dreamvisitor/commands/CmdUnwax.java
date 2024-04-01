@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.ChatColor;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Particle;
@@ -16,6 +16,8 @@ public class CmdUnwax implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
+        // unwax
+
         if (sender instanceof Player player) {
             Block targetBlock = player.getTargetBlockExact(10, FluidCollisionMode.NEVER);
 
@@ -24,9 +26,9 @@ public class CmdUnwax implements CommandExecutor {
                 sign.setWaxed(false);
                 sign.update(false);
                 sign.getWorld().spawnParticle(Particle.WAX_OFF, sign.getLocation().add(0.5, 0.5, 0.5), 5);
-                sender.sendMessage(Main.PREFIX + "Wax, be gone!");
-            } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "That is not a sign.");
-        } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "This command must be run by a player!");
+                sender.sendMessage(Dreamvisitor.PREFIX + "Wax, be gone!");
+            } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That is not a sign.");
+        } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be run by a player!");
 
         return true;
     }

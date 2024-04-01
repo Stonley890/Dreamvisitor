@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
@@ -26,6 +26,8 @@ public class CmdSandbox implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
 
+        // sandbox [<player> [on | off]]
+
         if (args.length == 0) {
 
             List<Player> sandboxedPlayers = new ArrayList<>();
@@ -36,11 +38,11 @@ public class CmdSandbox implements CommandExecutor {
             }
 
             if (sandboxedPlayers.isEmpty()) {
-                sender.sendMessage(Main.PREFIX + "No players currently online are in sandbox mode. Use /sandbox <player> [on|off] to toggle sandbox mode.");
+                sender.sendMessage(Dreamvisitor.PREFIX + "No players currently online are in sandbox mode. Use /sandbox <player> [on|off] to toggle sandbox mode.");
                 return true;
             }
 
-            ComponentBuilder messageBuilder = new ComponentBuilder(Main.PREFIX + "Players currently sandboxed:\n");
+            ComponentBuilder messageBuilder = new ComponentBuilder(Dreamvisitor.PREFIX + "Players currently sandboxed:\n");
 
             HoverEvent tooltop = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to remove."));
 
@@ -63,7 +65,7 @@ public class CmdSandbox implements CommandExecutor {
 
             for (Entity targetedEntity : targetedEntities) {
                 if (!(targetedEntity instanceof Player)) {
-                    sender.sendMessage(Main.PREFIX + ChatColor.RED + "This command only applies to players!");
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command only applies to players!");
                     return true;
                 }
                 targetedPlayers.add((Player) targetedEntity);
@@ -74,15 +76,15 @@ public class CmdSandbox implements CommandExecutor {
                 if (args[1].equals("on")) {
 
                     targetedPlayers.forEach(Sandbox::enableSandbox);
-                    sender.sendMessage(Main.PREFIX + "Enabled sandbox mode for " + targetedPlayers.size() + " players.");
+                    sender.sendMessage(Dreamvisitor.PREFIX + "Enabled sandbox mode for " + targetedPlayers.size() + " players.");
 
                 } else if (args[1].equals("off")) {
 
                     targetedPlayers.forEach(Sandbox::disableSandbox);
-                    sender.sendMessage(Main.PREFIX + "Disabled sandbox mode for " + targetedPlayers.size() + " players.");
+                    sender.sendMessage(Dreamvisitor.PREFIX + "Disabled sandbox mode for " + targetedPlayers.size() + " players.");
 
                 } else {
-                    sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid argument! /sandbox [player] [on|off]");
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid argument! /sandbox [player] [on|off]");
                 }
             } else {
                 // Toggle
@@ -90,7 +92,7 @@ public class CmdSandbox implements CommandExecutor {
                     if (PlayerUtility.getPlayerMemory(player.getUniqueId()).sandbox) Sandbox.disableSandbox(player);
                     else Sandbox.enableSandbox(player);
                 });
-                sender.sendMessage(Main.PREFIX + "Toggled sandbox mode for " + targetedPlayers.size() + " players.");
+                sender.sendMessage(Dreamvisitor.PREFIX + "Toggled sandbox mode for " + targetedPlayers.size() + " players.");
             }
         }
 

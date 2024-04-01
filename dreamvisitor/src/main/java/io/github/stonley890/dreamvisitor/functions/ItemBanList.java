@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.functions;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,7 +18,7 @@ public class ItemBanList implements Listener {
     public static ItemStack[] badItems;
 
     public static void saveItems() {
-        Main plugin = Main.getPlugin();
+        Dreamvisitor plugin = Dreamvisitor.getPlugin();
         badItems = inv.getContents();
         plugin.getConfig().set("itemBlacklist", badItems);
         plugin.saveConfig();

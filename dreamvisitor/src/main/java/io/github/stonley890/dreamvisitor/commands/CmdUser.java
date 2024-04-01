@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.ChatColor;
@@ -17,21 +17,23 @@ public class CmdUser implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
 
+        // user <name>
+
         // Must have at least 1 argument
         if (args.length > 0) {
-            sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Searching for " + args[0]);
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Searching for " + args[0]);
 
             // Get UUID
             UUID uuid = PlayerUtility.getUUIDOfUsername(args[0]);
 
             if /* The UUID could not be found */ (uuid == null) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "That user could not be found!");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That user could not be found!");
             } else {
 
                 // Get username (for proper CASE)
                 String username = PlayerUtility.getUsernameOfUuid(uuid);
 
-                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Player found. Looking for data.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Player found. Looking for data.");
 
                 String discordID;
                 String discordUsername = "N/A";
@@ -48,7 +50,7 @@ public class CmdUser implements CommandExecutor {
 
                 }
 
-                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Local data for player " + username + ":" +
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Local data for player " + username + ":" +
                         "\nUUID: " + uuid +
                         "\nDiscord Username: " + discordUsername +
                         "\nDiscord ID: " + discordID
@@ -57,7 +59,7 @@ public class CmdUser implements CommandExecutor {
 
             }
         } else {
-            sender.sendMessage(Main.PREFIX +
+            sender.sendMessage(Dreamvisitor.PREFIX +
                     ChatColor.RED + "Missing arguments! /user <username>");
         }
 

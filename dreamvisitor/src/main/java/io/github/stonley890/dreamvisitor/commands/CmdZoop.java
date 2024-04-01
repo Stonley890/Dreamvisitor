@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.ChatColor;
@@ -15,6 +15,8 @@ public class CmdZoop implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+
+        // zoop
 
         // If cmd executor is player
         if (sender instanceof Player player) {
@@ -39,7 +41,7 @@ public class CmdZoop implements CommandExecutor {
 
             PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
 
-            player.sendMessage(Main.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.vanished + ".");
+            player.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.vanished + ".");
 
         } else {
             sender.sendMessage(ChatColor.RED + "This command can only be executed by a player!");

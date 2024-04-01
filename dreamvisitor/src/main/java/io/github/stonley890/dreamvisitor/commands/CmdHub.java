@@ -2,7 +2,7 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.*;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -19,10 +19,12 @@ import java.util.List;
 
 public class CmdHub implements CommandExecutor {
 
-    final Main plugin = Main.getPlugin();
+    final Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+
+        // hub [<targets>]
 
         if (sender.hasPermission("dreamvisitor.hub")) {
 
@@ -32,19 +34,19 @@ public class CmdHub implements CommandExecutor {
             try {
                 entities = Bukkit.selectEntities(sender, args[0]);
             } catch (IllegalArgumentException e) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments!");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments!");
                 return true;
             }
 
             if (entities.isEmpty()) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "No targets selected.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No targets selected.");
             } else {
                 if (plugin.getConfig().getLocation("hubLocation") == null) {
-                    sender.sendMessage(Main.PREFIX + ChatColor.RED + "No hub is currently set!");
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No hub is currently set!");
                 } else {
 
-                    Main.hubLocation = plugin.getConfig().getLocation("hubLocation");
-                    assert Main.hubLocation != null;
+                    Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
+                    assert Dreamvisitor.hubLocation != null;
 
                     Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
 
@@ -58,26 +60,26 @@ public class CmdHub implements CommandExecutor {
                                 user.setLastLocation(player.getLocation());
                             }
 
-                            player.teleport(Main.hubLocation);
-                            player.spawnParticle(Particle.FIREWORKS_SPARK, Main.hubLocation, 100);
-                            player.playSound(Main.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,1f);
-                        } else entity.teleport(Main.hubLocation, TeleportCause.COMMAND);
+                            player.teleport(Dreamvisitor.hubLocation);
+                            player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                            player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,1f);
+                        } else entity.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
                     }
                 }
                 if (entities.size() == 1)
-                    sender.sendMessage(Main.PREFIX + "Teleported " + entities.get(0).getName() + " to the hub.");
+                    sender.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entities.get(0).getName() + " to the hub.");
                 else
-                    sender.sendMessage(Main.PREFIX + "Teleported " + entities.size() + " entities to the hub.");
+                    sender.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entities.size() + " entities to the hub.");
             }
 
         } else {
             if (sender instanceof Player) {
                 if (plugin.getConfig().getLocation("hubLocation") == null) {
-                    sender.sendMessage(Main.PREFIX + ChatColor.RED + "No hub is currently set!");
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No hub is currently set!");
                 } else {
 
-                    Main.hubLocation = plugin.getConfig().getLocation("hubLocation");
-                    assert Main.hubLocation != null;
+                    Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
+                    assert Dreamvisitor.hubLocation != null;
 
                     Player player = (Player) sender;
 
@@ -95,13 +97,13 @@ public class CmdHub implements CommandExecutor {
                     }
 
                     if (leashed.isEmpty() || !player.hasPermission("dreamvisitor.hub.leash")) {
-                        player.teleport(Main.hubLocation);
-                        player.spawnParticle(Particle.FIREWORKS_SPARK, Main.hubLocation, 100);
-                        player.playSound(Main.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
+                        player.teleport(Dreamvisitor.hubLocation);
+                        player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                        player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                                 1f);
                     } else {
 
-                        Location tpLocation = Main.hubLocation.clone().subtract(0, 14, 0);
+                        Location tpLocation = Dreamvisitor.hubLocation.clone().subtract(0, 14, 0);
 
                         player.teleport(tpLocation);
                         player.spawnParticle(Particle.FIREWORKS_SPARK, tpLocation, 100);
@@ -131,7 +133,7 @@ public class CmdHub implements CommandExecutor {
 
                 if (closest != null) {
                     if (plugin.getConfig().getLocation("hubLocation") == null) {
-                        sender.sendMessage(Main.PREFIX + ChatColor.RED + "No hub is currently set!");
+                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No hub is currently set!");
                     } else {
 
                         Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
@@ -140,19 +142,19 @@ public class CmdHub implements CommandExecutor {
                             user.setLastLocation(closest.getLocation());
                         }
 
-                        closest.teleport(Main.hubLocation);
-                        closest.spawnParticle(Particle.FIREWORKS_SPARK, Main.hubLocation, 100);
-                        closest.playSound(Main.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
+                        closest.teleport(Dreamvisitor.hubLocation);
+                        closest.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                        closest.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
                                 1f);
                     }
                 }
 
             } else {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Missing arguments! /hub [targets]");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments! /hub [targets]");
             }
         }
 
-        } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "You do not have permission to run that command!");
+        } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You do not have permission to run that command!");
 
         return true;
 

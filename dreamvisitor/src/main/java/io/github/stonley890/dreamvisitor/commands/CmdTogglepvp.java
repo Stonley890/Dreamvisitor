@@ -6,16 +6,19 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdTogglepvp implements CommandExecutor {
 
-    final Main plugin = Main.getPlugin();
+    final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     final String pvpDisabled = "disablepvp";
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+
+        // togglepvp
+
         // Change config
         if (plugin.getConfig().getBoolean(pvpDisabled)) {
             plugin.getConfig().set(pvpDisabled, false);

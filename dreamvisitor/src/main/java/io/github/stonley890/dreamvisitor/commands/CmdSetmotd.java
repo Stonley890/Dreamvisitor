@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,10 +10,12 @@ public class CmdSetmotd implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
 
+        // setmotd [<new-motd>...]
+
         if (args.length == 0) {
-            Main.MOTD = null;
-            sender.sendMessage(Main.PREFIX + "Reset MOTD to default:\n" + sender.getServer().getMotd());
-            Main.debug("Existing MOTD: " + sender.getServer().getMotd());
+            Dreamvisitor.MOTD = null;
+            sender.sendMessage(Dreamvisitor.PREFIX + "Reset MOTD to default:\n" + sender.getServer().getMotd());
+            Dreamvisitor.debug("Existing MOTD: " + sender.getServer().getMotd());
         } else {
 
             StringBuilder builder = new StringBuilder();
@@ -21,12 +23,12 @@ public class CmdSetmotd implements CommandExecutor {
                 builder.append(arg).append(" ");
             }
 
-            Main.debug("Before formatting: " + builder);
+            Dreamvisitor.debug("Before formatting: " + builder);
             String newMotd = builder.toString().replaceAll("&", "§").replaceAll("\\\\n","\n").strip();
 
-            Main.MOTD = newMotd;
-            sender.sendMessage(Main.PREFIX + "MOTD set to\n" + newMotd);
-            Main.debug("New MOTD: " + newMotd);
+            Dreamvisitor.MOTD = newMotd;
+            sender.sendMessage(Dreamvisitor.PREFIX + "MOTD set to\n" + newMotd);
+            Dreamvisitor.debug("New MOTD: " + newMotd);
         }
 
         return true;

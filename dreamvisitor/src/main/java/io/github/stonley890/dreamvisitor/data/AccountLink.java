@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.data;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class AccountLink {
 
-    static final Main plugin = Main.getPlugin();
+    static final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     static final File accountFile = new File(plugin.getDataFolder().getPath() + "/accountLink.txt");
 
     static final Map<UUID, Long> uuidToDiscordIdMap = new HashMap<>();
@@ -21,14 +21,14 @@ public class AccountLink {
     public static void init() throws IOException {
         // If the file does not exist, create one
         if (!accountFile.exists()) {
-            Main.debug("accountLink.txt does not exist. Creating one now...");
+            Dreamvisitor.debug("accountLink.txt does not exist. Creating one now...");
             if (!accountFile.createNewFile()) Bukkit.getLogger().warning("Unable to create accountLink.txt!");
         }
         loadFromFile();
     }
 
     private static void loadFromFile() throws IOException {
-        Main.debug("Loading accountLink.txt");
+        Dreamvisitor.debug("Loading accountLink.txt");
         BufferedReader reader = new BufferedReader(new FileReader(accountFile));
         String line;
         while ((line = reader.readLine()) != null) {
@@ -44,17 +44,17 @@ public class AccountLink {
     }
 
     public static void saveFile() throws IOException {
-        Main.debug("Saving...");
+        Dreamvisitor.debug("Saving...");
         BufferedWriter writer = new BufferedWriter(new FileWriter(accountFile));
         for (Map.Entry<UUID, Long> entry : uuidToDiscordIdMap.entrySet()) {
             UUID uuid = entry.getKey();
-            Main.debug("UUID for this entry: " + uuid.toString());
+            Dreamvisitor.debug("UUID for this entry: " + uuid.toString());
             long discordId = entry.getValue();
-            Main.debug("Discord ID for this entry: " + discordId);
+            Dreamvisitor.debug("Discord ID for this entry: " + discordId);
 
             writer.write(uuid.toString().replaceAll("-","") + ":" + discordId);
             writer.newLine();
-            Main.debug("Line written");
+            Dreamvisitor.debug("Line written");
         }
         writer.close();
     }
@@ -76,7 +76,7 @@ public class AccountLink {
         // set values
         uuidToDiscordIdMap.put(minecraftUUID, discordId);
         discordIdToUuidMap.put(discordId, minecraftUUID);
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
             try {
                 AccountLink.saveFile();
             } catch (IOException e) {

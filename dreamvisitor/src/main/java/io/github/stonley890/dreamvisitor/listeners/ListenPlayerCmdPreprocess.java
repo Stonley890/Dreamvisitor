@@ -14,13 +14,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.md_5.bungee.api.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerCmdPreprocess implements Listener {
 
-    final Main plugin = Main.getPlugin();
+    final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     final String[] msgAliases = {"/msg ","/tell ","/whisper ","/reply ","/t ","/w ","/r ", "/mail send "};
 
     @EventHandler
@@ -33,7 +33,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
         if ((cmd.startsWith("/me " ) || cmd.startsWith("/rp" )) && !event.isCancelled()) {
 
             // IF chatPaused stop /me unless bypassing
-            if (Main.chatPaused) {
+            if (Dreamvisitor.chatPaused) {
 
                 // Init bypassed players file
                 File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");

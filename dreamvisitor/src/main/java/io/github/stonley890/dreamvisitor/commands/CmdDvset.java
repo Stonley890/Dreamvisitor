@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.commands;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import net.md_5.bungee.api.ChatColor;
@@ -24,6 +24,8 @@ public class CmdDvset implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
 
+        // dvset [user|admin [<option> (<action>)]]
+
         if (args.length == 0) {
             if (sender instanceof Player player && sender.hasPermission("dreamvisitor.userset")) {
                 // Player GUI
@@ -43,10 +45,10 @@ public class CmdDvset implements CommandExecutor {
 
                                     if (args.length == 3) {
                                         memory.discordToggled = Boolean.parseBoolean(args[2]);
-                                        sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Discord Visibility toggled to " + ChatColor.WHITE + memory.discordToggled);
-                                    } else sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Discord Visibility is currently set to " + ChatColor.WHITE + memory.discordToggled);
+                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility toggled to " + ChatColor.WHITE + memory.discordToggled);
+                                    } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility is currently set to " + ChatColor.WHITE + memory.discordToggled);
 
-                                } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
+                                } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
                             }
                             case "vanished" -> {
                                 if (sender.hasPermission("dreamvisitor.set.zoop")) {
@@ -64,32 +66,32 @@ public class CmdDvset implements CommandExecutor {
                                             Bot.sendMessage(Bot.gameLogChannel, chatMessage);
                                         }
 
-                                        sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Discord Vanish toggled to " + ChatColor.WHITE + memory.vanished);
-                                    } else sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Discord Vanish is currently set to " + ChatColor.WHITE + memory.vanished);
+                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish toggled to " + ChatColor.WHITE + memory.vanished);
+                                    } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish is currently set to " + ChatColor.WHITE + memory.vanished);
 
-                                } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
+                                } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
                             }
                             case "autoinvswap" -> {
                                 if (sender.hasPermission("dreamvisitor.set.autoinvswap")) {
 
                                     if (args.length == 3) {
                                         memory.autoinvswap = Boolean.parseBoolean(args[2]);
-                                        sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap toggled to " + ChatColor.WHITE + memory.autoinvswap);
-                                    } else sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap is currently set to " + ChatColor.WHITE + memory.autoinvswap);
+                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap toggled to " + ChatColor.WHITE + memory.autoinvswap);
+                                    } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap is currently set to " + ChatColor.WHITE + memory.autoinvswap);
 
-                                } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
+                                } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
                             }
                             case "autoradio" -> {
                                 if (sender.hasPermission("dreamvisitor.set.autoradio")) {
 
                                     if (args.length == 3) {
                                         memory.autoRadio = Boolean.parseBoolean(args[2]);
-                                        sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Automatic Radio toggled to " + ChatColor.WHITE + memory.autoRadio);
-                                    } else sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Automatic Radio is currently set to " + ChatColor.WHITE + memory.autoRadio);
+                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Radio toggled to " + ChatColor.WHITE + memory.autoRadio);
+                                    } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Radio is currently set to " + ChatColor.WHITE + memory.autoRadio);
 
-                                } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
+                                } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
                             }
-                            default -> sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
+                            default -> sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
                         }
 
                         PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
@@ -99,7 +101,7 @@ public class CmdDvset implements CommandExecutor {
                     // Player GUI
                     sendUserGui(player);
 
-                } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "This command must be run by a player.");
+                } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be run by a player.");
 
             } else if (args[0].equals("admin") && sender.hasPermission("dreamvisitor.adminset")) {
                 if (args.length > 1) {
@@ -109,9 +111,9 @@ public class CmdDvset implements CommandExecutor {
                             if (sender.hasPermission("dreamvisitor.pausechat")) {
                                 if (args.length == 3) {
 
-                                    Main.chatPaused = Boolean.parseBoolean(args[2]);
+                                    Dreamvisitor.chatPaused = Boolean.parseBoolean(args[2]);
 
-                                    if (Main.chatPaused) {
+                                    if (Dreamvisitor.chatPaused) {
                                         // Broadcast to server
                                         Bukkit.getServer().broadcastMessage(org.bukkit.ChatColor.BLUE + "Chat has been paused.");
                                         // Broadcast to chat channel
@@ -124,11 +126,11 @@ public class CmdDvset implements CommandExecutor {
                                         // Broadcast to chat channel
                                         Bot.sendMessage(Bot.gameChatChannel, "**Chat has been unpaused. Messages will now be sent to Minecraft**");
                                     }
-                                    Main.getPlugin().getConfig().set("chatPaused", Main.chatPaused);
-                                    Main.getPlugin().saveConfig();
+                                    Dreamvisitor.getPlugin().getConfig().set("chatPaused", Dreamvisitor.chatPaused);
+                                    Dreamvisitor.getPlugin().saveConfig();
 
-                                    sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Chat Pause toggled to " + ChatColor.WHITE + Main.chatPaused);
-                                } else sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Chat Pause is currently set to " + ChatColor.WHITE + Main.chatPaused);
+                                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Chat Pause toggled to " + ChatColor.WHITE + Dreamvisitor.chatPaused);
+                                } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Chat Pause is currently set to " + ChatColor.WHITE + Dreamvisitor.chatPaused);
                             }
 
                         }
@@ -137,15 +139,15 @@ public class CmdDvset implements CommandExecutor {
                                 if (args.length == 3) {
 
                                     // Set config
-                                    Main.getPlugin().getConfig().set("softwhitelist", Boolean.parseBoolean(args[2]));
-                                    Main.getPlugin().saveConfig();
+                                    Dreamvisitor.getPlugin().getConfig().set("softwhitelist", Boolean.parseBoolean(args[2]));
+                                    Dreamvisitor.getPlugin().saveConfig();
 
-                                    sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Soft Whitelist toggled to " + ChatColor.WHITE + Boolean.parseBoolean(args[2]));
-                                } else sender.sendMessage(Main.PREFIX + ChatColor.GRAY + "Soft Whitelist is currently set to " + ChatColor.WHITE + Boolean.parseBoolean(args[2]));
+                                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Soft Whitelist toggled to " + ChatColor.WHITE + Boolean.parseBoolean(args[2]));
+                                } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Soft Whitelist is currently set to " + ChatColor.WHITE + Boolean.parseBoolean(args[2]));
                             }
 
                         }
-                        default -> sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
+                        default -> sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
                     }
 
                 }
@@ -155,7 +157,7 @@ public class CmdDvset implements CommandExecutor {
                     sendAdminGui(player);
                 }
 
-            } else sender.sendMessage(Main.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
+            } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments or insufficient permissions!");
         }
 
         return true;
@@ -165,7 +167,7 @@ public class CmdDvset implements CommandExecutor {
 
         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
-        ComponentBuilder builder = new ComponentBuilder(Main.PREFIX);
+        ComponentBuilder builder = new ComponentBuilder(Dreamvisitor.PREFIX);
         builder.append("User Options ");
 
         if (player.hasPermission("dreamvisitor.adminset")) {
@@ -218,7 +220,7 @@ public class CmdDvset implements CommandExecutor {
 
     private static void sendAdminGui(Player player) {
 
-        ComponentBuilder builder = new ComponentBuilder(Main.PREFIX);
+        ComponentBuilder builder = new ComponentBuilder(Dreamvisitor.PREFIX);
         builder.append("Admin Options ").color(ChatColor.DARK_AQUA);
 
         if (player.hasPermission("dreamvisitor.userset")) {
@@ -235,7 +237,7 @@ public class CmdDvset implements CommandExecutor {
             builder.append("\n\nChat Pause: ").color(ChatColor.WHITE)
                     .append("\nWhether to stop player messages.").color(ChatColor.DARK_AQUA)
                     .append("\n[").color(ChatColor.DARK_GRAY)
-                    .append(booleanToggle(Main.chatPaused, false, "pausechat"))
+                    .append(booleanToggle(Dreamvisitor.chatPaused, false, "pausechat"))
                     .append("").reset().append("]").color(ChatColor.DARK_GRAY);
         }
 
@@ -243,14 +245,14 @@ public class CmdDvset implements CommandExecutor {
             builder.append("\n\nSoft Whitelist: ").color(ChatColor.WHITE)
                     .append("\nWhether to enforce the soft whitelist.").color(ChatColor.DARK_AQUA)
                     .append("\n[").color(ChatColor.DARK_GRAY)
-                    .append(booleanToggle(Main.getPlugin().getConfig().getBoolean("softwhitelist"), false, "softwhitelist"))
+                    .append(booleanToggle(Dreamvisitor.getPlugin().getConfig().getBoolean("softwhitelist"), false, "softwhitelist"))
                     .append("").reset().append("]").color(ChatColor.DARK_GRAY);
 
             builder.append("\n\nSoft Whitelist Players: ").color(ChatColor.WHITE)
                     .append("\nThe players allowed by the soft whitelist.").color(ChatColor.DARK_AQUA);
 
             // Load softWhitelist.yml
-            File file = new File(Main.getPlugin().getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
+            File file = new File(Dreamvisitor.getPlugin().getDataFolder().getAbsolutePath() + "/softWhitelist.yml");
             FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
 
             BaseComponent[] playerList = playerList(fileConfig.getStringList("players"));
@@ -281,7 +283,7 @@ public class CmdDvset implements CommandExecutor {
             builder.append("\n\nPlayer Limit Override: ").color(ChatColor.WHITE)
                     .append("\nOverride server player limit. Set to -1 to use default.").color(ChatColor.DARK_AQUA)
                     .append("\n[").color(ChatColor.DARK_GRAY);
-            TextComponent value = intToggle(Main.playerLimit);
+            TextComponent value = intToggle(Dreamvisitor.playerLimit);
             value.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/playerlimit "));
             builder.append(value)
                     .append("").reset().append("]").color(ChatColor.DARK_GRAY).underlined(false);

@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,12 +21,14 @@ import java.util.UUID;
 
 public class CmdPauseBypass implements CommandExecutor {
 
-    final Main plugin = Main.getPlugin();
+    final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     final String playerList = "players";
     List<String> bypassedPlayers = new ArrayList<>(100);
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+
+        // pausebypass [add <player> | remove <player> | list]
 
         // Load pauseBypass.yml
         File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
@@ -36,12 +38,12 @@ public class CmdPauseBypass implements CommandExecutor {
         if (!file.exists()) {
             try {
                 if (!file.createNewFile()) {
-                    sender.sendMessage(Main.PREFIX + ChatColor.RED + "There was a problem accessing the file.");
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "There was a problem accessing the file.");
                     return false;
                 }
 
             } catch (IOException e) {
-                sender.sendMessage(Main.PREFIX +
+                sender.sendMessage(Dreamvisitor.PREFIX +
                         ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
                 throw new RuntimeException();
             }
@@ -51,7 +53,7 @@ public class CmdPauseBypass implements CommandExecutor {
         try {
             fileConfig.load(file);
         } catch (IOException | InvalidConfigurationException e1) {
-            sender.sendMessage(Main.PREFIX +
+            sender.sendMessage(Dreamvisitor.PREFIX +
                     ChatColor.RED + "There was a problem accessing the file. Check console for stacktrace.");
             throw new RuntimeException();
         }
@@ -59,7 +61,7 @@ public class CmdPauseBypass implements CommandExecutor {
         bypassedPlayers = fileConfig.getStringList(playerList);
 
         if (args.length == 0) {
-            sender.sendMessage(Main.PREFIX + ChatColor.RED + "Missing arguments!");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments!");
             return false;
         }
 
@@ -70,7 +72,7 @@ public class CmdPauseBypass implements CommandExecutor {
                 // Attempt to modify
                 modifyList(true, args[1], sender);
             } else {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "You must include a player!");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must include a player!");
             }
 
 
@@ -81,7 +83,7 @@ public class CmdPauseBypass implements CommandExecutor {
                 // Attempt to modify
                 modifyList(false, args[1], sender);
             } else {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "You must include a player!");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must include a player!");
             }
 
 
@@ -96,10 +98,10 @@ public class CmdPauseBypass implements CommandExecutor {
                 }
                 list.append(PlayerUtility.getUsernameOfUuid(players));
             }
-            sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Players bypassing: " + list);
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Players bypassing: " + list);
 
         } else {
-            sender.sendMessage(Main.PREFIX + ChatColor.RED + "Incorrect arguments!");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Incorrect arguments!");
             return false;
         }
 
@@ -124,17 +126,17 @@ public class CmdPauseBypass implements CommandExecutor {
 
         if (bypassedPlayers.contains(player.getUniqueId().toString())) {
             if (add) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "That player is already allowed.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That player is already allowed.");
             } else {
                 bypassedPlayers.remove(player.getUniqueId().toString());
-                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + playerName + " is no longer bypassing.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + playerName + " is no longer bypassing.");
             }
         } else {
             if (add) {
                 bypassedPlayers.add(player.getUniqueId().toString());
-                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + playerName + " is now bypassing.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + playerName + " is now bypassing.");
             } else {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "That player is already not allowed.");
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That player is already not allowed.");
             }
         }
 

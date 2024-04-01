@@ -2,9 +2,7 @@ package io.github.stonley890.dreamvisitor;
 
 import io.github.stonley890.dreamvisitor.commands.*;
 import io.github.stonley890.dreamvisitor.commands.tabcomplete.*;
-import io.github.stonley890.dreamvisitor.data.AccountLink;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import io.github.stonley890.dreamvisitor.data.Whitelist;
+import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.functions.ItemBanList;
 import io.github.stonley890.dreamvisitor.functions.Moonglobe;
@@ -31,10 +29,10 @@ import java.util.logging.Level;
 */
 
 @SuppressWarnings({ "null" })
-public class Main extends JavaPlugin {
+public class Dreamvisitor extends JavaPlugin {
 
     // public
-    public static Main PLUGIN;
+    public static Dreamvisitor PLUGIN;
     public static String MOTD = null;
     public final String VERSION = getDescription().getVersion();
     public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
@@ -81,6 +79,14 @@ public class Main extends JavaPlugin {
             debug("Initializing accountLink.txt");
             AccountLink.init();
 
+            // Initialize infractions
+            debug("Initializing infractions.yml");
+            Infraction.init();
+
+            // Init alts
+            debug("Initializing alts.yml");
+            AltFamily.init();
+
             // Start message
             getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
 
@@ -91,7 +97,7 @@ public class Main extends JavaPlugin {
             if (!botFailed) {
                 // Get saved data
                 debug("Fetching recorded channels and roles from config.");
-                DiscCommandsManager.initChannelsRoles(getConfig());
+                DiscCommandsManager.init(getConfig());
 
                 // Send server start message
                 Bot.gameLogChannel.sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
@@ -134,7 +140,7 @@ public class Main extends JavaPlugin {
                 // Push console log to Discord every 2 seconds
                 @Override
                 public void run() {
-                    if (Main.getPlugin().getConfig().getBoolean("log-console")) {
+                    if (Dreamvisitor.getPlugin().getConfig().getBoolean("log-console")) {
 
                         // If there are no messages in the queue, return
                         if (ConsoleLogger.messageBuilder.isEmpty()) return;
@@ -178,7 +184,7 @@ public class Main extends JavaPlugin {
                     }
 
                     // also check for missing channels
-                    if (Bot.gameLogChannel == null || Bot.gameChatChannel == null || Bot.whitelistChannel == null) DiscCommandsManager.initChannelsRoles(getConfig());
+                    if (Bot.gameLogChannel == null || Bot.gameChatChannel == null || Bot.whitelistChannel == null) DiscCommandsManager.init(getConfig());
 
                     // also check if memory usage is high and schedule restart
                     long maxMemory = Runtime.getRuntime().maxMemory();
@@ -273,6 +279,7 @@ public class Main extends JavaPlugin {
         Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
         Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
         Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
+        Objects.requireNonNull(getCommand("setback")).setExecutor(new CmdSetback());
     }
 
     private void registerTabCompletion() {
@@ -281,9 +288,10 @@ public class Main extends JavaPlugin {
         Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
         Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
         Objects.requireNonNull(getCommand("moonglobe")).setTabCompleter(new TabMoonglobe());
+        Objects.requireNonNull(getCommand("setback")).setTabCompleter(new TabSetback());
     }
 
-    public static Main getPlugin() {
+    public static Dreamvisitor getPlugin() {
         return PLUGIN;
     }
 
@@ -320,7 +328,7 @@ public class Main extends JavaPlugin {
                 PlayerUtility.clearPlayerMemory(player.getUniqueId());
             } catch (IOException e) {
                 Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access?");
-                if (Main.debugMode) throw new RuntimeException();
+                if (Dreamvisitor.debugMode) throw new RuntimeException();
             }
         }
 

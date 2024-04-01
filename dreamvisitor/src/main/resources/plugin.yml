@@ -1,6 +1,6 @@
 main: io.github.stonley890.dreamvisitor.Main
 name: Dreamvisitor
-version: 2.11.2
+version: 2.12.0
 api-version: 1.20
 description: A plugin created by Bog for WoF:TNW to add various features.
 author: Stonley890
@@ -38,11 +38,11 @@ commands:
     permission: dreamvisitor.zoop
   softwhitelist:
     description: Add or remove a player to/from the soft whitelist. This acts as another whitelist 'layer' so that the main whitelist does not need to be modified.
-    usage: /<command> [subcommand]
+    usage: /<command> [add <player> | remove <player> | list | on | off]
     permission: dreamvisitor.softwhitelist
   playerlimit:
     description: Override server player limit.
-    usage: /<command> [number of players]
+    usage: /<command> [number-of-players]
     permission: dreamvisitor.playerlimit
   togglepvp:
     description: Globally disable PvP.
@@ -50,7 +50,7 @@ commands:
     permission: dreamvisitor.togglepvp
   pausebypass:
     description: Let certain players bypass chat pause.
-    usage: /<command> [add|remove|list]
+    usage: /<command> [add <player> | remove <player> | list]
     permission: dreamvisitor.pausechat
   sethub:
     description: Set the hub location to teleport to with /hub. Must be run by a player.
@@ -103,6 +103,10 @@ commands:
     description: Manage moon globes.
     usage: /<command> [remove <targets> | create <targets> [<x> <y> <z> [max-distance]]]
     permission: dreamvisitor.moonglobes
+  setback:
+    description: Set the last location of a player in EssentialsX.
+    usage: /<command> <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]
+    permission: op
 
 permissions:
   

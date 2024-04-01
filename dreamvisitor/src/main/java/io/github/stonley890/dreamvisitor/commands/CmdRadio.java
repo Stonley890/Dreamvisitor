@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -17,9 +17,11 @@ public class CmdRadio implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
 
+        // radio <message>...
+
         if (args.length == 0) {
-            if (command.getName().equals("tagradio")) sender.sendMessage(Main.PREFIX + ChatColor.RED + "You must attach a message! /" + label + " <message>");
-            else sender.sendMessage(Main.PREFIX + ChatColor.RED + "You must attach a message! /" + label + "<tag> <message>");
+            if (command.getName().equals("tagradio")) sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /" + label + " <message>");
+            else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /" + label + "<tag> <message>");
             return false;
         }
 
