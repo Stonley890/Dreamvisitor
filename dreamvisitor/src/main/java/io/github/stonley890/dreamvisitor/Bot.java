@@ -1,27 +1,24 @@
 package io.github.stonley890.dreamvisitor;
 
-import javax.annotation.Nonnull;
-import javax.security.auth.login.LoginException;
-
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-import org.bukkit.Bukkit;
-
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.discord.DiscEventListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
+import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.stonley890.dreamvisitor.Dreamvisitor.PLUGIN;
-import static io.github.stonley890.dreamvisitor.Dreamvisitor.botFailed;
 
 public class Bot {
 
@@ -49,8 +46,6 @@ public class Bot {
                     .build();
             Dreamvisitor.debug("Bot created.");
             Dreamvisitor.botFailed = false;
-
-            jda.addEventListener(new DiscEventListener());
 
         } catch (LoginException e) {
 
