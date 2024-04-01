@@ -36,8 +36,8 @@ public class DCmdBroadcast implements DiscordCommand {
             builder.setAuthor("Staff Broadcast");
             builder.setTitle(message);
 
-            Bot.gameChatChannel.sendMessageEmbeds(builder.build()).queue();
-            Bot.gameLogChannel.sendMessageEmbeds(builder.build()).queue();
+            Bot.getGameChatChannel().sendMessageEmbeds(builder.build()).queue();
+            Bot.getGameLogChannel().sendMessageEmbeds(builder.build()).queue();
 
             // Reply
             event.reply("Broadcast sent.").queue();

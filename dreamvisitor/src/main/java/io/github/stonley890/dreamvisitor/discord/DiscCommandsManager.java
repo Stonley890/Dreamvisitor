@@ -4,6 +4,7 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.commands.*;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -24,27 +25,9 @@ public class DiscCommandsManager extends ListenerAdapter {
 
     // Get channels and roles from config
     @SuppressWarnings({"null"})
-    public static void init(@NotNull FileConfiguration config) {
+    public static void init() {
 
-        long chatChannelID = config.getLong("chatChannelID");
-        long logChannelID = config.getLong("logChannelID");
-        long whitelistChannelID = config.getLong("whitelistChannelID");
-
-        Dreamvisitor.debug(String.valueOf(chatChannelID));
-        Dreamvisitor.debug(String.valueOf(logChannelID));
-        Dreamvisitor.debug(String.valueOf(whitelistChannelID));
-
-        Bot.gameChatChannel = jda.getTextChannelById(chatChannelID);
-        Bot.gameLogChannel = jda.getTextChannelById(logChannelID);
-        Bot.whitelistChannel = jda.getTextChannelById(whitelistChannelID);
-
-        if (Bot.gameChatChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + chatChannelID + " does not exist!");
-        if (Bot.gameLogChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + logChannelID + " does not exist!");
-        if (Bot.whitelistChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + whitelistChannelID + " does not exist!");
-
-        for (int i = 0; i < 10; i++) {
-            Bot.tribeRole.add(jda.getRoleById(config.getLongList("tribeRoles").get(i)));
-        }
+        Dreamvisitor.debug("Initializing commands...");
 
         commands.add(new DCmdActivity());
         commands.add(new DCmdBroadcast());
@@ -62,6 +45,30 @@ public class DiscCommandsManager extends ListenerAdapter {
         commands.add(new DCmdUnwhitelist());
         commands.add(new DCmdUser());
         commands.add(new DCmdWarn());
+        commands.add(new DCmdAlts());
+
+        Dreamvisitor.debug("Ready to add to guild.");
+
+        try {
+            jda.awaitReady();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        List<CommandData> commandData = new ArrayList<>();
+        for (DiscordCommand command : commands) {
+            commandData.add(command.getCommandData());
+            Dreamvisitor.debug("Added command " + command.getName());
+        }
+
+        for (Guild guild : jda.getGuilds()) {
+            // register commands
+            guild.updateCommands().addCommands(commandData).queue();
+
+            Dreamvisitor.debug("Updated commands.");
+        }
+
+        commandData.clear();
 
     }
 
@@ -75,7 +82,8 @@ public class DiscCommandsManager extends ListenerAdapter {
                 return;
             }
         }
-        event.reply("No commands match your request. This is a fatal error.").queue();
+        event.reply("No commands match your request. This is a fatal error and should not be possible.\n" +
+                "*Great, everything is broken. I'm going to have to bother one of my superiors to fix this.*").queue();
     }
 
     // Register commands on ready
@@ -85,10 +93,13 @@ public class DiscCommandsManager extends ListenerAdapter {
         List<CommandData> commandData = new ArrayList<>();
         for (DiscordCommand command : commands) {
             commandData.add(command.getCommandData());
+            Dreamvisitor.debug("Added command " + command.getName());
         }
 
         // register commands
         event.getGuild().updateCommands().addCommands(commandData).queue();
+
+        Dreamvisitor.debug("Updated commands.");
 
         commandData.clear();
 

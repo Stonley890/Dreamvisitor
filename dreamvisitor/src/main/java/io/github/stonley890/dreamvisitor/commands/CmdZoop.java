@@ -28,14 +28,14 @@ public class CmdZoop implements CommandExecutor {
 
                 memory.vanished = false;
                 String chatMessage = "**" + player.getName() + " joined the game**";
-                Bot.sendMessage(Bot.gameChatChannel, chatMessage);
-                Bot.sendMessage(Bot.gameLogChannel, chatMessage);
+                Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
+                Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
 
             } else {
                 memory.vanished = true;
                 String chatMessage = "**" + player.getName() + " left the game**";
-                Bot.sendMessage(Bot.gameChatChannel, chatMessage);
-                Bot.sendMessage(Bot.gameLogChannel, chatMessage);
+                Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
+                Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
 
             }
 

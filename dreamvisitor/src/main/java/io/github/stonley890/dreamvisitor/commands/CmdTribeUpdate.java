@@ -16,6 +16,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -92,6 +93,9 @@ public class CmdTribeUpdate implements CommandExecutor {
                 } catch (NullPointerException e) {
                     sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
                     continue;
+                } catch (IOException e) {
+                    sender.sendMessage("Unable to fetch AccountLink maps from disk! Aborting.");
+                    return;
                 }
 
                 Dreamvisitor.debug(player.getUniqueId().toString());
@@ -111,7 +115,7 @@ public class CmdTribeUpdate implements CommandExecutor {
 
                             // Remove roles
                             for (String roleId : tribeRoles) {
-                                Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
+                                Bot.getGameLogChannel().getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
                             }
 
                             Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(i));
@@ -122,14 +126,12 @@ public class CmdTribeUpdate implements CommandExecutor {
                             }
 
                             // Add role
-                            Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
+                            Bot.getGameLogChannel().getGuild().addRoleToMember(user, targetRole).queue();
 
                             break;
                         }
                     }
-
                 }
-
             }
 
             Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + targets.size() + " players."));

@@ -22,11 +22,8 @@ public class DCmdSetlogchat implements DiscordCommand {
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
         // Get channel from args
-        Bot.gameLogChannel = (TextChannel) event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
+        Bot.setGameLogChannel((TextChannel) event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel));
         // Reply success
-        event.reply("Log chat channel set to " + Bot.gameLogChannel.getAsMention()).queue();
-        // Update config
-        Dreamvisitor.getPlugin().getConfig().set("logChannelID", Bot.gameLogChannel.getIdLong());
-        Dreamvisitor.getPlugin().saveConfig();
+        event.reply("Log chat channel set to " + Bot.getGameLogChannel().getAsMention()).queue();
     }
 }

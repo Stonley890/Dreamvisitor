@@ -16,8 +16,8 @@ public class ListenPlayerDeath implements Listener {
 
         // Send death messages
         String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getDeathMessage()) + "**";
-        Bot.sendMessage(Bot.gameChatChannel, chatMessage);
-        Bot.sendMessage(Bot.gameLogChannel, chatMessage);
+        Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
+        Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
     }
     
 }

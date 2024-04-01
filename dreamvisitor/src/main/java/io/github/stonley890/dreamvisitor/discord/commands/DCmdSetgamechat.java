@@ -22,11 +22,8 @@ public class DCmdSetgamechat implements DiscordCommand {
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
         // Get channel from args
-        Bot.gameChatChannel = (TextChannel) event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
+        Bot.setGameChatChannel((TextChannel) event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel));
         // Reply success
-        event.reply("Game chat channel set to " + Bot.gameChatChannel.getAsMention()).queue();
-        // Update config
-        Dreamvisitor.getPlugin().getConfig().set("chatChannelID", Bot.gameChatChannel.getIdLong());
-        Dreamvisitor.getPlugin().saveConfig();
+        event.reply("Game chat channel set to " + Bot.getGameChatChannel().getAsMention()).queue();
     }
 }

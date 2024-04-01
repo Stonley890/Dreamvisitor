@@ -27,7 +27,7 @@ public class DCmdMsg implements DiscordCommand {
         String msg = event.getOption("message", OptionMapping::getAsString);
 
         // Check for correct channel
-        if (event.getChannel() == Bot.gameChatChannel) {
+        if (event.getChannel() == Bot.getGameChatChannel()) {
             // Check for player online
             assert username != null;
             if (Bukkit.getServer().getPlayer(username) != null) {
@@ -38,7 +38,7 @@ public class DCmdMsg implements DiscordCommand {
                                 + ChatColor.DARK_AQUA + "me" + ChatColor.GRAY + "] " + ChatColor.WHITE + msg);
 
                 // Log message
-                Objects.requireNonNull(Bot.getJda().getTextChannelById(Bot.gameLogChannel.getId())).sendMessage(
+                Objects.requireNonNull(Bot.getJda().getTextChannelById(Bot.getGameLogChannel().getId())).sendMessage(
                         "**Message from " + event.getUser().getAsMention() + " to **`" + username + "`**:** " + msg).queue();
 
                 // Reply success
@@ -46,6 +46,6 @@ public class DCmdMsg implements DiscordCommand {
 
             } else event.reply("`" + username + "` is not online!").setEphemeral(true).queue();
         } else
-            event.reply("This command must be executed in " + Bot.gameChatChannel.getAsMention()).setEphemeral(true).queue();
+            event.reply("This command must be executed in " + Bot.getGameChatChannel().getAsMention()).setEphemeral(true).queue();
     }
 }

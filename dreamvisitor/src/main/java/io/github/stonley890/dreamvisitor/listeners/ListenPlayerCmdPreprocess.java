@@ -59,8 +59,8 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
                             + ")**]** " + ChatColor.stripColor(action);
                     // Send message
-                    Bot.sendMessage(Bot.gameChatChannel, message);
-                    Bot.sendMessage(Bot.gameLogChannel, message);
+                    Bot.sendMessage(Bot.getGameChatChannel(), message);
+                    Bot.sendMessage(Bot.getGameLogChannel(), message);
                 } // If list does not contain player, stop the command
                 else {
                     event.setCancelled(true);
@@ -76,8 +76,8 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
                         + ")**]** " + ChatColor.stripColor(action);
                 // Send message
-                Bot.sendMessage(Bot.gameChatChannel, message);
-                Bot.sendMessage(Bot.gameLogChannel, message);
+                Bot.sendMessage(Bot.getGameChatChannel(), message);
+                Bot.sendMessage(Bot.getGameLogChannel(), message);
             }
         } else {
             boolean isMsg = false;
@@ -90,7 +90,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
 
             if (isMsg) {
                 String message = "**" + Bot.escapeMarkdownFormatting(player.getName()) + "** sent command: `" + cmd + "`";
-                Bot.sendMessage(Bot.gameLogChannel, message);
+                Bot.sendMessage(Bot.getGameLogChannel(), message);
             }
         }
     }

@@ -44,7 +44,7 @@ public class CmdPanic implements CommandExecutor {
             plugin.saveConfig();
             Bukkit.getServer().broadcastMessage(
                     ChatColor.RED + "Panicked by " + sender.getName() + ".\nPlayer limit override set to 0.");
-            Bot.sendMessage(Bot.gameLogChannel, "**Panicked by " + sender.getName());
+            Bot.sendMessage(Bot.getGameLogChannel(), "**Panicked by " + sender.getName());
         }
         return true;
     }

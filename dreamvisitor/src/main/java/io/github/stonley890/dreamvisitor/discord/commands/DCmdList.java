@@ -24,7 +24,7 @@ public class DCmdList implements DiscordCommand {
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
         // Compile players to list unless no players online
-        if (event.getChannel() == Bot.gameChatChannel) {
+        if (event.getChannel() == Bot.getGameChatChannel()) {
 
             // Create a string builder
             StringBuilder list = new StringBuilder();
@@ -73,7 +73,7 @@ public class DCmdList implements DiscordCommand {
             }
 
         } else {
-            event.reply("This command must be executed in " + Bot.gameChatChannel.getAsMention()).setEphemeral(true)
+            event.reply("This command must be executed in " + Bot.getGameLogChannel().getAsMention()).setEphemeral(true)
                     .queue();
         }
     }

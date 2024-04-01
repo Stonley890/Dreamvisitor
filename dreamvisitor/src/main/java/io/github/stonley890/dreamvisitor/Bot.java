@@ -14,19 +14,21 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.stonley890.dreamvisitor.Dreamvisitor.PLUGIN;
+import static io.github.stonley890.dreamvisitor.Dreamvisitor.botFailed;
 
 public class Bot {
 
     public static final String[] TRIBE_NAMES = {"HiveWing", "IceWing", "LeafWing", "MudWing", "NightWing", "RainWing", "SandWing", "SeaWing", "SilkWing", "SkyWing"};
-    public static TextChannel gameChatChannel;
-    public static TextChannel gameLogChannel;
-    public static TextChannel whitelistChannel;
+    private static TextChannel gameChatChannel;
+    private static TextChannel gameLogChannel;
+    private static TextChannel whitelistChannel;
     public static final List<Role> tribeRole = new ArrayList<>();
     static JDA jda;
 
@@ -34,7 +36,7 @@ public class Bot {
         throw new IllegalStateException("Utility class.");
     }
 
-    public static void startBot() {
+    public static void startBot(@NotNull FileConfiguration config) {
 
         // Build JDA
         String token = Dreamvisitor.getPlugin().getConfig().getString("bot-token");
@@ -47,6 +49,8 @@ public class Bot {
                     .build();
             Dreamvisitor.debug("Bot created.");
             Dreamvisitor.botFailed = false;
+
+            jda.addEventListener(new DiscEventListener());
 
         } catch (LoginException e) {
 
@@ -71,11 +75,70 @@ public class Bot {
                 jda.awaitReady();
                 Dreamvisitor.debug("Bot is ready.");
 
+                long chatChannelID = config.getLong("chatChannelID");
+                long logChannelID = config.getLong("logChannelID");
+                long whitelistChannelID = config.getLong("whitelistChannelID");
+
+                Dreamvisitor.debug(String.valueOf(chatChannelID));
+                Dreamvisitor.debug(String.valueOf(logChannelID));
+                Dreamvisitor.debug(String.valueOf(whitelistChannelID));
+
+                Bot.gameChatChannel = jda.getTextChannelById(chatChannelID);
+                Bot.gameLogChannel = jda.getTextChannelById(logChannelID);
+                Bot.whitelistChannel = jda.getTextChannelById(whitelistChannelID);
+
+                if (Bot.gameChatChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + chatChannelID + " does not exist!");
+                if (Bot.gameLogChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + logChannelID + " does not exist!");
+                if (Bot.whitelistChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + whitelistChannelID + " does not exist!");
+
+                for (int i = 0; i < 10; i++) Bot.tribeRole.add(jda.getRoleById(config.getLongList("tribeRoles").get(i)));
+
             } catch (InterruptedException exception) {
                 throw new RuntimeException();
             }
         }
+    }
 
+    public static TextChannel getGameChatChannel() {
+        if (gameChatChannel == null) {
+            long channelId = Dreamvisitor.getPlugin().getConfig().getLong("chatChannelID");
+            gameChatChannel = jda.getTextChannelById(channelId);
+        }
+        return gameChatChannel;
+    }
+
+    public static void setGameChatChannel(TextChannel channel) {
+        gameChatChannel = channel;
+        Dreamvisitor.getPlugin().getConfig().set("chatChannelID", gameChatChannel.getIdLong());
+        Dreamvisitor.getPlugin().saveConfig();
+    }
+
+    public static TextChannel getWhitelistChannel() {
+        if (whitelistChannel == null) {
+            long channelId = Dreamvisitor.getPlugin().getConfig().getLong("whitelistChannelID");
+            whitelistChannel = jda.getTextChannelById(channelId);
+        }
+        return whitelistChannel;
+    }
+
+    public static void setWhitelistChannel(TextChannel channel) {
+        whitelistChannel = channel;
+        Dreamvisitor.getPlugin().getConfig().set("whitelistChannelID", whitelistChannel.getIdLong());
+        Dreamvisitor.getPlugin().saveConfig();
+    }
+
+    public static TextChannel getGameLogChannel() {
+        if (gameLogChannel == null) {
+            long channelId = Dreamvisitor.getPlugin().getConfig().getLong("logChannelID");
+            gameLogChannel = jda.getTextChannelById(channelId);
+        }
+        return gameLogChannel;
+    }
+
+    public static void setGameLogChannel(TextChannel channel) {
+        gameLogChannel = channel;
+        Dreamvisitor.getPlugin().getConfig().set("logChannelID", gameLogChannel.getIdLong());
+        Dreamvisitor.getPlugin().saveConfig();
     }
 
     public static JDA getJda() {
@@ -85,11 +148,8 @@ public class Bot {
     public static void sendMessage(TextChannel channel, @Nonnull String message) {
         if (!Dreamvisitor.botFailed && channel != null) {
 
-            if (channel == gameLogChannel) {
-                if (!PLUGIN.getConfig().getBoolean("log-console")) channel.sendMessage(message).queue();
-            } else {
-                channel.sendMessage(message).queue();
-            }
+            if (channel == getGameLogChannel()) if (!PLUGIN.getConfig().getBoolean("log-console")) channel.sendMessage(message).queue();
+            else channel.sendMessage(message).queue();
         }
     }
 

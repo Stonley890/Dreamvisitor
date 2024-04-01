@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Infraction;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -34,8 +35,8 @@ public class DCmdWarn implements DiscordCommand {
         return Commands.slash("warn", "Warn a member.")
                 .addOption(OptionType.USER, "member", "The member to warn", true)
                 .addOption(OptionType.INTEGER, "value", "How many infractions to count this as. 0 to not record in Circle.", true)
-                .addOption(OptionType.STRING, "reason", "The reason for this warn. Also used as the title of the infraction.", false)
                 .addOption(OptionType.BOOLEAN, "silent", "Whether to notify the member. If true, Dreamvisitor will NOT notify.", true)
+                .addOption(OptionType.STRING, "reason", "The reason for this warn. Also used as the title of the infraction.", false)
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
     }
 
@@ -126,6 +127,7 @@ public class DCmdWarn implements DiscordCommand {
                     return;
                 } catch (InvalidConfigurationException e) {
                     event.reply("Fatal error: Invalid action ID! The warn was not recorded.").queue();
+                    if (Dreamvisitor.debugMode) e.printStackTrace();
                     return;
                 }
                 event.reply("Infraction recorded.").queue();

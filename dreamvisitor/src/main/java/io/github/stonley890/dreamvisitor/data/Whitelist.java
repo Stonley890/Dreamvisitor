@@ -205,7 +205,7 @@ public class Whitelist {
         String sourceName = "web whitelist";
         if (source != null) sourceName = source.getName();
 
-        TextChannel systemChannel = Bot.gameLogChannel.getGuild().getSystemChannel();
+        TextChannel systemChannel = Bot.getGameLogChannel().getGuild().getSystemChannel();
         if (systemChannel != null) {
             EmbedBuilder logEmbed = getEmbedBuilder(username, source, sourceName);
 

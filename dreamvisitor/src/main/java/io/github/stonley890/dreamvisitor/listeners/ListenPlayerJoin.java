@@ -19,8 +19,8 @@ public class ListenPlayerJoin implements Listener {
 
         // Send join messages
         String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + " joined the game**";
-        Bot.sendMessage(Bot.gameChatChannel, chatMessage);
-        Bot.sendMessage(Bot.gameLogChannel, chatMessage);
+        Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
+        Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
 
         PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
 
@@ -32,9 +32,7 @@ public class ListenPlayerJoin implements Listener {
                     onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer().getName() + " is currently in sandbox mode.");
                 }
             }
-            if (!sandboxerOnline) {
-                Sandbox.disableSandbox(event.getPlayer());
-            }
+            if (!sandboxerOnline) Sandbox.disableSandbox(event.getPlayer());
         }
 
     }

@@ -15,8 +15,8 @@ public class AccountLink {
     static final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     static final File accountFile = new File(plugin.getDataFolder().getPath() + "/accountLink.txt");
 
-    static final Map<UUID, Long> uuidToDiscordIdMap = new HashMap<>();
-    static final Map<Long, UUID> discordIdToUuidMap = new HashMap<>();
+    @NotNull static final Map<UUID, Long> uuidToDiscordIdMap = new HashMap<>();
+    @NotNull static final Map<Long, UUID> discordIdToUuidMap = new HashMap<>();
 
     public static void init() throws IOException {
         // If the file does not exist, create one
@@ -40,7 +40,6 @@ public class AccountLink {
                 discordIdToUuidMap.put(discordID, uuid);
             }
         }
-
     }
 
     public static void saveFile() throws IOException {
@@ -59,7 +58,15 @@ public class AccountLink {
         writer.close();
     }
 
-    public static void linkAccounts(@NotNull UUID minecraftUUID, @NotNull Long discordId) {
+    private static void refresh() throws IOException {
+        if (uuidToDiscordIdMap.isEmpty()) {
+            loadFromFile();
+        }
+    }
+
+    public static void linkAccounts(@NotNull UUID minecraftUUID, @NotNull Long discordId) throws IOException {
+
+        refresh();
 
         // remove existing values
         for (UUID uuid : uuidToDiscordIdMap.keySet()) {
@@ -91,7 +98,8 @@ public class AccountLink {
      * @return the {@code long} Discord ID.
      * @throws NullPointerException if the given {@link UUID} does not have an associated Discord ID.
      */
-    public static long getDiscordId(@NotNull UUID minecraftUUID) throws NullPointerException {
+    public static long getDiscordId(@NotNull UUID minecraftUUID) throws NullPointerException, IOException {
+        refresh();
         return uuidToDiscordIdMap.get(minecraftUUID);
     }
 
@@ -100,7 +108,8 @@ public class AccountLink {
      * @param discordId the {@code long} Discord ID to get the {@link UUID} of.
      * @return the {@link UUID} associated with this Discord ID or {@code null} if it does not exist.
      */
-    public static @Nullable UUID getUuid(long discordId) {
+    public static @Nullable UUID getUuid(long discordId) throws IOException {
+        refresh();
         return discordIdToUuidMap.get(discordId);
     }
 }

@@ -12,9 +12,7 @@ public class ListenServerPing implements Listener {
     public void onPing(@NotNull ServerListPingEvent event) {
         event.setMaxPlayers(Dreamvisitor.getPlugin().getServer().getMaxPlayers());
 
-        if (Dreamvisitor.MOTD != null) {
-            event.setMotd(Dreamvisitor.MOTD);
-        }
+        if (Dreamvisitor.MOTD != null) event.setMotd(Dreamvisitor.MOTD);
     }
 
 }

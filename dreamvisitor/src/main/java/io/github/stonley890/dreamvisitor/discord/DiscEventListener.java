@@ -59,7 +59,7 @@ public class DiscEventListener extends ListenerAdapter {
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
         // If in the whitelist channel and username is "legal"
-        if (channel.equals(Bot.whitelistChannel) && !user.isBot() && !p.matcher(username).find()) {
+        if (channel.equals(Bot.getWhitelistChannel()) && !user.isBot() && !p.matcher(username).find()) {
 
             EmbedBuilder builder = new EmbedBuilder();
 
@@ -83,10 +83,16 @@ public class DiscEventListener extends ListenerAdapter {
 
                 // Link accounts if not already linked
                 Dreamvisitor.debug("Do accounts need to be linked?");
-                if (AccountLink.getUuid(user.getIdLong()) == null) {
-                    Dreamvisitor.debug("Yes, linking account.");
-                    AccountLink.linkAccounts(uuid, user.getIdLong());
-                    Dreamvisitor.debug("Linked.");
+                try {
+                    if (AccountLink.getUuid(user.getIdLong()) == null) {
+                        Dreamvisitor.debug("Yes, linking account.");
+                        AccountLink.linkAccounts(uuid, user.getIdLong());
+                        Dreamvisitor.debug("Linked.");
+                    }
+                } catch (IOException e) {
+                    event.getMessage().reply("An error occurred! Unable to fetch AccountLink maps from file!\n" +
+                            "*Great, everything is broken. I'm going to have to bother one of my superiors to fix this.*").queue();
+                    return;
                 }
 
                 try {
@@ -124,7 +130,7 @@ public class DiscEventListener extends ListenerAdapter {
                 }
             }
 
-        } else if (channel.equals(Bot.whitelistChannel) && !user.isBot()) {
+        } else if (channel.equals(Bot.getWhitelistChannel()) && !user.isBot()) {
 
             EmbedBuilder builder = new EmbedBuilder();
 
@@ -138,7 +144,7 @@ public class DiscEventListener extends ListenerAdapter {
         }
 
         // If in the chat channel and the chat is not paused, send to Minecraft
-        else if (channel.equals(Bot.gameChatChannel) && !user.isBot()
+        else if (channel.equals(Bot.getGameChatChannel()) && !user.isBot()
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             // Build message
@@ -160,7 +166,7 @@ public class DiscEventListener extends ListenerAdapter {
             }
         }
 
-        if (event.getChannel().equals(Bot.gameLogChannel)) {
+        if (event.getChannel().equals(Bot.getGameLogChannel())) {
 
             if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
 
@@ -314,7 +320,7 @@ You could say I have a special nostalgia with that one."""
 
             event.getChannel().sendMessage(response).queue();
 
-            if (channel.equals(Bot.gameChatChannel) && !user.isBot()
+            if (channel.equals(Bot.getGameChatChannel()) && !user.isBot()
                     && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
                 // Build message
@@ -356,7 +362,7 @@ You could say I have a special nostalgia with that one."""
             Dreamvisitor.getPlugin().saveConfig();
             Bukkit.getServer().broadcastMessage(
                     ChatColor.RED + "Panicked by " + interaction.getUser().getName() + ".\nPlayer limit override set to 0.");
-            Bot.sendMessage(Bot.gameLogChannel, "**Panicked by " + interaction.getUser().getName());
+            Bot.sendMessage(Bot.getGameLogChannel(), "**Panicked by " + interaction.getUser().getName());
             event.reply("Panicked!").queue();
 
             // Disable button after use
@@ -368,6 +374,7 @@ You could say I have a special nostalgia with that one."""
 
             try {
                 if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
+                    assert username != null;
                     Whitelist.remove(username, UUID.fromString(uuid));
                     event.reply("Removed `" + username + "` from the whitelist.").queue();
                 } else {
@@ -388,9 +395,11 @@ You could say I have a special nostalgia with that one."""
             try {
 
                 if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
+                    assert username != null;
                     Whitelist.remove(username, UUID.fromString(uuid));
                 }
                 BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
+                assert username != null;
                 banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
                 event.reply("Banned `" + username + "`.").queue();
 

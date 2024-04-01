@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -39,7 +40,11 @@ public class DCmdLink implements DiscordCommand {
             return;
         }
 
-        AccountLink.linkAccounts(uuid, targetUser.getIdLong());
+        try {
+            AccountLink.linkAccounts(uuid, targetUser.getIdLong());
+        } catch (IOException e) {
+            event.reply("Unable to fetch AccountLink maps from disk!").queue();
+        }
         event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
     }
 }

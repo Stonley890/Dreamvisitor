@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -31,7 +32,13 @@ public class DCmdUser implements DiscordCommand {
         Dreamvisitor.debug("Target user: " + targetUser.getId());
 
         // UUID from AccountLink.yml
-        UUID uuid = AccountLink.getUuid(targetUser.getIdLong());
+        UUID uuid;
+        try {
+            uuid = AccountLink.getUuid(targetUser.getIdLong());
+        } catch (IOException e) {
+            event.reply("Unable to fetch AccountLink maps from disk.").queue();
+            return;
+        }
         String stringUuid = "N/A";
         String username = "N/A";
 
@@ -39,6 +46,7 @@ public class DCmdUser implements DiscordCommand {
             username = PlayerUtility.getUsernameOfUuid(uuid);
             stringUuid = uuid.toString();
         }
+        if (username == null) username = "N/A";
 
         // Send data
         EmbedBuilder builder = new EmbedBuilder();

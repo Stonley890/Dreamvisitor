@@ -22,11 +22,8 @@ public class DCmdSetwhitelist implements DiscordCommand {
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
         // Get channel from args
-        Bot.whitelistChannel = (TextChannel) event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel);
+        Bot.setWhitelistChannel((TextChannel) event.getOption("channel", event.getChannel(), OptionMapping::getAsChannel));
         // Reply success
-        event.reply("Whitelist channel set to " + Bot.whitelistChannel.getAsMention()).queue();
-        // Update config
-        Dreamvisitor.getPlugin().getConfig().set("whitelistChannelID", Bot.whitelistChannel.getIdLong());
-        Dreamvisitor.getPlugin().saveConfig();
+        event.reply("Whitelist channel set to " + Bot.getWhitelistChannel().getAsMention()).queue();
     }
 }

@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
+import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
@@ -61,11 +62,12 @@ public class DCmdAlts implements DiscordCommand {
                     return;
                 }
                 long recordedParentOfParent = AltFamily.getParent(parent.getIdLong());
-                if (recordedParentOfParent != child.getIdLong()) {
+                if (recordedParentOfParent == child.getIdLong()) {
                     Objects.requireNonNull(event.getGuild()).retrieveMemberById(recordedParentOfChild).queue(member -> event.reply("The parent account is already linked to " + member.getAsMention() + " as a child account.").queue());
                     return;
                 }
                 AltFamily.setAlt(parent.getIdLong(), child.getIdLong());
+                event.reply("Alts recorded successfully!").queue();
 
             } catch (IOException | InvalidConfigurationException e) {
                 event.reply(e.getMessage()).queue();
@@ -90,27 +92,53 @@ public class DCmdAlts implements DiscordCommand {
             if (altFamily.getChildren().isEmpty()) {
                 event.reply("There are no alts linked to this account.").queue();
             } else {
-                UUID parentUuid = AccountLink.getUuid(altFamily.getParent());
-                String parentUsername = null;
+                UUID parentUuid;
+                try {
+                    parentUuid = AccountLink.getUuid(altFamily.getParent());
+                } catch (IOException e) {
+                    event.reply("Unable to fetch AccountLink maps from disk.").queue();
+                    return;
+                }
+                String parentUsername;
                 if (parentUuid != null) parentUsername = PlayerUtility.getUsernameOfUuid(parentUuid);
-
-                String parentEmbed = user.getAsMention();
-                if (parentUuid != null && parentUsername != null) parentEmbed = parentEmbed.concat("(" + parentUsername + "/`" + parentUuid + "`)");
-
-                EmbedBuilder embed = new EmbedBuilder();
-                embed.setTitle("Alts of " + user.getEffectiveName()).addField("Parent Account", parentEmbed, false);
-
-                StringBuilder childrenEmbed = new StringBuilder();
-
-                List<Member> childMembers = Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(altFamily.getChildren()).get();
-
-                for (Member member : childMembers) {
-                    childrenEmbed.append("- ").append(member.getAsMention()).append(" (").append(parentUsername).append("/`").append(parentUuid).append("`)\n");
+                else {
+                    parentUsername = null;
                 }
 
-                embed.addField("Children", childrenEmbed.toString(), false);
+                Objects.requireNonNull(event.getGuild()).retrieveMemberById(altFamily.getParent()).queue(parentUser -> {
 
-                event.replyEmbeds(embed.build()).queue();
+                    String parentEmbed = parentUser.getAsMention();
+                    if (parentUuid != null && parentUsername != null) parentEmbed = parentEmbed.concat(" (" + parentUsername + "/`" + parentUuid + "`)");
+
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setTitle("Alts of " + user.getEffectiveName()).addField("Parent Account", parentEmbed, false);
+
+                    StringBuilder childrenEmbed = new StringBuilder();
+
+                    Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(altFamily.getChildren()).onSuccess(childMembers -> {
+                        for (Member member : childMembers) {
+
+                            UUID childUuid;
+                            try {
+                                childUuid = AccountLink.getUuid(member.getIdLong());
+                            } catch (IOException e) {
+                                event.reply("Unable to fetch AccountLink maps from disk.").queue();
+                                return;
+                            }
+                            String childUsername;
+                            if (childUuid != null) childUsername = PlayerUtility.getUsernameOfUuid(childUuid);
+                            else {
+                                childUsername = null;
+                            }
+
+                            childrenEmbed.append("- ").append(member.getAsMention()).append(" (").append(childUsername).append("/`").append(childUuid).append("`)\n");
+                        }
+
+                        embed.addField("Children", childrenEmbed.toString(), false);
+
+                        event.replyEmbeds(embed.build()).queue();
+                    });
+                });
             }
         }
     }

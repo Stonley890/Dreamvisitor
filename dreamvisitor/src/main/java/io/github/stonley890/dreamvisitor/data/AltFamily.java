@@ -122,7 +122,7 @@ public class AltFamily implements ConfigurationSerializable {
 
     // non-static methods
 
-    private long parent;
+    private final long parent;
     @NotNull private List<Long> children = new ArrayList<>();
 
     public AltFamily(long parentId) {

@@ -92,15 +92,15 @@ public class Dreamvisitor extends JavaPlugin {
 
             // Bot
             debug("Starting Dreamvisitor bot...");
-            Bot.startBot();
+            Bot.startBot(getConfig());
 
             if (!botFailed) {
                 // Get saved data
                 debug("Fetching recorded channels and roles from config.");
-                DiscCommandsManager.init(getConfig());
+                DiscCommandsManager.init();
 
                 // Send server start message
-                Bot.gameLogChannel.sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
+                Bot.getGameLogChannel().sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
             }
 
             // If chat was previously paused, restore and notify in console\
@@ -145,7 +145,7 @@ public class Dreamvisitor extends JavaPlugin {
                         // If there are no messages in the queue, return
                         if (ConsoleLogger.messageBuilder.isEmpty()) return;
 
-                        Bot.gameLogChannel.sendMessage(ConsoleLogger.messageBuilder.toString()).queue(); // send message
+                        Bot.getGameLogChannel().sendMessage(ConsoleLogger.messageBuilder.toString()).queue(); // send message
                         ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length()); // delete queued messages
 
                         // If there are no overflow messages, return
@@ -161,7 +161,7 @@ public class Dreamvisitor extends JavaPlugin {
                             // Check that it fits
                             if (overFlowMessageBuilder.length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length() >= 2000) {
                                 // if not, queue current message and clear string builder
-                                Bot.gameLogChannel.sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\\\_")).queue();
+                                Bot.getGameLogChannel().sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\\\_")).queue();
                                 overFlowMessageBuilder = new StringBuilder();
 
                             } else overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(i)).append("\n");
@@ -179,12 +179,9 @@ public class Dreamvisitor extends JavaPlugin {
                     // Restart if requested and no players are online
                     if (restartScheduled && Bukkit.getOnlinePlayers().isEmpty()) {
                         Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
-                        Bot.sendMessage(Bot.gameLogChannel, "**Restarting the server as scheduled.**");
+                        Bot.sendMessage(Bot.getGameLogChannel(), "**Restarting the server as scheduled.**");
                         getServer().spigot().restart();
                     }
-
-                    // also check for missing channels
-                    if (Bot.gameLogChannel == null || Bot.gameChatChannel == null || Bot.whitelistChannel == null) DiscCommandsManager.init(getConfig());
 
                     // also check if memory usage is high and schedule restart
                     long maxMemory = Runtime.getRuntime().maxMemory();
@@ -235,8 +232,6 @@ public class Dreamvisitor extends JavaPlugin {
             throw new RuntimeException();
 
         }
-
-
     }
 
     private void registerListeners() {
@@ -313,14 +308,12 @@ public class Dreamvisitor extends JavaPlugin {
             getLogger().info("Closing bot instance.");
             int requestsCanceled = Bot.getJda().cancelRequests();
             if (requestsCanceled > 0) getLogger().info(requestsCanceled + " queued bot requests were canceled for shutdown.");
-            Bot.gameLogChannel.sendMessage("*Server has been shut down.*").complete();
+            Bot.getGameLogChannel().sendMessage("*Server has been shut down.*").complete();
             Bot.getJda().shutdownNow();
         }
 
         // remove moon globes
-        for (Moonglobe moonglobe : Moonglobe.activeMoonglobes) {
-            moonglobe.remove(null);
-        }
+        for (Moonglobe moonglobe : Moonglobe.activeMoonglobes) moonglobe.remove(null);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             try {
@@ -330,12 +323,6 @@ public class Dreamvisitor extends JavaPlugin {
                 Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access?");
                 if (Dreamvisitor.debugMode) throw new RuntimeException();
             }
-        }
-
-        try {
-            AccountLink.saveFile();
-        } catch (IOException e) {
-            Bukkit.getLogger().severe("Unable to save accountLink.txt!");
         }
 
         logger.removeAppender(appender);

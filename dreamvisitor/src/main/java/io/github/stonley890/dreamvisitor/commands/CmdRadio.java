@@ -67,7 +67,7 @@ public class CmdRadio implements CommandExecutor {
             else if (command.getName().equals("tagradio")) if (operator.getScoreboardTags().contains(args[0])) operator.sendMessage(finalMessage);
 
         }
-        Bot.sendMessage(Bot.gameLogChannel, ChatColor.stripColor(finalMessage));
+        Bot.sendMessage(Bot.getGameLogChannel(), ChatColor.stripColor(finalMessage));
     }
     
 }
