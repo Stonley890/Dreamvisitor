@@ -30,7 +30,7 @@ public class CmdPausechat implements CommandExecutor {
             Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been unpaused.");
             
             // Broadcast to chat channel
-            Bot.sendMessage(Bot.getGameChatChannel(), "**Chat has been unpaused. Messages will now be sent to Minecraft**");
+            Bot.getGameChatChannel().sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft**").queue();
 
         } else {
 
@@ -42,7 +42,7 @@ public class CmdPausechat implements CommandExecutor {
             Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been paused.");
 
             // Broadcast to chat channel
-            Bot.sendMessage(Bot.getGameChatChannel(), "**Chat has been paused. Messages will not be sent to Minecraft**");
+            Bot.getGameChatChannel().sendMessage("**Chat has been paused. Messages will not be sent to Minecraft**").queue();
 
         }
         plugin.saveConfig();

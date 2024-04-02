@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ban.ProfileBanList;
@@ -15,7 +17,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.io.File;
@@ -23,8 +24,8 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class Infraction implements ConfigurationSerializable {
 
@@ -65,9 +66,10 @@ public class Infraction implements ConfigurationSerializable {
      */
     @SuppressWarnings("unchecked")
     public static @NotNull List<Infraction> getInfractions(long memberId) throws IOException, InvalidConfigurationException {
-        List<Infraction> infractions = (List<Infraction>) getConfig().getList(memberId + ".infractions");
-        if (infractions == null) return new ArrayList<>();
-        else return infractions;
+        List<Map<?, ?>> infractionsMap = getConfig().getMapList(memberId + ".infractions");
+        List<Infraction> infractions = new ArrayList<>();
+        for (Map<?, ?> map : infractionsMap) infractions.add(deserialize((Map<String, Object>) map));
+        return infractions;
     }
 
     /**
@@ -94,9 +96,11 @@ public class Infraction implements ConfigurationSerializable {
      * @throws IOException                   if read/write to disk fails.
      * @throws InvalidConfigurationException if the file is not YAML-formatted.
      */
-    public static void setInfractions(List<Infraction> infractions, long memberId) throws IOException, InvalidConfigurationException {
+    public static void setInfractions(@NotNull List<Infraction> infractions, long memberId) throws IOException, InvalidConfigurationException {
         YamlConfiguration config = getConfig();
-        config.set(memberId + ".infractions", infractions);
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (Infraction infraction : infractions) mapList.add(infraction.serialize());
+        config.set(memberId + ".infractions", mapList);
         saveToDisk(config);
     }
 
@@ -121,14 +125,18 @@ public class Infraction implements ConfigurationSerializable {
 
         byte infractionsUntilBan = getInfractionsUntilBan(member.getIdLong());
 
-        boolean banPoint;
-        banPoint = (infractionsUntilBan + infraction.value >= BAN_POINT);
-        boolean hasTempban = hasTempban(member.getIdLong());
         List<Infraction> infractions = getInfractions(member.getIdLong());
         byte infractionCount = getInfractionCount(infractions, false);
+
+        boolean banPoint;
+        banPoint = (infractionCount + infraction.value >= BAN_POINT);
+
+        boolean hasTempban = hasTempban(member.getIdLong());
+
         byte totalInfractionCount;
         if (!hasTempban) totalInfractionCount = infractionCount;
         else totalInfractionCount = (byte) (infractionCount + BAN_POINT);
+
         boolean notifyBan = (!actionId.equals(actionNoBan));
         boolean doBan = (actionId.equals(actionBan));
         boolean totalBan = (actionId.equals(actionAllBan));
@@ -144,12 +152,15 @@ public class Infraction implements ConfigurationSerializable {
         }
 
         if (!silent) {
+
             JDA jda = Bot.getJda();
             Category category = jda.getCategoryById(Dreamvisitor.getPlugin().getConfig().getLong("infractions-category-id"));
             if (category == null) {
                 throw new InvalidConfigurationException("Category of infractions-category-id is null!");
             }
-            category.createTextChannel("infraction-" + member.getUser().getName()).queue(channel -> {
+            category.createTextChannel("infraction-" + member.getUser().getName() + "-" + (totalInfractionCount + infraction.value)).queue(channel -> {
+
+                ActionRow buttons = ActionRow.of(Button.primary("warn-understand", "I understand"), Button.secondary("warn-explain", "I want an explanation"));
 
                 channel.upsertPermissionOverride(member).setAllowed(Permission.VIEW_CHANNEL).queue();
 
@@ -160,7 +171,7 @@ public class Infraction implements ConfigurationSerializable {
 
                 if (infraction.value == 0) description.append("This infraction does not count towards a ban.");
                 else {
-                    if (infraction.value == 1) description.append("This infraction brings your total count to ").append(totalInfractionCount).append(". ");
+                    if (infraction.value == 1) description.append("This infraction brings your total count to ").append(infractionCount + infraction.value).append(". ");
                     else description.append("This infraction is worth ").append(infraction.value).append(" warns as opposed to one, bringing your total to ").append(totalInfractionCount).append(". ");
 
                     if (banPoint) {
@@ -176,23 +187,29 @@ public class Infraction implements ConfigurationSerializable {
                     }
                 }
 
-                description.append("\n\nIf you want an explanation for this infraction, press the secondary button below and a staff member will provide more information. Press the primary button to dismiss this message.\n\n");
+                description.append("\n\nIf you want an explanation for this infraction, press the secondary button below and a staff member will provide more information. Press the primary button to dismiss this message.");
 
-                if (!hasTempban) description.append("**You do not have a previous temp-ban. You will receive a temp-ban after ").append(infractionsUntilBan).append(" more infractions.**");
-                else description.append("**You have previously been temp-banned. You will be permanently banned after ").append(infractionsUntilBan).append(" more infractions.**");
+                if (!banPoint) {
+                    if (!hasTempban) description.append("\n\n**You do not have a previous temp-ban. You will receive a temp-ban after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
+                    else description.append("\n\n**You have previously been temp-banned. You will be permanently banned after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
+                }
+
 
                 embed.setTitle("Infraction Notice").setDescription(description).setFooter("See the #rules channel for more information about our rules system.").setColor(Color.getHSBColor(17, 100, 100));
 
-                channel.sendMessage(member.getAsMention()).setEmbeds(embed.build()).queue();
+                channel.sendMessage(member.getAsMention()).setEmbeds(embed.build()).setActionRows(buttons).queue();
             });
         }
 
         if (doBan) {
             UUID uuid = AccountLink.getUuid(member.getIdLong());
             if (uuid != null) Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), bukkitTask -> {
-                ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
-                if (!hasTempban) banList.addBan(Bukkit.createPlayerProfile(uuid), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
-                else banList.addBan(Bukkit.createPlayerProfile(uuid), infraction.reason, (Date) null, "Dreamvisitor");
+                String username = PlayerUtility.getUsernameOfUuid(uuid);
+                if (username != null) {
+                    ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
+                    if (!hasTempban) banList.addBan(Bukkit.createPlayerProfile(uuid), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
+                    else banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
+                }
             });
         }
 
@@ -212,7 +229,7 @@ public class Infraction implements ConfigurationSerializable {
 
     private final byte value;
     private boolean expired = false;
-    @Nullable
+    @NotNull
     private final String reason;
     @NotNull
     private final LocalDateTime time;
@@ -223,7 +240,7 @@ public class Infraction implements ConfigurationSerializable {
      * @param infractionValue  the value of the infraction.
      * @param infractionReason the reason for the infraction.
      */
-    public Infraction(byte infractionValue, @Nullable String infractionReason, @NotNull LocalDateTime dateTime) {
+    public Infraction(byte infractionValue, @NotNull String infractionReason, @NotNull LocalDateTime dateTime) {
         value = infractionValue;
         reason = infractionReason;
         time = dateTime;
@@ -250,7 +267,7 @@ public class Infraction implements ConfigurationSerializable {
         return value;
     }
 
-    public @Nullable String getReason() {
+    public @NotNull String getReason() {
         return reason;
     }
 
@@ -279,13 +296,16 @@ public class Infraction implements ConfigurationSerializable {
         Map<String, Object> objectMap = new HashMap<>();
         objectMap.put("value", value);
         objectMap.put("reason", reason);
-        objectMap.put("time", time);
+        objectMap.put("time", time.toString());
+        objectMap.put("expired", expired);
 
         return objectMap;
     }
 
     @Contract("_ -> new")
-    private static @NotNull Infraction deserialize(@NotNull Map<String, Object> map) {
-        return new Infraction((Byte) map.get("value"), (String) map.get("reason"), (LocalDateTime) map.get("time"));
+    public static @NotNull Infraction deserialize(@NotNull Map<String, Object> map) {
+        Infraction infraction = new Infraction(Byte.parseByte(String.valueOf((int) map.get("value"))), (String) map.get("reason"), LocalDateTime.parse((CharSequence) map.get("time")));
+        if (map.get("expired") != null && (boolean) map.get("expired")) infraction.expire();
+        return infraction;
     }
 }

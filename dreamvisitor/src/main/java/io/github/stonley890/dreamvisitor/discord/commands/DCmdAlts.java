@@ -5,6 +5,7 @@ import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -41,8 +42,8 @@ public class DCmdAlts implements DiscordCommand {
         if (subcommand == null) {
             event.reply("No subcommand given.").queue();
         } else if (subcommand.equals("link")) {
-            Member parent = event.getOption("parent", OptionMapping::getAsMember);
-            Member child = event.getOption("child", OptionMapping::getAsMember);
+            User parent = event.getOption("parent", OptionMapping::getAsUser);
+            User child = event.getOption("child", OptionMapping::getAsUser);
 
             if (parent == null) {
                 event.reply("Parent account could not be found.").queue();
@@ -56,12 +57,12 @@ public class DCmdAlts implements DiscordCommand {
             try {
                 long recordedParentOfChild = AltFamily.getParent(child.getIdLong());
                 if (recordedParentOfChild != child.getIdLong()) {
-                    Objects.requireNonNull(event.getGuild()).retrieveMemberById(recordedParentOfChild).queue(member -> event.reply("The child account is already linked to " + member.getAsMention()).queue());
+                    event.getJDA().retrieveUserById(recordedParentOfChild).queue(user -> event.reply("The child account is already linked to " + user.getAsMention()).queue());
                     return;
                 }
                 long recordedParentOfParent = AltFamily.getParent(parent.getIdLong());
                 if (recordedParentOfParent == child.getIdLong()) {
-                    Objects.requireNonNull(event.getGuild()).retrieveMemberById(recordedParentOfChild).queue(member -> event.reply("The parent account is already linked to " + member.getAsMention() + " as a child account.").queue());
+                    event.getJDA().retrieveUserById(recordedParentOfChild).queue(user -> event.reply("The parent account is already linked to " + user.getAsMention() + " as a child account.").queue());
                     return;
                 }
                 AltFamily.setAlt(parent.getIdLong(), child.getIdLong());
@@ -72,7 +73,7 @@ public class DCmdAlts implements DiscordCommand {
             }
 
         } else if (subcommand.equals("get")) {
-            Member user = event.getOption("user", OptionMapping::getAsMember);
+            User user = event.getOption("user", OptionMapping::getAsUser);
             if (user == null) {
                 event.reply("That member could not be found.").queue();
                 return;
@@ -103,13 +104,13 @@ public class DCmdAlts implements DiscordCommand {
                     parentUsername = null;
                 }
 
-                Objects.requireNonNull(event.getGuild()).retrieveMemberById(altFamily.getParent()).queue(parentUser -> {
+                event.getJDA().retrieveUserById(altFamily.getParent()).queue(parentUser -> {
 
                     String parentEmbed = parentUser.getAsMention();
                     if (parentUuid != null && parentUsername != null) parentEmbed = parentEmbed.concat(" (" + parentUsername + "/`" + parentUuid + "`)");
 
                     EmbedBuilder embed = new EmbedBuilder();
-                    embed.setTitle("Alts of " + user.getEffectiveName()).addField("Parent Account", parentEmbed, false);
+                    embed.setTitle("Alts of " + user.getName()).addField("Parent Account", parentEmbed, false);
 
                     StringBuilder childrenEmbed = new StringBuilder();
 

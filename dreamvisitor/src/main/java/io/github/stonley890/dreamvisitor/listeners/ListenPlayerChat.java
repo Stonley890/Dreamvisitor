@@ -65,20 +65,20 @@ public class ListenPlayerChat implements Listener {
             if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
                     || event.getPlayer().hasPermission("dreamvisitor.nopause")) {
 
-                Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
-                Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
+                Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                Bot.sendLog(chatMessage);
                 
             } else {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
 
-                Bot.sendMessage(Bot.getGameLogChannel(), "Blocked: " + chatMessage);
+                Bot.sendLog("Blocked: " + chatMessage);
 
             }  
         } else if (!event.isCancelled()) {
 
-            Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
-            Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
+            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+            Bot.sendLog(chatMessage);
 
         }
     }

@@ -19,8 +19,8 @@ public class ListenPlayerJoin implements Listener {
 
         // Send join messages
         String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + " joined the game**";
-        Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
-        Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
+        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+        Bot.sendLog(chatMessage);
 
         PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
 

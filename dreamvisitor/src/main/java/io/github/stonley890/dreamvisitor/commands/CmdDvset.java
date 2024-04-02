@@ -58,12 +58,12 @@ public class CmdDvset implements CommandExecutor {
 
                                         if (memory.vanished) {
                                             String chatMessage = "**" + player.getName() + " left the game**";
-                                            Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
-                                            Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
+                                            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                                            Bot.sendLog(chatMessage);
                                         } else {
                                             String chatMessage = "**" + player.getName() + " joined the game**";
-                                            Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
-                                            Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
+                                            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                                            Bot.sendLog(chatMessage);
                                         }
 
                                         sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish toggled to " + ChatColor.WHITE + memory.vanished);
@@ -117,14 +117,14 @@ public class CmdDvset implements CommandExecutor {
                                         // Broadcast to server
                                         Bukkit.getServer().broadcastMessage(org.bukkit.ChatColor.BLUE + "Chat has been paused.");
                                         // Broadcast to chat channel
-                                        Bot.sendMessage(Bot.getGameChatChannel(), "**Chat has been paused. Messages will not be sent to Minecraft**");
+                                        Bot.getGameChatChannel().sendMessage("**Chat has been paused. Messages will not be sent to Minecraft**").queue();
 
 
                                     } else {
                                         // Broadcast to server
                                         Bukkit.getServer().broadcastMessage(org.bukkit.ChatColor.BLUE + "Chat has been unpaused.");
                                         // Broadcast to chat channel
-                                        Bot.sendMessage(Bot.getGameChatChannel(), "**Chat has been unpaused. Messages will now be sent to Minecraft**");
+                                        Bot.getGameChatChannel().sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft**").queue();
                                     }
                                     Dreamvisitor.getPlugin().getConfig().set("chatPaused", Dreamvisitor.chatPaused);
                                     Dreamvisitor.getPlugin().saveConfig();

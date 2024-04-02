@@ -35,7 +35,7 @@ public class ItemBanList implements Listener {
                 for (ItemStack content : player.getInventory().getContents()) {
                     if (content == null || !content.isSimilar(item)) continue;
                     player.getInventory().remove(item);
-                    Bot.sendMessage(Bot.getGameLogChannel(), "Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
+                    Bot.sendLog("Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
                 }
             }
         }

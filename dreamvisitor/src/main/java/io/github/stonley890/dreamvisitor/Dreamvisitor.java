@@ -179,7 +179,7 @@ public class Dreamvisitor extends JavaPlugin {
                     // Restart if requested and no players are online
                     if (restartScheduled && Bukkit.getOnlinePlayers().isEmpty()) {
                         Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
-                        Bot.sendMessage(Bot.getGameLogChannel(), "**Restarting the server as scheduled.**");
+                        Bot.sendLog("**Restarting the server as scheduled.**");
                         getServer().spigot().restart();
                     }
 

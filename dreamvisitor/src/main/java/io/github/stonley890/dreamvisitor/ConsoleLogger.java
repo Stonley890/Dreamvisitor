@@ -43,7 +43,7 @@ public class ConsoleLogger extends AbstractAppender {
         // Truncate messages over 2000 characters
         if (message.length() >= 2000) {
             String tooLongMessage = "**This message was too long! Here is the shorter version:**\n";
-            message = message.substring(0, 1998 - tooLongMessage.length());
+            message = message.substring(0, 1998 - tooLongMessage.length()).concat(tooLongMessage);
         }
 
         // Pause adding strings if the new message will be > 2000

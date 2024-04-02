@@ -14,11 +14,14 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,10 +34,10 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -125,7 +128,7 @@ public class DiscEventListener extends ListenerAdapter {
                         Whitelist.report(username, uuid, event.getAuthor());
                     }
                 } catch (IOException e) {
-                    Bot.sendMessage((TextChannel) channel, "There was a problem accessing the whitelist file. Please try again later.");
+                    ((TextChannel) channel).sendMessage("There was a problem accessing the whitelist file. Please try again later.").queue();
                     if (Dreamvisitor.debugMode) throw new RuntimeException();
                 }
             }
@@ -334,7 +337,7 @@ You could say I have a special nostalgia with that one."""
                         // If the player has discord on, build and send the message
                         if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordToggled) {
 
-                            player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<Dreamvisitor> " + response);
+                            player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<" + event.getJDA().getSelfUser().getName() + "> " + response);
                         }
                     }
                 }
@@ -345,6 +348,8 @@ You could say I have a special nostalgia with that one."""
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+
+        Dreamvisitor.debug("Button interaction with ID " + event.getButton().getId());
 
         Button button = event.getButton();
         ButtonInteraction interaction = event.getInteraction();
@@ -362,7 +367,7 @@ You could say I have a special nostalgia with that one."""
             Dreamvisitor.getPlugin().saveConfig();
             Bukkit.getServer().broadcastMessage(
                     ChatColor.RED + "Panicked by " + interaction.getUser().getName() + ".\nPlayer limit override set to 0.");
-            Bot.sendMessage(Bot.getGameLogChannel(), "**Panicked by " + interaction.getUser().getName());
+            Bot.sendLog("**Panicked by " + interaction.getUser().getName());
             event.reply("Panicked!").queue();
 
             // Disable button after use
@@ -423,14 +428,204 @@ You could say I have a special nostalgia with that one."""
 
         } else if (button.getId().equals(Infraction.actionBan) || button.getId().equals(Infraction.actionNoBan) || button.getId().equals(Infraction.actionAllBan) || button.getId().equals(Infraction.actionUserBan)) {
             try {
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
                 Infraction.execute(DCmdWarn.lastInfraction, Objects.requireNonNull(Objects.requireNonNull(event.getGuild()).retrieveMemberById(DCmdWarn.memberId).complete()), DCmdWarn.silent, button.getId());
+                event.reply("Infraction notice created.").queue();
             } catch (IOException e) {
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
                 event.reply("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
             } catch (InvalidConfigurationException e) {
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
                 event.reply("Fatal error! Invalid action ID! This should be impossible!").queue();
+            }
+        } else if (button.getId().equals("warn-understand")) {
+            TextChannel channel = (TextChannel) event.getMessageChannel();
+            channel.upsertPermissionOverride(Objects.requireNonNull(event.getMember())).setDenied(Permission.VIEW_CHANNEL).queue();
+            event.reply("Marked as dismissed.").queue();
+            event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+        } else if (button.getId().equals("warn-explain")) {
+            event.reply("A staff member will assist you shortly.").queue();
+            event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+        } else if (button.getId().startsWith("infraction-")) {
+            if (button.getId().startsWith("infraction-expire-")) {
+
+                long id = Long.parseLong(button.getId().substring("infraction-expire-".length()));
+                Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+
+                    @NotNull List<Infraction> infractions;
+
+                    try {
+                        infractions = Infraction.getInfractions(member.getIdLong());
+                    } catch (IOException | InvalidConfigurationException e) {
+                        event.reply("There was an error reading from infractions.yml.").queue();
+                        if (Dreamvisitor.debugMode) e.printStackTrace();
+                        return;
+                    }
+
+                    if (infractions.isEmpty()) {
+                        event.reply("That user has no infractions.").queue();
+                        return;
+                    }
+
+                    SelectMenu.Builder selectMenu = SelectMenu.create("infraction-expire-" + member.getId());
+
+                    for (Infraction infraction : infractions) {
+                        if (infraction.isExpired()) continue;
+
+                        String shortenedReason;
+                        if (infraction.getReason().length() >= 35) shortenedReason = infraction.getReason().substring(0, 35) + "... [Value " + infraction.getValue() + "]";
+                        else shortenedReason = infraction.getReason() + " [Value " + infraction.getValue() + "]";
+
+                        selectMenu.addOption(
+                                infraction.getTime().format(DateTimeFormatter.ofPattern("M/d/u H:m")),
+                                infraction.getTime().toString(),
+                                shortenedReason
+                        );
+                    }
+
+                    if (selectMenu.getOptions().isEmpty()) {
+                        event.reply("That user has no unexpired infractions.").queue();
+                        return;
+                    }
+
+                    ActionRow dropdown = ActionRow.of(selectMenu.build());
+
+                    event.reply("Select the infraction to expire.").addActionRows(dropdown).queue();
+
+                });
+
+            } else if (button.getId().startsWith("infraction-remove-")) {
+
+                long id = Long.parseLong(button.getId().substring("infraction-remove-".length()));
+                Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+
+                    @NotNull List<Infraction> infractions;
+
+                    try {
+                        infractions = Infraction.getInfractions(member.getIdLong());
+                    } catch (IOException | InvalidConfigurationException e) {
+                        event.reply("There was an error reading from infractions.yml.").queue();
+                        if (Dreamvisitor.debugMode) e.printStackTrace();
+                        return;
+                    }
+
+                    if (infractions.isEmpty()) {
+                        event.reply("That user has no infractions.").queue();
+                        return;
+                    }
+
+                    SelectMenu.Builder selectMenu = SelectMenu.create("infraction-remove-" + member.getId());
+
+                    for (Infraction infraction : infractions) {
+
+                        String shortenedReason;
+                        if (infraction.getReason().length() >= 35) shortenedReason = infraction.getReason().substring(0, 35) + "... [Value " + infraction.getValue() + "]";
+                        else shortenedReason = infraction.getReason() + " [Value " + infraction.getValue() + "]";
+
+                        selectMenu.addOption(
+                                infraction.getTime().format(DateTimeFormatter.ofPattern("M/d/u H:m")),
+                                infraction.getTime().toString(),
+                                shortenedReason
+                        );
+                    }
+
+                    ActionRow dropdown = ActionRow.of(selectMenu.build());
+
+                    event.reply("Select the infraction to remove.").addActionRows(dropdown).queue();
+
+                });
+
             }
         }
 
+    }
+
+    @Override
+    public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
+        if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-expire-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("infraction-expire-".length()));
+            Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+
+                @NotNull List<Infraction> infractions;
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+
+                LocalDateTime selectedTime = LocalDateTime.parse(selectOption.getValue());
+
+                try {
+                    infractions = Infraction.getInfractions(member.getIdLong());
+                } catch (IOException | InvalidConfigurationException e) {
+                    event.reply("There was an error reading from infractions.yml.").queue();
+                    if (Dreamvisitor.debugMode) e.printStackTrace();
+                    return;
+                }
+
+                if (infractions.isEmpty()) {
+                    event.reply("That user has no infractions.").queue();
+                    return;
+                }
+
+                for (Infraction infraction : infractions) {
+                    if (infraction.isExpired()) continue;
+                    if (infraction.getTime().equals(selectedTime)) {
+                        infractions.remove(infraction);
+                        infraction.expire();
+                        infractions.add(infraction);
+                        break;
+                    }
+                }
+                try {
+                    Infraction.setInfractions(infractions, member.getIdLong());
+                } catch (IOException | InvalidConfigurationException e) {
+                    event.reply("There was an error writing to infractions.yml.").queue();
+                    if (Dreamvisitor.debugMode) e.printStackTrace();
+                    return;
+                }
+
+                event.reply("Infraction expired.").queue();
+                event.getHook().editOriginalComponents(ActionRow.of(event.getSelectMenu().asDisabled())).queue();
+            });
+        } else if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-remove-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("infraction-remove-".length()));
+            Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+
+                @NotNull List<Infraction> infractions;
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+
+                LocalDateTime selectedTime = LocalDateTime.parse(selectOption.getValue());
+
+                try {
+                    infractions = Infraction.getInfractions(member.getIdLong());
+                } catch (IOException | InvalidConfigurationException e) {
+                    event.reply("There was an error reading from infractions.yml.").queue();
+                    if (Dreamvisitor.debugMode) e.printStackTrace();
+                    return;
+                }
+
+                if (infractions.isEmpty()) {
+                    event.reply("That user has no infractions.").queue();
+                    return;
+                }
+
+                for (Infraction infraction : infractions) {
+                    if (infraction.getTime().equals(selectedTime)) {
+                        infractions.remove(infraction);
+                        break;
+                    }
+                }
+                try {
+                    Infraction.setInfractions(infractions, member.getIdLong());
+                } catch (IOException | InvalidConfigurationException e) {
+                    event.reply("There was an error writing to infractions.yml.").queue();
+                    if (Dreamvisitor.debugMode) e.printStackTrace();
+                    return;
+                }
+
+                event.reply("Infraction removed.").queue();
+                event.getHook().editOriginalComponents(ActionRow.of(event.getSelectMenu().asDisabled())).queue();
+            });
+        }
     }
 
 }

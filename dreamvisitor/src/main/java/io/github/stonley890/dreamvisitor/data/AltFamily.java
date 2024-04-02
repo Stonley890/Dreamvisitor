@@ -114,6 +114,16 @@ public class AltFamily implements ConfigurationSerializable {
         AltFamily altFamily = new AltFamily(parentId);
         altFamily.setChildren(children);
         updateFamily(altFamily);
+
+        List<Infraction> childInfractions = Infraction.getInfractions(childId);
+        if (childInfractions.isEmpty()) return;
+        List<Infraction> parentInfractions = Infraction.getInfractions(parentId);
+
+        parentInfractions.addAll(childInfractions);
+        childInfractions.clear();
+
+        Infraction.setInfractions(childInfractions, childId);
+        Infraction.setInfractions(parentInfractions, parentId);
     }
 
     public static boolean checkValidity(long parent, List<Long> children) throws IOException, InvalidConfigurationException {

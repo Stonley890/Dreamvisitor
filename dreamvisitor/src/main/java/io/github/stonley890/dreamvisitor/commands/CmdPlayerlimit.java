@@ -41,7 +41,7 @@ public class CmdPlayerlimit implements CommandExecutor {
                 return false;
             }
         } else {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Player limit override is currently set to " + Dreamvisitor.getPlugin().getServer().getMaxPlayers() + ".");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Player limit override is currently set to " + Dreamvisitor.playerLimit + ".");
         }
         return true;
     }

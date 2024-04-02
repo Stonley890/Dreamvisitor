@@ -1,6 +1,7 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.Infraction;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -27,30 +28,42 @@ public class DCmdWarn implements DiscordCommand {
     public static Infraction lastInfraction = null;
     public static boolean silent = false;
     public static long memberId = 0;
-    public static final String buttonLimitThree = "limit_three";
-    public static final String buttonExceedThree = "exceed_three";
 
     @Override
     public @NotNull SlashCommandData getCommandData() {
         return Commands.slash("warn", "Warn a member.")
                 .addOption(OptionType.USER, "member", "The member to warn", true)
-                .addOption(OptionType.INTEGER, "value", "How many infractions to count this as. 0 to not record in Circle.", true)
+                .addOption(OptionType.INTEGER, "value", "How many infractions to count this as.", true)
                 .addOption(OptionType.BOOLEAN, "silent", "Whether to notify the member. If true, Dreamvisitor will NOT notify.", true)
-                .addOption(OptionType.STRING, "reason", "The reason for this warn. Also used as the title of the infraction.", false)
+                .addOption(OptionType.STRING, "reason", "The reason for this warn.", false)
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
     }
 
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
+        event.deferReply().queue(DCmdWarn::updateLastInteraction);
+
         Member member = Objects.requireNonNull(event.getOption("member")).getAsMember();
         if (member == null) {
-            event.reply("That member does not exist.").queue();
+            event.getHook().editOriginal("That member does not exist.").queue();
+            return;
+        }
+
+        try {
+            long parent = AltFamily.getParent(member.getIdLong());
+            if (parent != member.getIdLong()) {
+                Objects.requireNonNull(event.getGuild()).retrieveMemberById(parent).queue(parentMember -> event.getHook().editOriginal("That user is the child of " + parentMember.getAsMention() + ". Warn them instead.").queue());
+                return;
+            }
+        } catch (IOException | InvalidConfigurationException e) {
+            event.getHook().editOriginal("An I/O error occurred! Does the server have read/write access? Cannot read alts.yml! The warn was not recorded.").queue();
+            if (Dreamvisitor.debugMode) e.printStackTrace();
             return;
         }
 
         int value = Objects.requireNonNull(event.getOption("value")).getAsInt();
         if (value > 6) {
-            event.reply("Slow down there. You cannot give an infraction a value higher than **3**.").queue();
+            event.getHook().editOriginal("Slow down there. You cannot give an infraction a value higher than **3**.").queue();
             return;
         }
 
@@ -59,13 +72,14 @@ public class DCmdWarn implements DiscordCommand {
         try {
             infractions = Infraction.getInfractions(member.getIdLong());
         } catch (IOException | InvalidConfigurationException e) {
-            event.reply("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
+            event.getHook().editOriginal("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
+            if (Dreamvisitor.debugMode) e.printStackTrace();
             return;
         }
 
         int infractionCount = Infraction.getInfractionCount(infractions, false);
         if (infractionCount + value > Infraction.BAN_POINT) {
-            event.reply("You cannot add an infraction whose value exceeds the ban point of " + Infraction.BAN_POINT +
+            event.getHook().editOriginal("You cannot add an infraction whose value exceeds the ban point of " + Infraction.BAN_POINT +
                     ". The highest value you can assign is " + (Infraction.BAN_POINT - infractionCount)).queue();
             return;
         }
@@ -81,10 +95,12 @@ public class DCmdWarn implements DiscordCommand {
         try {
             hasTempban = Infraction.hasTempban(member.getIdLong());
         } catch (IOException e) {
-            event.reply("There was an error reading from `infractions.yml` on disk! The warn was not recorded.").queue();
+            event.getHook().editOriginal("There was an error reading from `infractions.yml` on disk! The warn was not recorded.").queue();
+            if (Dreamvisitor.debugMode) e.printStackTrace();
             return;
         } catch (InvalidConfigurationException e) {
-            event.reply("`infractions.yml` is improperly formatted and could not be parsed as YAML! The warn was not recorded.").queue();
+            event.getHook().editOriginal("`infractions.yml` is improperly formatted and could not be parsed as YAML! The warn was not recorded.").queue();
+            if (Dreamvisitor.debugMode) e.printStackTrace();
             return;
         }
 
@@ -94,43 +110,47 @@ public class DCmdWarn implements DiscordCommand {
                 ActionRow actionRow;
                 if (!hasTempban) {
                     if (silent) actionRow = ActionRow.of(
-                            Button.danger(Infraction.actionBan, "Yes, ban them for two weeks."),
-                            Button.secondary(Infraction.actionNoBan, "No, don't auto-ban them.")
+                            Button.danger(Infraction.actionBan, "Ban them for two weeks."),
+                            Button.secondary(Infraction.actionNoBan, "Don't auto-ban them.")
                     );
                     else actionRow = ActionRow.of(
-                            Button.danger(Infraction.actionBan, "Yes, ban them for two weeks."),
+                            Button.danger(Infraction.actionBan, "Ban them for two weeks."),
                             Button.primary(Infraction.actionUserBan, "No, but mention a temp-ban in the message."),
                             Button.secondary(Infraction.actionNoBan, "No, don't mention a temp-ban.")
                     );
                 } else {
                     if (silent) actionRow = ActionRow.of(
-                            Button.danger(Infraction.actionBan, "Yes, permanently ban them from Minecraft."),
-                            Button.danger(Infraction.actionAllBan, "Yes, permanently ban them from all."),
+                            Button.danger(Infraction.actionBan, "Permanently ban from Minecraft."),
+                            Button.danger(Infraction.actionAllBan, "Permanently ban from all."),
                             Button.secondary(Infraction.actionNoBan, "No, don't ban them.")
                     );
                     else actionRow = ActionRow.of(
-                            Button.danger(Infraction.actionAllBan, "Yes, permanently ban them from Minecraft."),
-                            Button.danger(Infraction.actionAllBan, "Ban them from all immediately (skip message)."),
+                            Button.danger(Infraction.actionBan, "Permanently ban from Minecraft."),
+                            Button.danger(Infraction.actionAllBan, "Ban from all immediately (skip message)."),
                             Button.primary(Infraction.actionUserBan, "Mention a ban, but don't auto-ban."),
                             Button.secondary(Infraction.actionNoBan, "Don't mention a ban and don't auto-ban.")
                     );
                 }
 
-                event.reply("This will be the user's third warn. Do you want me to also give them a ban from the Minecraft server?")
-                        .addActionRows(actionRow).queue(DCmdWarn::updateLastInteraction);
+                memberId = member.getIdLong();
+
+                lastInfraction = new Infraction((byte) value, reason, LocalDateTime.now());
+                event.getHook().editOriginal("This will be the user's third warn. Do you want me to also give them a ban from the Minecraft server?")
+                        .setActionRows(actionRow).queue();
             } else {
 
                 try {
                     Infraction.execute(new Infraction((byte) value, reason, LocalDateTime.now()), member, silent, Infraction.actionNoBan);
                 } catch (IOException e) {
-                    event.reply("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
+                    event.getHook().editOriginal("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
+                    if (Dreamvisitor.debugMode) e.printStackTrace();
                     return;
                 } catch (InvalidConfigurationException e) {
-                    event.reply("Fatal error: Invalid action ID! The warn was not recorded.").queue();
+                    event.getHook().editOriginal("Fatal error: Invalid action ID! The warn was not recorded.").queue();
                     if (Dreamvisitor.debugMode) e.printStackTrace();
                     return;
                 }
-                event.reply("Infraction recorded.").queue();
+                event.getHook().editOriginal("Infraction recorded.").queue();
 
             }
         }
@@ -140,12 +160,17 @@ public class DCmdWarn implements DiscordCommand {
 
         List<ActionRow> actionRows = new ArrayList<>();
 
-        lastInteraction.retrieveOriginal().queue(original -> {
-            for (ActionRow actionRow : original.getActionRows()) {
-                actionRows.add(actionRow.asDisabled());
-            }
-        });
+        if (lastInteraction != null) {
+            lastInteraction.retrieveOriginal().queue(original -> {
+                for (ActionRow actionRow : original.getActionRows()) {
+                    actionRows.add(actionRow.asDisabled());
+                }
+            });
+            lastInteraction.editOriginalComponents(actionRows).queue(completion -> lastInteraction = newInteraction);
+            return;
+        }
 
-        lastInteraction.editOriginalComponents(actionRows).queue(completion -> lastInteraction = newInteraction);
+        lastInteraction = newInteraction;
+
     }
 }

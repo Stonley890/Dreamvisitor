@@ -25,8 +25,8 @@ public class ListenPlayerQuit implements Listener {
 
         // Send player quits to Discord
         String chatMessage = "**" + Bot.escapeMarkdownFormatting(player.getName()) + " left the game**";
-        Bot.sendMessage(Bot.getGameChatChannel(), chatMessage);
-        Bot.sendMessage(Bot.getGameLogChannel(), chatMessage);
+        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+        Bot.sendLog(chatMessage);
 
         PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
 

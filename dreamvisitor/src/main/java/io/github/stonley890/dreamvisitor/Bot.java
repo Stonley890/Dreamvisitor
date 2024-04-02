@@ -13,7 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,12 +139,8 @@ public class Bot {
         return jda;
     }
 
-    public static void sendMessage(TextChannel channel, @Nonnull String message) {
-        if (!Dreamvisitor.botFailed && channel != null) {
-
-            if (channel == getGameLogChannel()) if (!PLUGIN.getConfig().getBoolean("log-console")) channel.sendMessage(message).queue();
-            else channel.sendMessage(message).queue();
-        }
+    public static void sendLog(@NotNull String message) {
+        if (!Dreamvisitor.botFailed &&!PLUGIN.getConfig().getBoolean("log-console")) Bot.getGameLogChannel().sendMessage(message).queue();
     }
 
 

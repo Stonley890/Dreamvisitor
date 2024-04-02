@@ -48,11 +48,6 @@ triberoles:
   - 964773212321882132
   - 660599708145942581
 
-# The guild ID of the tribe server.
-# This will allow Dreamvistor to sync roles across servers.
-# Default: 1103730296068788358
-tribeGuildID: 1103730296068788358
-
 # Whether chat is paused or not.
 # This can be toggled in Minecraft with /pausechat
 # Default: false
