@@ -71,7 +71,13 @@ public class Moonglobe {
 
                 Location eyeLocation = onlinePlayer.getEyeLocation();
 
-                Location targetPosition = eyeLocation.add(0.5*(-1 * Math.sin(Math.toRadians(eyeLocation.getYaw()))), 0, 0.5*(Math.cos(Math.toRadians(eyeLocation.getYaw()))));
+                // x is multiplied by -1 because (x, y) on circle represents (z, -x) in-game.
+                float radius = 0.5f; // distance from player
+                Location targetPosition = eyeLocation.add(
+                        radius * Math.sin(Math.toRadians(eyeLocation.getYaw())),
+                        0,
+                        radius * -1 * (Math.cos(Math.toRadians(eyeLocation.getYaw())))
+                );
                         // onlinePlayer.getEyeLocation().add(-0.5, 0, -0.5);
                 Vector posDifference = targetPosition.subtract(activeMoonglobe.currentLocation).toVector();
                 Vector momentum = posDifference.multiply(momentumMultiplier);
