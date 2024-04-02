@@ -69,7 +69,10 @@ public class Moonglobe {
 
                 if (!activeMoonglobe.shown) activeMoonglobe.showGlobe();
 
-                Location targetPosition = onlinePlayer.getEyeLocation().add(-0.5, 0, -0.5);
+                Location eyeLocation = onlinePlayer.getEyeLocation();
+
+                Location targetPosition = eyeLocation.add(0.5*(-1 * Math.sin(Math.toRadians(eyeLocation.getYaw()))), 0, 0.5*(Math.cos(Math.toRadians(eyeLocation.getYaw()))));
+                        // onlinePlayer.getEyeLocation().add(-0.5, 0, -0.5);
                 Vector posDifference = targetPosition.subtract(activeMoonglobe.currentLocation).toVector();
                 Vector momentum = posDifference.multiply(momentumMultiplier);
 
