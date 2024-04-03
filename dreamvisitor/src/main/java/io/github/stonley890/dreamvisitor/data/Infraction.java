@@ -44,15 +44,28 @@ public class Infraction implements ConfigurationSerializable {
         }
     }
 
-    private static @NotNull YamlConfiguration getConfig() throws IOException, InvalidConfigurationException {
+    private static @NotNull YamlConfiguration getConfig() {
         YamlConfiguration config = new YamlConfiguration();
-        config.load(file);
+        try {
+            config.load(file);
+        } catch (IOException e) {
+            Bukkit.getLogger().severe("infractions.yml cannot be read! Does the server have read/write access? " + e.getMessage());
+            Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
+        } catch (InvalidConfigurationException e) {
+            Bukkit.getLogger().severe("infractions.yml is not a valid configuration! Is it formatted correctly? " + e.getMessage());
+            Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
+        }
         return config;
     }
 
-    private static void saveToDisk(@NotNull YamlConfiguration config) throws IOException {
+    private static void saveToDisk(@NotNull YamlConfiguration config) {
         Dreamvisitor.debug("Saving infractions.yml...");
-        config.save(file);
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            Bukkit.getLogger().severe("infractions.yml cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
+            Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
+        }
         Dreamvisitor.debug("Done!");
     }
 
@@ -61,11 +74,9 @@ public class Infraction implements ConfigurationSerializable {
      *
      * @param memberId the Discord Snowflake ID of the member whose infractions to fetch.
      * @return a non-null {@link List<Infraction>}
-     * @throws IOException                   if there is an error reading from disk.
-     * @throws InvalidConfigurationException if the file is not YAML-formatted.
      */
     @SuppressWarnings("unchecked")
-    public static @NotNull List<Infraction> getInfractions(long memberId) throws IOException, InvalidConfigurationException {
+    public static @NotNull List<Infraction> getInfractions(long memberId) {
         List<Map<?, ?>> infractionsMap = getConfig().getMapList(memberId + ".infractions");
         List<Infraction> infractions = new ArrayList<>();
         for (Map<?, ?> map : infractionsMap) infractions.add(deserialize((Map<String, Object>) map));
@@ -82,9 +93,7 @@ public class Infraction implements ConfigurationSerializable {
     @Contract(pure = true)
     public static byte getInfractionCount(@NotNull List<Infraction> infractions, boolean countExpired) {
         byte count = 0;
-        for (Infraction infraction : infractions) {
-            if (countExpired || !infraction.isExpired()) count += infraction.value;
-        }
+        for (Infraction infraction : infractions) if (countExpired || !infraction.isExpired()) count += infraction.value;
         return count;
     }
 
@@ -93,10 +102,8 @@ public class Infraction implements ConfigurationSerializable {
      *
      * @param infractions the {@link List<Infraction>} to write.
      * @param memberId    the Discord Snowflake ID of the member to write to.
-     * @throws IOException                   if read/write to disk fails.
-     * @throws InvalidConfigurationException if the file is not YAML-formatted.
      */
-    public static void setInfractions(@NotNull List<Infraction> infractions, long memberId) throws IOException, InvalidConfigurationException {
+    public static void setInfractions(@NotNull List<Infraction> infractions, long memberId) {
         YamlConfiguration config = getConfig();
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (Infraction infraction : infractions) mapList.add(infraction.serialize());
@@ -104,21 +111,21 @@ public class Infraction implements ConfigurationSerializable {
         saveToDisk(config);
     }
 
-    public static void setTempban(long memberId, boolean state) throws IOException, InvalidConfigurationException {
+    public static void setTempban(long memberId, boolean state) {
         YamlConfiguration config = getConfig();
         config.set(memberId + ".tempban", state);
         saveToDisk(config);
     }
 
-    public static boolean hasTempban(long memberId) throws IOException, InvalidConfigurationException {
+    public static boolean hasTempban(long memberId) {
         return getConfig().getBoolean(memberId + ".tempban");
     }
 
-    public static byte getInfractionsUntilBan(long memberId) throws IOException, InvalidConfigurationException {
+    public static byte getInfractionsUntilBan(long memberId) {
         return (byte) (BAN_POINT - getInfractionCount(getInfractions(memberId), false));
     }
 
-    public static void execute(@NotNull Infraction infraction, @NotNull Member member, boolean silent, @NotNull String actionId) throws IOException, InvalidConfigurationException {
+    public static void execute(@NotNull Infraction infraction, @NotNull Member member, boolean silent, @NotNull String actionId) throws InvalidObjectException {
 
         if (!actionId.equals(actionBan) && !actionId.equals(actionAllBan) && !actionId.equals(actionNoBan) && !actionId.equals(actionUserBan))
             throw new InvalidObjectException("Action string does not match any valid actions!");
@@ -156,7 +163,7 @@ public class Infraction implements ConfigurationSerializable {
             JDA jda = Bot.getJda();
             Category category = jda.getCategoryById(Dreamvisitor.getPlugin().getConfig().getLong("infractions-category-id"));
             if (category == null) {
-                throw new InvalidConfigurationException("Category of infractions-category-id is null!");
+                throw new InvalidObjectException("Category of infractions-category-id is null!");
             }
             category.createTextChannel("infraction-" + member.getUser().getName() + "-" + (totalInfractionCount + infraction.value)).queue(channel -> {
 
@@ -252,10 +259,8 @@ public class Infraction implements ConfigurationSerializable {
      * Save an infraction to a member and write to disk.
      *
      * @param memberId the Discord Snowflake ID of the member.
-     * @throws IOException                   if read/write to disk fails.
-     * @throws InvalidConfigurationException if the file is not YAML-formatted.
      */
-    private void save(long memberId) throws IOException, InvalidConfigurationException {
+    private void save(long memberId) {
         YamlConfiguration config = getConfig();
         List<Map<?, ?>> mapList = config.getMapList(memberId + ".infractions");
         mapList.add(serialize());

@@ -1,6 +1,5 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.Infraction;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -13,10 +12,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -38,26 +35,14 @@ public class DCmdInfractions implements DiscordCommand {
             return;
         }
 
-        try {
-            long parent = AltFamily.getParent(user.getIdLong());
-            if (parent != user.getIdLong()) {
-                Objects.requireNonNull(event.getGuild()).retrieveMemberById(parent).queue(parentMember -> event.reply("That user is the child of " + parentMember.getAsMention() + ". Search their infractions instead.").queue());
-                return;
-            }
-        } catch (IOException | InvalidConfigurationException e) {
-            event.getHook().editOriginal("An I/O error occurred! Does the server have read/write access? Cannot read alts.yml! The warn was not recorded.").queue();
-            if (Dreamvisitor.debugMode) e.printStackTrace();
+        long parent = AltFamily.getParent(user.getIdLong());
+        if (parent != user.getIdLong()) {
+            Objects.requireNonNull(event.getGuild()).retrieveMemberById(parent).queue(parentMember -> event.reply("That user is the child of " + parentMember.getAsMention() + ". Search their infractions instead.").queue());
             return;
         }
 
         List<Infraction> infractions;
-        try {
-            infractions = Infraction.getInfractions(user.getIdLong());
-        } catch (IOException | InvalidConfigurationException e) {
-            event.reply("Something went wrong while trying to read infractions.yml.").queue();
-            if (Dreamvisitor.debugMode) e.printStackTrace();
-            return;
-        }
+        infractions = Infraction.getInfractions(user.getIdLong());
 
         if (infractions.isEmpty()) {
             event.reply(user.getName() + " has no recorded infractions.").queue();

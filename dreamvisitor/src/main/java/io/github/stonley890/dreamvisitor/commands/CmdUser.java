@@ -10,7 +10,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.UUID;
 
 public class CmdUser implements CommandExecutor {
@@ -49,9 +48,6 @@ public class CmdUser implements CommandExecutor {
                     discordID = "N/A";
                     // Discord username from JDA
 
-                } catch (IOException e) {
-                    sender.sendMessage("Unable to fetch AccountLink maps from disk! Aborting.");
-                    return true;
                 }
 
                 sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Local data for player " + username + ":" +

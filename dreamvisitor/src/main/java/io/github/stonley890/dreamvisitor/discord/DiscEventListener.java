@@ -2,14 +2,12 @@ package io.github.stonley890.dreamvisitor.discord;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.data.AccountLink;
-import io.github.stonley890.dreamvisitor.data.Infraction;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import io.github.stonley890.dreamvisitor.data.Whitelist;
+import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.discord.commands.DCmdWarn;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Channel;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -25,7 +23,6 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,8 +33,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -86,16 +83,10 @@ public class DiscEventListener extends ListenerAdapter {
 
                 // Link accounts if not already linked
                 Dreamvisitor.debug("Do accounts need to be linked?");
-                try {
-                    if (AccountLink.getUuid(user.getIdLong()) == null) {
-                        Dreamvisitor.debug("Yes, linking account.");
-                        AccountLink.linkAccounts(uuid, user.getIdLong());
-                        Dreamvisitor.debug("Linked.");
-                    }
-                } catch (IOException e) {
-                    event.getMessage().reply("An error occurred! Unable to fetch AccountLink maps from file!\n" +
-                            "*Great, everything is broken. I'm going to have to bother one of my superiors to fix this.*").queue();
-                    return;
+                if (AccountLink.getUuid(user.getIdLong()) == null) {
+                    Dreamvisitor.debug("Yes, linking account.");
+                    AccountLink.linkAccounts(uuid, user.getIdLong());
+                    Dreamvisitor.debug("Linked.");
                 }
 
                 try {
@@ -345,7 +336,6 @@ You could say I have a special nostalgia with that one."""
         }
     }
 
-
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
 
@@ -356,11 +346,7 @@ You could say I have a special nostalgia with that one."""
 
         if (Objects.equals(button.getId(), "panic")) {
             Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
-                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                    if (!player.isOp()) {
-                        player.kickPlayer("Panic!");
-                    }
-                }
+                for (Player player : Bukkit.getServer().getOnlinePlayers()) if (!player.isOp()) player.kickPlayer("Panic!");
             });
             Dreamvisitor.playerLimit = 0;
             Dreamvisitor.getPlugin().getConfig().set("playerlimit", 0);
@@ -434,9 +420,6 @@ You could say I have a special nostalgia with that one."""
             } catch (IOException e) {
                 event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
                 event.reply("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
-            } catch (InvalidConfigurationException e) {
-                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
-                event.reply("Fatal error! Invalid action ID! This should be impossible!").queue();
             }
         } else if (button.getId().equals("warn-understand")) {
             TextChannel channel = (TextChannel) event.getMessageChannel();
@@ -454,13 +437,7 @@ You could say I have a special nostalgia with that one."""
 
                     @NotNull List<Infraction> infractions;
 
-                    try {
-                        infractions = Infraction.getInfractions(member.getIdLong());
-                    } catch (IOException | InvalidConfigurationException e) {
-                        event.reply("There was an error reading from infractions.yml.").queue();
-                        if (Dreamvisitor.debugMode) e.printStackTrace();
-                        return;
-                    }
+                    infractions = Infraction.getInfractions(member.getIdLong());
 
                     if (infractions.isEmpty()) {
                         event.reply("That user has no infractions.").queue();
@@ -468,6 +445,7 @@ You could say I have a special nostalgia with that one."""
                     }
 
                     SelectMenu.Builder selectMenu = SelectMenu.create("infraction-expire-" + member.getId());
+                    selectMenu.setPlaceholder("Select an infraction to remove");
 
                     for (Infraction infraction : infractions) {
                         if (infraction.isExpired()) continue;
@@ -501,13 +479,7 @@ You could say I have a special nostalgia with that one."""
 
                     @NotNull List<Infraction> infractions;
 
-                    try {
-                        infractions = Infraction.getInfractions(member.getIdLong());
-                    } catch (IOException | InvalidConfigurationException e) {
-                        event.reply("There was an error reading from infractions.yml.").queue();
-                        if (Dreamvisitor.debugMode) e.printStackTrace();
-                        return;
-                    }
+                    infractions = Infraction.getInfractions(member.getIdLong());
 
                     if (infractions.isEmpty()) {
                         event.reply("That user has no infractions.").queue();
@@ -534,10 +506,8 @@ You could say I have a special nostalgia with that one."""
                     event.reply("Select the infraction to remove.").addActionRows(dropdown).queue();
 
                 });
-
             }
         }
-
     }
 
     @Override
@@ -552,13 +522,7 @@ You could say I have a special nostalgia with that one."""
 
                 LocalDateTime selectedTime = LocalDateTime.parse(selectOption.getValue());
 
-                try {
-                    infractions = Infraction.getInfractions(member.getIdLong());
-                } catch (IOException | InvalidConfigurationException e) {
-                    event.reply("There was an error reading from infractions.yml.").queue();
-                    if (Dreamvisitor.debugMode) e.printStackTrace();
-                    return;
-                }
+                infractions = Infraction.getInfractions(member.getIdLong());
 
                 if (infractions.isEmpty()) {
                     event.reply("That user has no infractions.").queue();
@@ -574,20 +538,14 @@ You could say I have a special nostalgia with that one."""
                         break;
                     }
                 }
-                try {
-                    Infraction.setInfractions(infractions, member.getIdLong());
-                } catch (IOException | InvalidConfigurationException e) {
-                    event.reply("There was an error writing to infractions.yml.").queue();
-                    if (Dreamvisitor.debugMode) e.printStackTrace();
-                    return;
-                }
+                Infraction.setInfractions(infractions, member.getIdLong());
 
                 event.reply("Infraction expired.").queue();
-                event.getHook().editOriginalComponents(ActionRow.of(event.getSelectMenu().asDisabled())).queue();
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
             });
         } else if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-remove-")) {
             long id = Long.parseLong(event.getComponent().getId().substring("infraction-remove-".length()));
-            Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+            event.getJDA().retrieveUserById(id).queue(member -> {
 
                 @NotNull List<Infraction> infractions;
                 SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
@@ -595,13 +553,7 @@ You could say I have a special nostalgia with that one."""
 
                 LocalDateTime selectedTime = LocalDateTime.parse(selectOption.getValue());
 
-                try {
-                    infractions = Infraction.getInfractions(member.getIdLong());
-                } catch (IOException | InvalidConfigurationException e) {
-                    event.reply("There was an error reading from infractions.yml.").queue();
-                    if (Dreamvisitor.debugMode) e.printStackTrace();
-                    return;
-                }
+                infractions = Infraction.getInfractions(member.getIdLong());
 
                 if (infractions.isEmpty()) {
                     event.reply("That user has no infractions.").queue();
@@ -614,16 +566,44 @@ You could say I have a special nostalgia with that one."""
                         break;
                     }
                 }
+                Infraction.setInfractions(infractions, member.getIdLong());
+
+                event.reply("Infraction removed.").queue();
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+            });
+        } else if (Objects.requireNonNull(event.getComponent().getId()).startsWith("alts-remove-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("alts-remove-".length()));
+            event.getJDA().retrieveUserById(id).queue(member -> {
+
+                AltFamily altFamily;
+                List<Long> childrenIds;
+                
                 try {
-                    Infraction.setInfractions(infractions, member.getIdLong());
-                } catch (IOException | InvalidConfigurationException e) {
-                    event.reply("There was an error writing to infractions.yml.").queue();
-                    if (Dreamvisitor.debugMode) e.printStackTrace();
+                    altFamily = AltFamily.getFamily(member.getIdLong());
+                    childrenIds = altFamily.getChildren();
+                } catch (AltFamily.MismatchException e) {
+                    event.reply(e.getMessage()).queue();
+                    event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
                     return;
                 }
 
-                event.reply("Infraction removed.").queue();
-                event.getHook().editOriginalComponents(ActionRow.of(event.getSelectMenu().asDisabled())).queue();
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+                Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(childrenIds).onSuccess(children -> {
+                    for (Member child : children) {
+                        if (child.getEffectiveName().equals(selectOption.getValue())) {
+                            childrenIds.remove(child.getIdLong());
+                            altFamily.setChildren(childrenIds);
+                            AltFamily.updateFamily(altFamily);
+                            event.reply("Removed " + child.getEffectiveName() + " from the family.").queue();
+                            event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                            return;
+                        }
+                    }
+                    event.reply("That child account could not be found.").queue();
+                    event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                });
+
             });
         }
     }

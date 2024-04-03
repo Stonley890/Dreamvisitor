@@ -16,10 +16,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class Moonglobe {
 
@@ -55,30 +52,41 @@ public class Moonglobe {
     }
 
     public static void tick() {
-        for (Moonglobe activeMoonglobe : activeMoonglobes) {
 
-            if (activeMoonglobe.remove) {
-                activeMoonglobes.remove(activeMoonglobe);
-                continue;
-            }
+        Iterator<Moonglobe> iterator = activeMoonglobes.iterator();
+
+        while (iterator.hasNext()) {
+            Moonglobe activeMoonglobe = iterator.next();
 
             Player onlinePlayer = Bukkit.getPlayer(activeMoonglobe.player);
             if (onlinePlayer == null) {
                 if (activeMoonglobe.shown) activeMoonglobe.hideGlobe();
             } else {
 
+                if (activeMoonglobe.remove) {
+                    iterator.remove();
+                    activeMoonglobes.remove(activeMoonglobe);
+                    return;
+                }
+
+                if ((!Objects.equals(activeMoonglobe.origin.getWorld(), onlinePlayer.getLocation().getWorld())) || (activeMoonglobe.origin.distance(activeMoonglobe.currentLocation) > activeMoonglobe.allowedDistance)) {
+                    activeMoonglobe.remove("Too far away from origin.");
+                    return;
+                }
+
                 if (!activeMoonglobe.shown) activeMoonglobe.showGlobe();
 
                 Location eyeLocation = onlinePlayer.getEyeLocation();
 
                 // x is multiplied by -1 because (x, y) on circle represents (z, -x) in-game.
-                float radius = 0.5f; // distance from player
+                float radius = 0.75f; // distance from player
+                float rotation = eyeLocation.getYaw() - 90;
                 Location targetPosition = eyeLocation.add(
-                        radius * Math.sin(Math.toRadians(eyeLocation.getYaw())),
+                        radius * Math.sin(Math.toRadians(rotation)),
                         0,
-                        radius * -1 * (Math.cos(Math.toRadians(eyeLocation.getYaw())))
+                        radius * -1 * (Math.cos(Math.toRadians(rotation)))
                 );
-                        // onlinePlayer.getEyeLocation().add(-0.5, 0, -0.5);
+                // onlinePlayer.getEyeLocation().add(-0.5, 0, -0.5);
                 Vector posDifference = targetPosition.subtract(activeMoonglobe.currentLocation).toVector();
                 Vector momentum = posDifference.multiply(momentumMultiplier);
 
@@ -96,11 +104,7 @@ public class Moonglobe {
 
                 activeMoonglobe.currentLocation = newLocation;
                 activeMoonglobe.glowEntity.teleport(activeMoonglobe.currentLocation);
-
             }
-
-            if ((!Objects.equals(activeMoonglobe.origin.getWorld(), activeMoonglobe.currentLocation.getWorld())) || (activeMoonglobe.origin.distance(activeMoonglobe.currentLocation) > activeMoonglobe.allowedDistance))
-                activeMoonglobe.remove("Too far away from origin.");
 
         }
     }

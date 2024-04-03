@@ -13,10 +13,10 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import org.bukkit.configuration.InvalidConfigurationException;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -68,7 +68,7 @@ public class DCmdAlts implements DiscordCommand {
                 AltFamily.setAlt(parent.getIdLong(), child.getIdLong());
                 event.reply("Alts recorded successfully!").queue();
 
-            } catch (IOException | InvalidConfigurationException e) {
+            } catch (AltFamily.NotChildException e) {
                 event.reply(e.getMessage()).queue();
             }
 
@@ -83,7 +83,7 @@ public class DCmdAlts implements DiscordCommand {
 
             try {
                 altFamily = AltFamily.getFamily(user.getIdLong());
-            } catch (IOException | InvalidConfigurationException e) {
+            } catch (AltFamily.MismatchException e) {
                 event.reply(e.getMessage()).queue();
                 return;
             }
@@ -92,12 +92,7 @@ public class DCmdAlts implements DiscordCommand {
                 event.reply("There are no alts linked to this account.").queue();
             } else {
                 UUID parentUuid;
-                try {
-                    parentUuid = AccountLink.getUuid(altFamily.getParent());
-                } catch (IOException e) {
-                    event.reply("Unable to fetch AccountLink maps from disk.").queue();
-                    return;
-                }
+                parentUuid = AccountLink.getUuid(altFamily.getParent());
                 String parentUsername;
                 if (parentUuid != null) parentUsername = PlayerUtility.getUsernameOfUuid(parentUuid);
                 else {
@@ -114,28 +109,27 @@ public class DCmdAlts implements DiscordCommand {
 
                     StringBuilder childrenEmbed = new StringBuilder();
 
+                    SelectMenu.Builder selectMenu = SelectMenu.create("alts-remove-" + parentUser.getId());
+                    selectMenu.setPlaceholder("Remove an alt");
+
                     Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(altFamily.getChildren()).onSuccess(childMembers -> {
                         for (Member member : childMembers) {
 
                             UUID childUuid;
-                            try {
-                                childUuid = AccountLink.getUuid(member.getIdLong());
-                            } catch (IOException e) {
-                                event.reply("Unable to fetch AccountLink maps from disk.").queue();
-                                return;
-                            }
+                            childUuid = AccountLink.getUuid(member.getIdLong());
                             String childUsername;
                             if (childUuid != null) childUsername = PlayerUtility.getUsernameOfUuid(childUuid);
                             else {
                                 childUsername = null;
                             }
 
+                            selectMenu.addOption(member.getEffectiveName(), member.getEffectiveName());
                             childrenEmbed.append("- ").append(member.getAsMention()).append(" (").append(childUsername).append("/`").append(childUuid).append("`)\n");
                         }
 
                         embed.addField("Children", childrenEmbed.toString(), false);
 
-                        event.replyEmbeds(embed.build()).queue();
+                        event.replyEmbeds(embed.build()).addActionRows(ActionRow.of(selectMenu.build())).queue();
                     });
                 });
             }

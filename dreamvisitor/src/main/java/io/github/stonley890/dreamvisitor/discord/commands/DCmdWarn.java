@@ -1,6 +1,5 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.Infraction;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,7 +12,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -49,15 +47,9 @@ public class DCmdWarn implements DiscordCommand {
             return;
         }
 
-        try {
-            long parent = AltFamily.getParent(member.getIdLong());
-            if (parent != member.getIdLong()) {
-                Objects.requireNonNull(event.getGuild()).retrieveMemberById(parent).queue(parentMember -> event.getHook().editOriginal("That user is the child of " + parentMember.getAsMention() + ". Warn them instead.").queue());
-                return;
-            }
-        } catch (IOException | InvalidConfigurationException e) {
-            event.getHook().editOriginal("An I/O error occurred! Does the server have read/write access? Cannot read alts.yml! The warn was not recorded.").queue();
-            if (Dreamvisitor.debugMode) e.printStackTrace();
+        long parent = AltFamily.getParent(member.getIdLong());
+        if (parent != member.getIdLong()) {
+            Objects.requireNonNull(event.getGuild()).retrieveMemberById(parent).queue(parentMember -> event.getHook().editOriginal("That user is the child of " + parentMember.getAsMention() + ". Warn them instead.").queue());
             return;
         }
 
@@ -69,13 +61,7 @@ public class DCmdWarn implements DiscordCommand {
 
         List<Infraction> infractions;
 
-        try {
-            infractions = Infraction.getInfractions(member.getIdLong());
-        } catch (IOException | InvalidConfigurationException e) {
-            event.getHook().editOriginal("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
-            if (Dreamvisitor.debugMode) e.printStackTrace();
-            return;
-        }
+        infractions = Infraction.getInfractions(member.getIdLong());
 
         int infractionCount = Infraction.getInfractionCount(infractions, false);
         if (infractionCount + value > Infraction.BAN_POINT) {
@@ -92,17 +78,7 @@ public class DCmdWarn implements DiscordCommand {
 
         boolean hasTempban;
 
-        try {
-            hasTempban = Infraction.hasTempban(member.getIdLong());
-        } catch (IOException e) {
-            event.getHook().editOriginal("There was an error reading from `infractions.yml` on disk! The warn was not recorded.").queue();
-            if (Dreamvisitor.debugMode) e.printStackTrace();
-            return;
-        } catch (InvalidConfigurationException e) {
-            event.getHook().editOriginal("`infractions.yml` is improperly formatted and could not be parsed as YAML! The warn was not recorded.").queue();
-            if (Dreamvisitor.debugMode) e.printStackTrace();
-            return;
-        }
+        hasTempban = Infraction.hasTempban(member.getIdLong());
 
         if (infractionCount < Infraction.BAN_POINT) {
             if (infractionCount + value == Infraction.BAN_POINT) {
@@ -143,11 +119,6 @@ public class DCmdWarn implements DiscordCommand {
                     Infraction.execute(new Infraction((byte) value, reason, LocalDateTime.now()), member, silent, Infraction.actionNoBan);
                 } catch (IOException e) {
                     event.getHook().editOriginal("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
-                    if (Dreamvisitor.debugMode) e.printStackTrace();
-                    return;
-                } catch (InvalidConfigurationException e) {
-                    event.getHook().editOriginal("Fatal error: Invalid action ID! The warn was not recorded.").queue();
-                    if (Dreamvisitor.debugMode) e.printStackTrace();
                     return;
                 }
                 event.getHook().editOriginal("Infraction recorded.").queue();
