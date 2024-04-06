@@ -25,8 +25,8 @@ public class Moonglobe {
 
     private final UUID player;
     private final Location origin;
-    private Location currentLocation;
     private final float allowedDistance;
+    private Location currentLocation;
     private boolean shown = false;
     private ItemDisplay glowEntity = null;
     private boolean remove = false;
@@ -40,14 +40,6 @@ public class Moonglobe {
         allowedDistance = allowedOriginDistance;
 
         activeMoonglobes.add(this);
-
-    }
-
-    public void remove(@Nullable String reason) {
-        remove = true;
-        hideGlobe();
-        Player onlinePlayer = Bukkit.getPlayer(player);
-        if (onlinePlayer != null && reason != null) onlinePlayer.sendMessage(ChatColor.RED + "You moon globe was removed: " + reason);
 
     }
 
@@ -107,6 +99,14 @@ public class Moonglobe {
             }
 
         }
+    }
+
+    public void remove(@Nullable String reason) {
+        remove = true;
+        hideGlobe();
+        Player onlinePlayer = Bukkit.getPlayer(player);
+        if (onlinePlayer != null && reason != null) onlinePlayer.sendMessage(ChatColor.RED + "You moon globe was removed: " + reason);
+
     }
 
     private void showGlobe() {

@@ -24,6 +24,7 @@ public class Sandbox implements Listener {
 
     /**
      * Enable sandbox mode for the given {@link Player}. If they are not already in sandbox mode, they will be put into creative mode and their inventory will be swapped.
+     *
      * @param player the player to enable sandbox mode for.
      */
     public static void enableSandbox(@NotNull Player player) {
@@ -51,6 +52,7 @@ public class Sandbox implements Listener {
 
     /**
      * Disable sandbox mode for the given {@link Player}. If they are still in sandbox mode, they will be put into survival mode and their inventory will be swapped.
+     *
      * @param player the player to disable sandbox mode for.
      */
     public static void disableSandbox(@NotNull Player player) {

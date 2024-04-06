@@ -42,7 +42,7 @@ commands:
     permission: dreamvisitor.softwhitelist
   playerlimit:
     description: Override server player limit.
-    usage: /<command> [number-of-players]
+    usage: /<command> [<new limit>]
     permission: dreamvisitor.playerlimit
   togglepvp:
     description: Globally disable PvP.
@@ -89,7 +89,7 @@ commands:
     permission: dreamvisitor.invswap
   setmotd:
     description: Set the MOTD shown in the server list. Does not persist through restarts.
-    usage: /<command> [<MOTD>]
+    usage: /<command> [<new MOTD>]
     permission: dreamvisitor.setmotd
   synctime:
     description: Sync time across worlds.
@@ -97,7 +97,7 @@ commands:
     permission: dreamvisitor.synctime
   sandbox:
     description: Manage Creative Mode sandboxing.
-    usage: /<command> [<player> [on|off]]
+    usage: /<command> [<player> [on | off]]
     permission: dreamvisitor.sandbox
   moonglobe:
     description: Manage moon globes.
@@ -105,7 +105,7 @@ commands:
     permission: dreamvisitor.moonglobes
   setback:
     description: Set the last location of a player in EssentialsX.
-    usage: /<command> <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]
+    usage: /<command> <player targets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]
     permission: op
 
 permissions:

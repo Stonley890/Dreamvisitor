@@ -16,14 +16,13 @@ import java.util.Map;
 
 public class AltFamily implements ConfigurationSerializable {
 
-    public static class NotChildException extends Exception {
-        public NotChildException() {}
-    }
-    public static class MismatchException extends Exception {
-        public MismatchException() {}
-    }
-
     static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getPath() + "/alts.yml");
+    private final long parent;
+    @NotNull private List<Long> children = new ArrayList<>();
+
+    public AltFamily(long parentId) {
+        parent = parentId;
+    }
 
     public static void init() throws IOException {
         // If the file does not exist, create one
@@ -158,13 +157,14 @@ public class AltFamily implements ConfigurationSerializable {
         Infraction.setInfractions(parentInfractions, parentId);
     }
 
-    // non-static methods
-
-    private final long parent;
-    @NotNull private List<Long> children = new ArrayList<>();
-
-    public AltFamily(long parentId) {
-        parent = parentId;
+    @SuppressWarnings("unchecked")
+    public static @NotNull AltFamily deserialize(@NotNull Map<String, Object> objectMap) {
+        long parent = (long) objectMap.get("parent");
+        List<Long> children = (List<Long>) objectMap.get("children");
+        if (children == null) children = new ArrayList<>();
+        AltFamily altFamily = new AltFamily(parent);
+        altFamily.setChildren(children);
+        return altFamily;
     }
 
     public long getParent() {
@@ -188,13 +188,11 @@ public class AltFamily implements ConfigurationSerializable {
         return objectMap;
     }
 
-    @SuppressWarnings("unchecked")
-    public static @NotNull AltFamily deserialize(@NotNull Map<String, Object> objectMap) {
-        long parent = (long) objectMap.get("parent");
-        List<Long> children = (List<Long>) objectMap.get("children");
-        if (children == null) children = new ArrayList<>();
-        AltFamily altFamily = new AltFamily(parent);
-        altFamily.setChildren(children);
-        return altFamily;
+    public static class NotChildException extends Exception {
+        public NotChildException() {}
+    }
+
+    public static class MismatchException extends Exception {
+        public MismatchException() {}
     }
 }

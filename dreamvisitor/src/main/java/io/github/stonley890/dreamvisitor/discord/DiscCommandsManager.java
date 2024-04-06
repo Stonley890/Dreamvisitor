@@ -61,7 +61,9 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         for (Guild guild : jda.getGuilds()) {
             // register commands
-            guild.updateCommands().addCommands(commandData).queue();
+            for (CommandData commandDatum : commandData) {
+                guild.upsertCommand(commandDatum).queue();
+            }
 
             Dreamvisitor.debug("Updated commands.");
         }

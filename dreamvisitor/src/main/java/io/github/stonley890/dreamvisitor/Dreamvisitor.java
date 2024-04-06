@@ -31,11 +31,12 @@ import java.util.logging.Level;
 @SuppressWarnings({ "null" })
 public class Dreamvisitor extends JavaPlugin {
 
+    public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
+    // private
+    private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
     // public
     public static Dreamvisitor PLUGIN;
     public static String MOTD = null;
-    public final String VERSION = getDescription().getVersion();
-    public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
     public static boolean chatPaused;
     public static int playerLimit;
     public static Location hubLocation;
@@ -43,10 +44,22 @@ public class Dreamvisitor extends JavaPlugin {
     public static boolean debugMode;
     public static boolean restartScheduled = false;
     public static boolean botFailed = true;
-
-    // private
-    private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
     private static ConsoleLogger appender;
+    public final String VERSION = getDescription().getVersion();
+
+    public static Dreamvisitor getPlugin() {
+        return PLUGIN;
+    }
+
+    public static @NotNull String getPlayerPath(@NotNull UUID uuid) {
+        return PLUGIN.getDataFolder().getAbsolutePath() + "/player/" + uuid + ".yml";
+    }
+
+    public static void debug(String message) {
+        if (getPlugin().getConfig().getBoolean("debug")){
+            Bukkit.getLogger().info("DEBUG: " + message);
+        }
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -284,20 +297,6 @@ public class Dreamvisitor extends JavaPlugin {
         Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
         Objects.requireNonNull(getCommand("moonglobe")).setTabCompleter(new TabMoonglobe());
         Objects.requireNonNull(getCommand("setback")).setTabCompleter(new TabSetback());
-    }
-
-    public static Dreamvisitor getPlugin() {
-        return PLUGIN;
-    }
-
-    public static @NotNull String getPlayerPath(@NotNull UUID uuid) {
-        return PLUGIN.getDataFolder().getAbsolutePath() + "/player/" + uuid + ".yml";
-    }
-
-    public static void debug(String message) {
-        if (getPlugin().getConfig().getBoolean("debug")){
-            Bukkit.getLogger().info("DEBUG: " + message);
-        }
     }
 
     @Override

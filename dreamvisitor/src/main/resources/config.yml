@@ -91,5 +91,5 @@ infraction-expire-time-days: 90
 
 # The ID of the category to create infractions channels.
 # They will accumulate here.
-# Default:
-infractions-category-id: 934335944717381642
+# Default: 1226180189604544593
+infractions-category-id: 1226180189604544593

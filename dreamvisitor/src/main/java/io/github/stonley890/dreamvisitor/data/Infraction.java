@@ -35,6 +35,24 @@ public class Infraction implements ConfigurationSerializable {
     public static final String actionAllBan = "all_ban"; // ban from all
     public static final int BAN_POINT = 3;
     static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getPath() + "/infractions.yml");
+    private final byte value;
+    @NotNull
+    private final String reason;
+    @NotNull
+    private final LocalDateTime time;
+    private boolean expired = false;
+
+    /**
+     * Creates and saves an infraction to disk.
+     *
+     * @param infractionValue  the value of the infraction.
+     * @param infractionReason the reason for the infraction.
+     */
+    public Infraction(byte infractionValue, @NotNull String infractionReason, @NotNull LocalDateTime dateTime) {
+        value = infractionValue;
+        reason = infractionReason;
+        time = dateTime;
+    }
 
     public static void init() throws IOException {
         // If the file does not exist, create one
@@ -234,26 +252,14 @@ public class Infraction implements ConfigurationSerializable {
 
     }
 
-    private final byte value;
-    private boolean expired = false;
-    @NotNull
-    private final String reason;
-    @NotNull
-    private final LocalDateTime time;
-
-    /**
-     * Creates and saves an infraction to disk.
-     *
-     * @param infractionValue  the value of the infraction.
-     * @param infractionReason the reason for the infraction.
-     */
-    public Infraction(byte infractionValue, @NotNull String infractionReason, @NotNull LocalDateTime dateTime) {
-        value = infractionValue;
-        reason = infractionReason;
-        time = dateTime;
-    }
-
     // need to check for alts and make sure a child account cannot be warned
+
+    @Contract("_ -> new")
+    public static @NotNull Infraction deserialize(@NotNull Map<String, Object> map) {
+        Infraction infraction = new Infraction(Byte.parseByte(String.valueOf((int) map.get("value"))), (String) map.get("reason"), LocalDateTime.parse((CharSequence) map.get("time")));
+        if (map.get("expired") != null && (boolean) map.get("expired")) infraction.expire();
+        return infraction;
+    }
 
     /**
      * Save an infraction to a member and write to disk.
@@ -305,12 +311,5 @@ public class Infraction implements ConfigurationSerializable {
         objectMap.put("expired", expired);
 
         return objectMap;
-    }
-
-    @Contract("_ -> new")
-    public static @NotNull Infraction deserialize(@NotNull Map<String, Object> map) {
-        Infraction infraction = new Infraction(Byte.parseByte(String.valueOf((int) map.get("value"))), (String) map.get("reason"), LocalDateTime.parse((CharSequence) map.get("time")));
-        if (map.get("expired") != null && (boolean) map.get("expired")) infraction.expire();
-        return infraction;
     }
 }

@@ -163,7 +163,7 @@ public class CmdDvset implements CommandExecutor {
         return true;
     }
 
-    private static void sendUserGui(Player player) {
+    private static void sendUserGui(@NotNull Player player) {
 
         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
@@ -218,7 +218,7 @@ public class CmdDvset implements CommandExecutor {
 
     }
 
-    private static void sendAdminGui(Player player) {
+    private static void sendAdminGui(@NotNull Player player) {
 
         ComponentBuilder builder = new ComponentBuilder(Dreamvisitor.PREFIX);
         builder.append("Admin Options ").color(ChatColor.DARK_AQUA);
@@ -333,7 +333,7 @@ public class CmdDvset implements CommandExecutor {
      * @param cmdName the command to run. This will be formatted as {@code /dvset <state> <cmdName> !value}
      * @return a {@link TextComponent} representing the value with a command to change it.
      */
-    private static TextComponent booleanToggle(boolean value, boolean user, String cmdName) {
+    private static @NotNull TextComponent booleanToggle(boolean value, boolean user, String cmdName) {
         TextComponent toggle = new TextComponent();
         toggle.setUnderlined(true);
 
