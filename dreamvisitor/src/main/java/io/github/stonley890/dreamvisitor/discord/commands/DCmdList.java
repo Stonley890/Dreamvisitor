@@ -73,7 +73,7 @@ public class DCmdList implements DiscordCommand {
             }
 
         } else {
-            event.reply("This command must be executed in " + Bot.getGameLogChannel().getAsMention()).setEphemeral(true)
+            event.reply("This command must be executed in " + Bot.getGameChatChannel().getAsMention()).setEphemeral(true)
                     .queue();
         }
     }

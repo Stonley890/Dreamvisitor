@@ -5,10 +5,9 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.commands.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -18,7 +17,7 @@ public class DiscCommandsManager extends ListenerAdapter {
     static final JDA jda = Bot.getJda();
 
     static final List<DiscordCommand> commands = new ArrayList<>();
-    
+
 
     // Get channels and roles from config
     @SuppressWarnings({"null"})
@@ -26,28 +25,30 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         Dreamvisitor.debug("Initializing commands...");
 
-        commands.add(new DCmdActivity());
-        commands.add(new DCmdBroadcast());
-        commands.add(new DCmdLink());
-        commands.add(new DCmdList());
-        commands.add(new DCmdMsg());
-        commands.add(new DCmdPanic());
-        commands.add(new DCmdResourcepackupdate());
-        commands.add(new DCmdSchedulerestart());
-        commands.add(new DCmdSetgamechat());
-        commands.add(new DCmdSetlogchat());
-        commands.add(new DCmdSetrole());
-        commands.add(new DCmdSetwhitelist());
-        commands.add(new DCmdToggleweb());
-        commands.add(new DCmdUnwhitelist());
-        commands.add(new DCmdUser());
-        commands.add(new DCmdWarn());
-        commands.add(new DCmdAlts());
-        commands.add(new DCmdInfractions());
+        List<DiscordCommand> addList = new ArrayList<>();
+
+        addList.add(new DCmdActivity());
+        addList.add(new DCmdBroadcast());
+        addList.add(new DCmdLink());
+        addList.add(new DCmdList());
+        addList.add(new DCmdMsg());
+        addList.add(new DCmdPanic());
+        addList.add(new DCmdResourcepackupdate());
+        addList.add(new DCmdSchedulerestart());
+        addList.add(new DCmdSetgamechat());
+        addList.add(new DCmdSetlogchat());
+        addList.add(new DCmdSetrole());
+        addList.add(new DCmdSetwhitelist());
+        addList.add(new DCmdToggleweb());
+        addList.add(new DCmdUnwhitelist());
+        addList.add(new DCmdUser());
+        addList.add(new DCmdWarn());
+        addList.add(new DCmdAlts());
+        addList.add(new DCmdInfractions());
 
         Dreamvisitor.debug("Ready to add to guild.");
 
-        addCommands(commands);
+        addCommands(addList);
 
     }
 
@@ -65,33 +66,25 @@ public class DiscCommandsManager extends ListenerAdapter {
                 "*Great, everything is broken. I'm going to have to bother one of my superiors to fix this.*").queue();
     }
 
-    // Register commands on ready
-    @Override
-    @SuppressWarnings({"null"})
-    public void onGuildReady(@NotNull GuildReadyEvent event) {
-        List<CommandData> commandData = new ArrayList<>();
-        for (DiscordCommand command : commands) {
-            commandData.add(command.getCommandData());
-            Dreamvisitor.debug("Added command " + command.getName());
-        }
+    public static void addCommands(@NotNull List<DiscordCommand> commands) {
 
-        // register commands
-        event.getGuild().updateCommands().addCommands(commandData).queue();
+        Dreamvisitor.debug("Request to add " + commands.size() + " commands.");
 
-        Dreamvisitor.debug("Updated commands.");
-
-        commandData.clear();
+        DiscCommandsManager.commands.addAll(commands);
 
     }
 
-    public static void addCommands(List<DiscordCommand> commands) {
+    public static void updateCommands() {
+
+        Dreamvisitor.debug("Updating all Discord commands.");
+
         try {
             jda.awaitReady();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        List<CommandData> commandData = new ArrayList<>();
+        List<SlashCommandData> commandData = new ArrayList<>();
         for (DiscordCommand command : commands) {
             commandData.add(command.getCommandData());
             Dreamvisitor.debug("Added command " + command.getName());
@@ -99,13 +92,9 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         for (Guild guild : jda.getGuilds()) {
             // register commands
-            for (CommandData commandDatum : commandData) {
-                guild.upsertCommand(commandDatum).queue();
-            }
-
-            Dreamvisitor.debug("Updated commands.");
+            guild.updateCommands().addCommands(commandData).queue();
         }
 
-        commandData.clear();
+        Dreamvisitor.debug("Updated commands for " + jda.getGuilds().size() + " guild(s).");
     }
 }
