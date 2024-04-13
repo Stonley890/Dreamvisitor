@@ -47,28 +47,7 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         Dreamvisitor.debug("Ready to add to guild.");
 
-        try {
-            jda.awaitReady();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        List<CommandData> commandData = new ArrayList<>();
-        for (DiscordCommand command : commands) {
-            commandData.add(command.getCommandData());
-            Dreamvisitor.debug("Added command " + command.getName());
-        }
-
-        for (Guild guild : jda.getGuilds()) {
-            // register commands
-            for (CommandData commandDatum : commandData) {
-                guild.upsertCommand(commandDatum).queue();
-            }
-
-            Dreamvisitor.debug("Updated commands.");
-        }
-
-        commandData.clear();
+        addCommands(commands);
 
     }
 
@@ -103,5 +82,30 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         commandData.clear();
 
+    }
+
+    public static void addCommands(List<DiscordCommand> commands) {
+        try {
+            jda.awaitReady();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        List<CommandData> commandData = new ArrayList<>();
+        for (DiscordCommand command : commands) {
+            commandData.add(command.getCommandData());
+            Dreamvisitor.debug("Added command " + command.getName());
+        }
+
+        for (Guild guild : jda.getGuilds()) {
+            // register commands
+            for (CommandData commandDatum : commandData) {
+                guild.upsertCommand(commandDatum).queue();
+            }
+
+            Dreamvisitor.debug("Updated commands.");
+        }
+
+        commandData.clear();
     }
 }

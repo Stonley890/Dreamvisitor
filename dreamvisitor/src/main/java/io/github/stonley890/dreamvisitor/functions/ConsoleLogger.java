@@ -1,5 +1,6 @@
-package io.github.stonley890.dreamvisitor;
+package io.github.stonley890.dreamvisitor.functions;
 
+import io.github.stonley890.dreamvisitor.Bot;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;

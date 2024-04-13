@@ -4,6 +4,7 @@ import io.github.stonley890.dreamvisitor.commands.*;
 import io.github.stonley890.dreamvisitor.commands.tabcomplete.*;
 import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.functions.ConsoleLogger;
 import io.github.stonley890.dreamvisitor.functions.ItemBanList;
 import io.github.stonley890.dreamvisitor.functions.Moonglobe;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
