@@ -15,7 +15,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +47,6 @@ public class Dreamvisitor extends JavaPlugin {
     public static boolean botFailed = true;
     private static ConsoleLogger appender;
     public final String VERSION = getDescription().getVersion();
-    public final int dataVersion = 1;
 
     public static Dreamvisitor getPlugin() {
         return PLUGIN;
@@ -69,7 +67,6 @@ public class Dreamvisitor extends JavaPlugin {
     public void onEnable() {
 
         try {
-
             // Initialize variables
             PLUGIN = this;
 
@@ -115,9 +112,6 @@ public class Dreamvisitor extends JavaPlugin {
                 // Get saved data
                 debug("Fetching recorded channels and roles from config.");
                 DiscCommandsManager.init();
-
-                // Update commands if needed
-                if (getConfig().getInt("data-version") < dataVersion) DiscCommandsManager.updateCommands();
 
                 // Send server start message
                 Bot.getGameLogChannel().sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
@@ -228,8 +222,6 @@ public class Dreamvisitor extends JavaPlugin {
 
             // Check for scheduled restart every minute
             Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
-
-            getConfig().set("data-version", dataVersion);
 
             debug("Enable finished.");
         } catch (Exception e) {

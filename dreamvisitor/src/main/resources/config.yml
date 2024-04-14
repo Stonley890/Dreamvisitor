@@ -3,10 +3,6 @@
 # Default: false
 debug: false
 
-# This allows Dreamvisitor to know when you have updated and will make changes accordingly.
-# Do NOT modify this.
-data-version: 0
-
 # The Dreamvisitor bot token. DO NOT SHARE THIS.
 # Dreamvisitor will not work properly unless this is a valid bot token.
 # Ask Bog for a bot token if Dreamvisitor reports a login error on startup.
