@@ -175,7 +175,7 @@ public class Dreamvisitor extends JavaPlugin {
                             // Check that it fits
                             if ((overFlowMessageBuilder.toString().length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length()) >= 2000) {
                                 // if not, queue current message and clear string builder
-                                Bot.getGameLogChannel().sendMessage(overFlowMessageBuilder.toString().replaceAll("_","\\\\_")).queue();
+                                Bot.getGameLogChannel().sendMessage(overFlowMessageBuilder.toString()).queue();
                                 overFlowMessageBuilder = new StringBuilder();
 
                             } else overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(i)).append("\n");

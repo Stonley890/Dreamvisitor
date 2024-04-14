@@ -1,6 +1,7 @@
 package io.github.stonley890.dreamvisitor.functions;
 
 import io.github.stonley890.dreamvisitor.Bot;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;
@@ -47,8 +48,8 @@ public class ConsoleLogger extends AbstractAppender {
             message = message.substring(0, (1998 - tooLongMessage.length())).concat(tooLongMessage);
         }
 
-        // Pause adding strings if the new message will be > 2000
-        if (messageBuilder.toString().length() + message.length() + "\n".length() <= 2000) {
+        // Pause adding strings if the new message will be >= 2000
+        if (messageBuilder.toString().length() + message.length() + "\n".length() < 2000) {
 
             if (!messageBuilder.isEmpty()) {
                 messageBuilder.append("\n");
