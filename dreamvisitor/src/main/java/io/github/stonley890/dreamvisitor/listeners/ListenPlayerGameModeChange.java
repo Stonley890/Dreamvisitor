@@ -18,7 +18,7 @@ public class ListenPlayerGameModeChange implements Listener {
         Player player = event.getPlayer();
         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
-        if (memory.autoinvswap) if ((player.getGameMode().equals(GameMode.SURVIVAL) && event.getNewGameMode().equals(GameMode.CREATIVE)) || (player.getGameMode().equals(GameMode.CREATIVE) && event.getNewGameMode().equals(GameMode.SURVIVAL))) Bukkit.dispatchCommand(player, "invswap");
+        if (memory.autoinvswap && ((player.getGameMode().equals(GameMode.SURVIVAL) && event.getNewGameMode().equals(GameMode.CREATIVE)) || (player.getGameMode().equals(GameMode.CREATIVE) && event.getNewGameMode().equals(GameMode.SURVIVAL)))) Bukkit.dispatchCommand(player, "invswap");
 
     }
 

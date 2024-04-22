@@ -42,7 +42,7 @@ public class ListenPlayerQuit implements Listener {
             PlayerUtility.savePlayerMemory(player.getUniqueId());
             PlayerUtility.clearPlayerMemory(player.getUniqueId());
         } catch (IOException e) {
-            Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access? Player memory will remain in memory.");
+            Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access? Player memory will remain in memory. " + e.getMessage());
         }
 
         Dreamvisitor.debug("Checking sandbox.");
@@ -56,7 +56,7 @@ public class ListenPlayerQuit implements Listener {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 Dreamvisitor.debug("Is " + onlinePlayer.getName() + " moderator?");
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    Dreamvisitor.debug("Yes! ALl good.");
+                    Dreamvisitor.debug("Yes! All good.");
                     moderatorOnline = true;
                     break;
                 }
@@ -68,7 +68,7 @@ public class ListenPlayerQuit implements Listener {
                     if (PlayerUtility.getPlayerMemory(onlinePlayer.getUniqueId()).sandbox) {
                         Dreamvisitor.debug("Yes. Disabling.");
                         Sandbox.disableSandbox(onlinePlayer);
-                        onlinePlayer.sendMessage("There are no sandbox managers available.");
+                        onlinePlayer.sendMessage("You are no longer in Sandbox Mode because there are no sandbox managers available.");
                     }
                 }
             }

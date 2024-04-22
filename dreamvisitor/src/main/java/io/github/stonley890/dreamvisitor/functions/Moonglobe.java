@@ -97,7 +97,7 @@ public class Moonglobe {
     private static @NotNull Location getTargetPosition(@NotNull Player onlinePlayer) {
         Location eyeLocation = onlinePlayer.getEyeLocation();
 
-        // x is multiplied by -1 because (x, y) on unit circle represents (z, -x) in-game.
+        // x is multiplied by -1 because (x, y) on unit circle represents (z, -x) top-down in-game.
         float radius = 0.75f; // distance from player
         float rotation = eyeLocation.getYaw() - 90;
         return eyeLocation.add(

@@ -6,6 +6,7 @@ import java.util.List;
 
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -45,7 +46,17 @@ public class ListenPlayerChat implements Listener {
 
         String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + "**: " + event.getMessage();
 
-        if (Dreamvisitor.chatPaused && !event.isCancelled()) {
+        if (!Dreamvisitor.chatPaused || event.isCancelled()) {
+            if (event.isCancelled()) return;
+
+            try {
+                Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+            } catch (InsufficientPermissionException e) {
+                Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+            }
+            Bot.sendLog(chatMessage);
+
+        } else {
 
             // Load pauseBypass file
             File file = new File(plugin.getDataFolder().getAbsolutePath() + "/pauseBypass.yml");
@@ -65,21 +76,20 @@ public class ListenPlayerChat implements Listener {
             if (bypassedPlayers.contains(event.getPlayer().getUniqueId().toString())
                     || event.getPlayer().hasPermission("dreamvisitor.nopause")) {
 
-                Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                try {
+                    Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                } catch (InsufficientPermissionException e) {
+                    Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+                }
                 Bot.sendLog(chatMessage);
-                
+
             } else {
                 event.setCancelled(true);
                 event.getPlayer().sendMessage(ChatColor.RED + "Chat is currently paused.");
 
                 Bot.sendLog("Blocked: " + chatMessage);
 
-            }  
-        } else if (!event.isCancelled()) {
-
-            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
-            Bot.sendLog(chatMessage);
-
+            }
         }
     }
 

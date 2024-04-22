@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -44,7 +45,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 try {
                     fileConfig.load(file);
                 } catch (IOException | InvalidConfigurationException e1) {
-                    Bukkit.getLogger().warning("Could not load 'pauseBypass.yml' file! Restart to reinitialize.");
+                    Bukkit.getLogger().warning("Could not load 'pauseBypass.yml' file! " + e1.getMessage());
                 }
 
                 // Remember bypassed players
@@ -59,7 +60,11 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
                             + ")**]** " + ChatColor.stripColor(action);
                     // Send message
-                    Bot.getGameChatChannel().sendMessage(message).queue();
+                    try {
+                        Bot.getGameChatChannel().sendMessage(message).queue();
+                    } catch (InsufficientPermissionException e) {
+                        Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+                    }
                     Bot.sendLog(message);
                 } // If list does not contain player, stop the command
                 else {
@@ -76,21 +81,20 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 String message = "**[" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getDisplayName())) + " **(" + player.getName()
                         + ")**]** " + ChatColor.stripColor(action);
                 // Send message
-                Bot.getGameChatChannel().sendMessage(message).queue();
+                try {
+                    Bot.getGameChatChannel().sendMessage(message).queue();
+                } catch (InsufficientPermissionException e) {
+                    Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+                }
                 Bot.sendLog(message);
             }
         } else {
-            boolean isMsg = false;
             for (String string : msgAliases) {
                 if (cmd.startsWith(string)) {
-                    isMsg = true;
-                    break;
+                    String message = "**" + Bot.escapeMarkdownFormatting(player.getName()) + "** sent command: `" + cmd + "`";
+                    Bot.sendLog(message);
+                    return;
                 }
-            }
-
-            if (isMsg) {
-                String message = "**" + Bot.escapeMarkdownFormatting(player.getName()) + "** sent command: `" + cmd + "`";
-                Bot.sendLog(message);
             }
         }
     }

@@ -91,8 +91,9 @@ public class ListenPlayerLogin implements Listener {
         // Load file
         try {
             fileConfig.load(file);
-        } catch (IOException | InvalidConfigurationException e1) {
-            throw new RuntimeException();
+        } catch (IOException | InvalidConfigurationException ignored) {
+            event.disallow(Result.KICK_OTHER, "You are not allowed at this time.");
+            return;
         }
 
         // Fetch soft-whitelisted players
