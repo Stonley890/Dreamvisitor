@@ -56,7 +56,6 @@ public class CmdUser implements CommandExecutor {
                         "\nDiscord ID: " + discordID
                 );
 
-
             }
         } else {
             sender.sendMessage(Dreamvisitor.PREFIX +

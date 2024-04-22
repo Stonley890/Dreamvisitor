@@ -9,10 +9,12 @@ import io.github.stonley890.dreamvisitor.functions.ItemBanList;
 import io.github.stonley890.dreamvisitor.functions.Moonglobe;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import io.github.stonley890.dreamvisitor.listeners.*;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -72,6 +74,8 @@ public class Dreamvisitor extends JavaPlugin {
 
             debugMode = getConfig().getBoolean("debug");
 
+            checkConfig();
+
             debug("Registering listeners...");
             registerListeners();
 
@@ -84,9 +88,7 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Creating data folder...");
             // Create config if needed
             boolean directoryCreated = getDataFolder().mkdir();
-            if (!directoryCreated) {
-                debug("Dreamvisitor did not create a data folder.");
-            }
+            if (!directoryCreated) debug("Dreamvisitor did not create a data folder. It may already exist.");
             saveDefaultConfig();
 
             // Initialize account link
@@ -114,7 +116,13 @@ public class Dreamvisitor extends JavaPlugin {
                 DiscCommandsManager.init();
 
                 // Send server start message
-                Bot.getGameLogChannel().sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
+                try {
+                    Bot.getGameLogChannel().sendMessage("Server has been started.\n*Dreamvisitor " + VERSION + "*").queue();
+                } catch (InsufficientPermissionException e) {
+                    Bukkit.getLogger().severe("Dreamvisitor Bot does not have permission to send messages in the game log channel!");
+                    throw e;
+                }
+
             }
 
             // If chat was previously paused, restore and notify in console\
@@ -159,7 +167,14 @@ public class Dreamvisitor extends JavaPlugin {
                         // If there are no messages in the queue, return
                         if (ConsoleLogger.messageBuilder.isEmpty()) return;
 
-                        Bot.getGameLogChannel().sendMessage(ConsoleLogger.messageBuilder.toString()).queue(); // send message
+                        try {
+                            Bot.getGameLogChannel().sendMessage(ConsoleLogger.messageBuilder.toString()).queue(); // send message
+                        } catch (InsufficientPermissionException e) {
+                            Bukkit.getLogger().warning("Dreamvisitor Bot does not have the necessary permissions to send messages in game log channel.");
+                        } catch (IllegalArgumentException e) {
+                            Bukkit.getLogger().severe("Console logger tried to send an invalid message!");
+                        }
+
                         ConsoleLogger.messageBuilder.delete(0, ConsoleLogger.messageBuilder.length()); // delete queued messages
 
                         // If there are no overflow messages, return
@@ -175,7 +190,13 @@ public class Dreamvisitor extends JavaPlugin {
                             // Check that it fits
                             if ((overFlowMessageBuilder.toString().length() + ConsoleLogger.overFlowMessages.get(i).length() + "\n".length()) >= 2000) {
                                 // if not, queue current message and clear string builder
-                                Bot.getGameLogChannel().sendMessage(overFlowMessageBuilder.toString()).queue();
+                                try {
+                                    Bot.getGameLogChannel().sendMessage(overFlowMessageBuilder.toString()).queue();
+                                } catch (InsufficientPermissionException e) {
+                                    Bukkit.getLogger().warning("Dreamvisitor Bot does not have the necessary permissions to send messages in game log channel.");
+                                } catch (IllegalArgumentException e) {
+                                    Bukkit.getLogger().severe("Console logger tried to send an invalid message!");
+                                }
                                 overFlowMessageBuilder = new StringBuilder();
 
                             } else overFlowMessageBuilder.append(ConsoleLogger.overFlowMessages.get(i)).append("\n");
@@ -235,9 +256,7 @@ public class Dreamvisitor extends JavaPlugin {
 
                 builder.append(e.getMessage());
 
-                for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-                    builder.append("\n").append(stackTraceElement.toString());
-                }
+                for (StackTraceElement stackTraceElement : e.getStackTrace()) builder.append("\n").append(stackTraceElement.toString());
 
                 Bot.getJda().retrieveUserById(505833634134228992L).complete().openPrivateChannel().complete().sendMessage(builder.toString()).complete();
             }
@@ -246,6 +265,13 @@ public class Dreamvisitor extends JavaPlugin {
             throw new RuntimeException();
 
         }
+    }
+
+    private void checkConfig() throws InvalidConfigurationException {
+        if (getConfig().getLongList("triberoles").size() != 10) throw new InvalidConfigurationException("triberoles must contain exactly 10 entries.");
+        if (getConfig().getInt("playerlimit") < -1) getConfig().set("playerlimit", -1);
+        if (getConfig().getInt("infraction-expire-time-days") < 1) throw new InvalidConfigurationException("infraction-expire-time-days must be at least 1.");
+        saveConfig();
     }
 
     private void registerListeners() {
@@ -262,42 +288,51 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new Sandbox(), this);
     }
 
-    private void registerCommands() {
-        Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdRadio());
-        Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
-        Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
-        Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
-        Objects.requireNonNull(getCommand("pausebypass")).setExecutor(new CmdPauseBypass());
-        Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
-        Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
-        Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
-        Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
-        Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
-        Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdRadio());
-        Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
-        Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
-        Objects.requireNonNull(getCommand("itembanlist")).setExecutor(new CmdItemBanList());
-        Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
-        Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
-        Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
-        Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
-        Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
-        Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
-        Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
-        Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
-        Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
-        Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
-        Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
-        Objects.requireNonNull(getCommand("setback")).setExecutor(new CmdSetback());
+    private void registerCommands() throws NullPointerException {
+        try {
+            Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdRadio());
+            Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
+            Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
+            Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
+            Objects.requireNonNull(getCommand("pausebypass")).setExecutor(new CmdPauseBypass());
+            Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
+            Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
+            Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
+            Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
+            Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
+            Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdRadio());
+            Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
+            Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
+            Objects.requireNonNull(getCommand("itembanlist")).setExecutor(new CmdItemBanList());
+            Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
+            Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
+            Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
+            Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
+            Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
+            Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
+            Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
+            Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
+            Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
+            Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
+            Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
+            Objects.requireNonNull(getCommand("setback")).setExecutor(new CmdSetback());
+        } catch (NullPointerException e) {
+            throw new NullPointerException("One or more Minecraft commands intended to be registered does not exist.");
+        }
+
     }
 
-    private void registerTabCompletion() {
-        Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
-        Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
-        Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
-        Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
-        Objects.requireNonNull(getCommand("moonglobe")).setTabCompleter(new TabMoonglobe());
-        Objects.requireNonNull(getCommand("setback")).setTabCompleter(new TabSetback());
+    private void registerTabCompletion() throws NullPointerException {
+        try {
+            Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
+            Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
+            Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
+            Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
+            Objects.requireNonNull(getCommand("moonglobe")).setTabCompleter(new TabMoonglobe());
+            Objects.requireNonNull(getCommand("setback")).setTabCompleter(new TabSetback());
+        } catch (NullPointerException e) {
+            throw new NullPointerException("One or more Minecraft commands intended to be registered does not exist.");
+        }
     }
 
     @Override

@@ -45,6 +45,8 @@ public class Moonglobe {
 
     public static void tick() {
 
+        if (activeMoonglobes.isEmpty()) return;
+
         Iterator<Moonglobe> iterator = activeMoonglobes.iterator();
 
         while (iterator.hasNext()) {
@@ -68,17 +70,8 @@ public class Moonglobe {
 
                 if (!activeMoonglobe.shown) activeMoonglobe.showGlobe();
 
-                Location eyeLocation = onlinePlayer.getEyeLocation();
+                Location targetPosition = getTargetPosition(onlinePlayer);
 
-                // x is multiplied by -1 because (x, y) on circle represents (z, -x) in-game.
-                float radius = 0.75f; // distance from player
-                float rotation = eyeLocation.getYaw() - 90;
-                Location targetPosition = eyeLocation.add(
-                        radius * Math.sin(Math.toRadians(rotation)),
-                        0,
-                        radius * -1 * (Math.cos(Math.toRadians(rotation)))
-                );
-                // onlinePlayer.getEyeLocation().add(-0.5, 0, -0.5);
                 Vector posDifference = targetPosition.subtract(activeMoonglobe.currentLocation).toVector();
                 Vector momentum = posDifference.multiply(momentumMultiplier);
 
@@ -99,6 +92,19 @@ public class Moonglobe {
             }
 
         }
+    }
+
+    private static @NotNull Location getTargetPosition(@NotNull Player onlinePlayer) {
+        Location eyeLocation = onlinePlayer.getEyeLocation();
+
+        // x is multiplied by -1 because (x, y) on unit circle represents (z, -x) in-game.
+        float radius = 0.75f; // distance from player
+        float rotation = eyeLocation.getYaw() - 90;
+        return eyeLocation.add(
+                radius * Math.sin(Math.toRadians(rotation)),
+                0,
+                radius * -1 * Math.cos(Math.toRadians(rotation))
+        );
     }
 
     public void remove(@Nullable String reason) {

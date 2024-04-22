@@ -4,6 +4,7 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -36,11 +37,14 @@ public class DCmdBroadcast implements DiscordCommand {
             builder.setAuthor("Staff Broadcast");
             builder.setTitle(message);
 
-            Bot.getGameChatChannel().sendMessageEmbeds(builder.build()).queue();
-            Bot.getGameLogChannel().sendMessageEmbeds(builder.build()).queue();
+            try {
+                Bot.getGameChatChannel().sendMessageEmbeds(builder.build()).queue();
+            } catch (InsufficientPermissionException e) {
+                event.reply("Dreamvisitor Bot does not have the permissions VIEW_CHANNEL, MESSAGE_SEND, or MESSAGE_EMBED_LINKS. The message was still sent to Minecraft").queue();
+            }
 
             // Reply
-            event.reply("Broadcast sent.").queue();
+            event.reply("Broadcast sent.").setEphemeral(true).queue();
         } else {
             event.reply("Message too long! " + message.length() + " > 350").setEphemeral(true).queue();
         }

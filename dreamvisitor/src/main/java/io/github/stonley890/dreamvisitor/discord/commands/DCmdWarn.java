@@ -12,9 +12,9 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,17 +111,30 @@ public class DCmdWarn implements DiscordCommand {
                 memberId = member.getIdLong();
 
                 lastInfraction = new Infraction((byte) value, reason, LocalDateTime.now());
-                event.getHook().editOriginal("This will be the user's third warn. Do you want me to also give them a ban from the Minecraft server?")
-                        .setActionRows(actionRow).queue();
+                try {
+                    event.getHook().editOriginal("This will be the user's third warn. Do you want me to also give them a ban from the Minecraft server?")
+                            .setActionRows(actionRow).queue();
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning("There was a problem responding to a /warn command: " + e.getMessage());
+                }
             } else {
 
                 try {
                     Infraction.execute(new Infraction((byte) value, reason, LocalDateTime.now()), member, silent, Infraction.actionNoBan);
-                } catch (IOException e) {
-                    event.getHook().editOriginal("An I/O error occurred! Does the server have read/write access? Cannot read infractions.yml! The warn was not recorded.").queue();
+                } catch (Exception e) {
+                    try {
+                        event.getHook().editOriginal("There was a problem executing this command: " + e.getMessage()).queue();
+                    } catch (Exception ex) {
+                        Bukkit.getLogger().warning("There was a problem responding to a /warn command: " + ex.getMessage());
+                    }
                     return;
                 }
-                event.getHook().editOriginal("Infraction recorded.").queue();
+
+                try {
+                    event.getHook().editOriginal("Infraction recorded.").queue(null, throwable -> Bukkit.getLogger().warning("There was a problem responding to a /warn command: " + throwable.getMessage()));
+                } catch (IllegalArgumentException e) {
+                    Bukkit.getLogger().warning("There was a problem responding to a /warn command: " + e.getMessage());
+                }
 
             }
         }
@@ -136,9 +149,8 @@ public class DCmdWarn implements DiscordCommand {
                 for (ActionRow actionRow : original.getActionRows()) {
                     actionRows.add(actionRow.asDisabled());
                 }
-            });
-            lastInteraction.editOriginalComponents(actionRows).queue(completion -> lastInteraction = newInteraction);
-            return;
+            }, null);
+            if (!actionRows.isEmpty()) lastInteraction.editOriginalComponents(actionRows).queue(completion -> lastInteraction = newInteraction);
         }
 
         lastInteraction = newInteraction;

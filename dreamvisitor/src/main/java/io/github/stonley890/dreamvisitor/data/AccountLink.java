@@ -13,20 +13,19 @@ import java.util.UUID;
 public class AccountLink {
 
     static final Dreamvisitor plugin = Dreamvisitor.getPlugin();
-    static final File accountFile = new File(plugin.getDataFolder().getPath() + "/accountLink.txt");
+    static final File file = new File(plugin.getDataFolder().getPath() + "/accountLink.txt");
 
     @NotNull static final Map<UUID, Long> uuidToDiscordIdMap = new HashMap<>();
     @NotNull static final Map<Long, UUID> discordIdToUuidMap = new HashMap<>();
 
-    public static void init() {
+    public static void init() throws IOException {
         // If the file does not exist, create one
-        if (!accountFile.exists()) {
+        if (!file.exists()) {
             Dreamvisitor.debug("accountLink.txt does not exist. Creating one now...");
             try {
-                if (!accountFile.createNewFile()) Bukkit.getLogger().warning("Unable to create accountLink.txt!");
+                if (!file.createNewFile()) throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
             } catch (IOException e) {
-                Bukkit.getLogger().severe("accountLink.yml cannot be read/written! Does the server have read/write access? " + e.getMessage());
-                Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
+                throw new IOException("Dreamvisitor tried to create " + file.getName() + ", but it cannot be read/written! Does the server have read/write access?", e);
             }
         }
         loadFromFile();
@@ -36,7 +35,7 @@ public class AccountLink {
         Dreamvisitor.debug("Loading accountLink.txt");
         BufferedReader reader;
         try {
-            reader = new BufferedReader(new FileReader(accountFile));
+            reader = new BufferedReader(new FileReader(file));
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(":");
@@ -61,7 +60,7 @@ public class AccountLink {
         Dreamvisitor.debug("Saving...");
         BufferedWriter writer;
         try {
-            writer = new BufferedWriter(new FileWriter(accountFile));
+            writer = new BufferedWriter(new FileWriter(file));
             for (Map.Entry<UUID, Long> entry : uuidToDiscordIdMap.entrySet()) {
                 UUID uuid = entry.getKey();
                 Dreamvisitor.debug("UUID for this entry: " + uuid.toString());

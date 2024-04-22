@@ -165,6 +165,7 @@ public class Whitelist {
             // username does not exist alert
             Dreamvisitor.debug("Username does not exist.");
             Dreamvisitor.debug("Failed whitelist.");
+            return false;
         } else {
 
             Dreamvisitor.debug("Got UUID");
@@ -178,7 +179,6 @@ public class Whitelist {
                 Dreamvisitor.debug("Already whitelisted.");
                 Dreamvisitor.debug("Resolved.");
 
-                return true;
             } else {
                 Dreamvisitor.debug("Player is not whitelisted.");
 
@@ -189,10 +189,10 @@ public class Whitelist {
 
                 report(username, uuid, null);
 
-                return true;
             }
+            return true;
         }
-        return false;
+
     }
 
     /**

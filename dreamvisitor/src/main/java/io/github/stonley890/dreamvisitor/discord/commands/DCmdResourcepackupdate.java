@@ -28,8 +28,8 @@ public class DCmdResourcepackupdate implements DiscordCommand {
             Properties prop = new Properties();
             prop.load(input);
             resourcePackURL = prop.getProperty("resource-pack");
-        } catch (IOException e) {
-            if (Dreamvisitor.debugMode) throw new RuntimeException();
+        } catch (Exception e) {
+            event.reply("Dreamvisitor was unable to read server.properties: " + e.getMessage()).queue();
         }
 
         if (resourcePackURL != null) {
@@ -73,11 +73,11 @@ public class DCmdResourcepackupdate implements DiscordCommand {
                             event.getHook().editOriginal("Hash updated to " + newHash + "!").queue();
                         }
                     } catch (IOException e) {
-                        if (Dreamvisitor.debugMode) throw new RuntimeException();
+                        event.reply("Dreamvisitor encountered an error: " + e.getMessage()).queue();
                     }
                 }
             } catch (Exception e) {
-                if (Dreamvisitor.debugMode) throw new RuntimeException();
+                event.reply("Dreamvisitor encountered an error: " + e.getMessage()).queue();
             }
 
 

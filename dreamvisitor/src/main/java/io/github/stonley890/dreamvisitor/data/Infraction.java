@@ -2,11 +2,12 @@ package io.github.stonley890.dreamvisitor.data;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.discord.commands.DCmdWarn;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.BanList;
@@ -58,7 +59,11 @@ public class Infraction implements ConfigurationSerializable {
         // If the file does not exist, create one
         if (!file.exists()) {
             Dreamvisitor.debug("infractions.yml does not exist. Creating one now...");
-            if (!file.createNewFile()) Bukkit.getLogger().warning("Unable to create infractions.yml!");
+            try {
+                if (!file.createNewFile()) throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
+            } catch (IOException e) {
+                throw new IOException("Dreamvisitor tried to create " + file.getName() + ", but it cannot be read/written! Does the server have read/write access?", e);
+            }
         }
     }
 
@@ -67,10 +72,10 @@ public class Infraction implements ConfigurationSerializable {
         try {
             config.load(file);
         } catch (IOException e) {
-            Bukkit.getLogger().severe("infractions.yml cannot be read! Does the server have read/write access? " + e.getMessage());
+            Bukkit.getLogger().severe(file.getName() + " cannot be read! Does the server have read/write access? " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         } catch (InvalidConfigurationException e) {
-            Bukkit.getLogger().severe("infractions.yml is not a valid configuration! Is it formatted correctly? " + e.getMessage());
+            Bukkit.getLogger().severe(file.getName() + " is not a valid configuration! Is it formatted correctly? " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
         return config;
@@ -143,10 +148,10 @@ public class Infraction implements ConfigurationSerializable {
         return (byte) (BAN_POINT - getInfractionCount(getInfractions(memberId), false));
     }
 
-    public static void execute(@NotNull Infraction infraction, @NotNull Member member, boolean silent, @NotNull String actionId) throws InvalidObjectException {
+    public static void execute(@NotNull Infraction infraction, @NotNull Member member, boolean silent, @NotNull String actionId) throws InsufficientPermissionException, InvalidObjectException {
 
         if (!actionId.equals(actionBan) && !actionId.equals(actionAllBan) && !actionId.equals(actionNoBan) && !actionId.equals(actionUserBan))
-            throw new InvalidObjectException("Action string does not match any valid actions!");
+            throw new InvalidObjectException("Action string does not match any valid actions! Give action ID " + actionId + " does not match possible options: " + actionBan + ", " + actionAllBan + ", " + actionNoBan + ", " + actionUserBan + ".\nSomething has gone very wrong. The infraction has not been recorded.");
 
         byte infractionsUntilBan = getInfractionsUntilBan(member.getIdLong());
 
@@ -178,11 +183,8 @@ public class Infraction implements ConfigurationSerializable {
 
         if (!silent) {
 
-            JDA jda = Bot.getJda();
-            Category category = jda.getCategoryById(Dreamvisitor.getPlugin().getConfig().getLong("infractions-category-id"));
-            if (category == null) {
-                throw new InvalidObjectException("Category of infractions-category-id is null!");
-            }
+            Category category = Bot.getGameLogChannel().getGuild().getCategoryById(Dreamvisitor.getPlugin().getConfig().getLong("infractions-category-id"));
+            if (category == null) throw new InvalidObjectException("Category of infractions-category-id is null! The infraction has not been recorded.");
             category.createTextChannel("infraction-" + member.getUser().getName() + "-" + (totalInfractionCount + infraction.value)).queue(channel -> {
 
                 ActionRow buttons = ActionRow.of(Button.primary("warn-understand", "I understand"), Button.secondary("warn-explain", "I want an explanation"));
@@ -191,7 +193,7 @@ public class Infraction implements ConfigurationSerializable {
 
                 EmbedBuilder embed = new EmbedBuilder();
 
-                StringBuilder description = new StringBuilder("You have recieved an infraction for the following reason:\n");
+                StringBuilder description = new StringBuilder("You have received an infraction for the following reason:\n");
                 description.append("**").append(infraction.reason).append("**\n\n");
 
                 if (infraction.value == 0) description.append("This infraction does not count towards a ban.");
@@ -219,11 +221,11 @@ public class Infraction implements ConfigurationSerializable {
                     else description.append("\n\n**You have previously been temp-banned. You will be permanently banned after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
                 }
 
-
                 embed.setTitle("Infraction Notice").setDescription(description).setFooter("See the #rules channel for more information about our rules system.").setColor(Color.getHSBColor(17, 100, 100));
 
                 channel.sendMessage(member.getAsMention()).setEmbeds(embed.build()).setActionRows(buttons).queue();
-            });
+            }, throwable -> DCmdWarn.lastInteraction.editOriginal("There was a problem executing this command: " + throwable.getMessage()).queue());
+
         }
 
         if (doBan) {
@@ -232,7 +234,7 @@ public class Infraction implements ConfigurationSerializable {
                 String username = PlayerUtility.getUsernameOfUuid(uuid);
                 if (username != null) {
                     ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
-                    if (!hasTempban) banList.addBan(Bukkit.createPlayerProfile(uuid), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
+                    if (!hasTempban) banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
                     else banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
                 }
             });

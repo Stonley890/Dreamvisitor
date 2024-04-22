@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.discord.commands;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -39,7 +40,10 @@ public class DCmdLink implements DiscordCommand {
             return;
         }
 
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle(targetUser.getAsMention() + " is now linked to `" + username + "`!");
+
         AccountLink.linkAccounts(uuid, targetUser.getIdLong());
-        event.reply(targetUser.getAsMention() + " is now linked to `" + username + "`!").queue();
+        event.replyEmbeds(embed.build()).queue();
     }
 }

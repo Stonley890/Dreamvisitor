@@ -91,6 +91,8 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         Dreamvisitor.debug("Request to add " + commands.size() + " commands.");
 
+        if (commands.isEmpty()) return;
+
         try {
             jda.awaitReady();
         } catch (InterruptedException e) {
@@ -99,8 +101,10 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         List<SlashCommandData> commandData = new ArrayList<>();
         for (DiscordCommand command : commands) {
-            commandData.add(command.getCommandData());
-            Dreamvisitor.debug("Added command " + command.getName());
+            if (command != null) {
+                commandData.add(command.getCommandData());
+                Dreamvisitor.debug("Added command " + command.getName());
+            }
         }
 
         for (Guild guild : jda.getGuilds()) {
@@ -112,6 +116,7 @@ public class DiscCommandsManager extends ListenerAdapter {
 
         Dreamvisitor.debug("Updated commands for " + jda.getGuilds().size() + " guild(s).");
 
+        commands.removeIf(Objects::isNull);
         DiscCommandsManager.commands.addAll(commands);
 
     }

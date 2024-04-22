@@ -25,7 +25,7 @@ public class CmdUnwax implements CommandExecutor {
             if (targetBlock.getState() instanceof Sign sign) {
                 sign.setWaxed(false);
                 sign.update(false);
-                sign.getWorld().spawnParticle(Particle.WAX_OFF, sign.getLocation().add(0.5, 0.5, 0.5), 5);
+                sign.getWorld().spawnParticle(Particle.WAX_OFF, sign.getLocation().add(0.5, 0.5, 0.5), 5, 0.2, 0.2, 0.2);
                 sender.sendMessage(Dreamvisitor.PREFIX + "Wax, be gone!");
             } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That is not a sign.");
         } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This command must be run by a player!");

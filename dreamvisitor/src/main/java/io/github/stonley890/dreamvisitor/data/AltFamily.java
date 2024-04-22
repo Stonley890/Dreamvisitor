@@ -28,7 +28,11 @@ public class AltFamily implements ConfigurationSerializable {
         // If the file does not exist, create one
         if (!file.exists()) {
             Dreamvisitor.debug("alts.yml does not exist. Creating one now...");
-            if (!file.createNewFile()) Bukkit.getLogger().warning("Unable to create alts.yml!");
+            try {
+                if (!file.createNewFile()) throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
+            } catch (IOException e) {
+                throw new IOException("Dreamvisitor tried to create " + file.getName() + ", but it cannot be read/written! Does the server have read/write access?", e);
+            }
         }
     }
 
@@ -67,15 +71,15 @@ public class AltFamily implements ConfigurationSerializable {
      * Get the children of a parent account.
      * @param parentId the ID of the user to get the child accounts of.
      * @return a {@link List<Long>} of child user IDs.
-     * @throws NotChildException if the ID given is not a parent account.
+     * @throws NotParentException if the ID given is not a parent account.
      */
-    public static @NotNull List<Long> getChildren(long parentId) throws NotChildException {
+    public static @NotNull List<Long> getChildren(long parentId) throws NotParentException {
         List<AltFamily> altFamilyList = getAltFamilyList();
         for (AltFamily altFamily : altFamilyList) {
             if (altFamily.getParent() == parentId) return altFamily.getChildren();
         }
         if (getParent(parentId) == parentId) return new ArrayList<>();
-        else throw new NotChildException();
+        else throw new NotParentException();
     }
 
     /**
@@ -97,25 +101,19 @@ public class AltFamily implements ConfigurationSerializable {
      * Get the {@link AltFamily} of a given user ID. You can give either a parent or child account ID.
      * @param userId the ID of the user to search for.
      * @return the {@link AltFamily} connected to this account. It will have no children if the account has not been associated with any others.
-     * @throws MismatchException if there is a mismatch with the parent and child of a family.
      */
-    public static @NotNull AltFamily getFamily(long userId) throws MismatchException {
+    public static @NotNull AltFamily getFamily(long userId) {
+
         List<AltFamily> altFamilyList = AltFamily.getAltFamilyList();
-        long recordedParent = getParent(userId);
-        if (recordedParent != userId) {
-            for (AltFamily altFamily : altFamilyList) if (altFamily.getParent() == recordedParent) return altFamily;
-            throw new MismatchException();
-        } else {
-            List<Long> recordedChildren = new ArrayList<>();
-            try {
-                recordedChildren = getChildren(userId);
-            } catch (NotChildException ignored) {}
-            if (recordedChildren.isEmpty()) return new AltFamily(userId);
-            else {
-                for (AltFamily altFamily : altFamilyList) if (altFamily.getChildren().equals(recordedChildren)) return altFamily;
-                throw new MismatchException();
-            }
+
+        for (AltFamily altFamily : altFamilyList) {
+
+            if (altFamily.parent == userId) return altFamily;
+
+            for (Long child : altFamily.getChildren()) if (child == userId) return altFamily;
+
         }
+        return new AltFamily(userId);
     }
 
     @SuppressWarnings("unchecked")
@@ -139,7 +137,27 @@ public class AltFamily implements ConfigurationSerializable {
         saveToDisk(buildConfig(altFamilyList));
     }
 
-    public static void setAlt(long parentId, long childId) throws NotChildException {
+    /**
+     * Set a child account to a parent account.
+     * If the child is already linked to another parent, it will be removed.
+     * Infractions will be transferred from the child to the parent automatically.
+     * @param parentId the ID of the parent account.
+     * @param childId the ID of the child account.
+     * @throws NotParentException if the parent account is a child of another parent.
+     */
+    public static void setAlt(long parentId, long childId) throws NotParentException {
+
+
+        long initialParent = getParent(childId);
+        if (initialParent == parentId) return;
+
+        // remove child from parent if exists
+        if (initialParent != childId) {
+            AltFamily family = getFamily(childId);
+            family.children.remove(childId);
+            updateFamily(family);
+        }
+
         List<Long> children = getChildren(parentId);
         children.add(childId);
         AltFamily altFamily = new AltFamily(parentId);
@@ -188,11 +206,8 @@ public class AltFamily implements ConfigurationSerializable {
         return objectMap;
     }
 
-    public static class NotChildException extends Exception {
-        public NotChildException() {}
+    public static class NotParentException extends Exception {
+        public NotParentException() {}
     }
 
-    public static class MismatchException extends Exception {
-        public MismatchException() {}
-    }
 }

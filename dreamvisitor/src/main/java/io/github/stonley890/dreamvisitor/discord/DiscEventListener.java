@@ -577,15 +577,9 @@ You could say I have a special nostalgia with that one."""
 
                 AltFamily altFamily;
                 List<Long> childrenIds;
-                
-                try {
-                    altFamily = AltFamily.getFamily(member.getIdLong());
-                    childrenIds = altFamily.getChildren();
-                } catch (AltFamily.MismatchException e) {
-                    event.reply(e.getMessage()).queue();
-                    event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
-                    return;
-                }
+
+                altFamily = AltFamily.getFamily(member.getIdLong());
+                childrenIds = altFamily.getChildren();
 
                 SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
                 if (selectOption == null) return;

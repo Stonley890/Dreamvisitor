@@ -65,11 +65,11 @@ public class DCmdList implements DiscordCommand {
                     }
                     // Send list
                     event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Dreamvisitor.playerLimit + " " + playerForm + " online:** `" + list + "`")
-                            .queue();
+                            .setEphemeral(true).queue();
                 }
 
             } else {
-                event.reply("**There are no players online.**").queue();
+                event.reply("**There are no players online.**").setEphemeral(true).queue();
             }
 
         } else {

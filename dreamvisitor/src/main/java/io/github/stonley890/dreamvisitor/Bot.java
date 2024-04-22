@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.bukkit.Bukkit;
@@ -39,7 +40,6 @@ public class Bot {
         // Try to create a bot
         Dreamvisitor.debug("Attempting to create a bot...");
         try {
-
             jda = JDABuilder.createLight(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                     .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER)
                     .build();
@@ -81,9 +81,9 @@ public class Bot {
                 Bot.gameLogChannel = jda.getTextChannelById(logChannelID);
                 Bot.whitelistChannel = jda.getTextChannelById(whitelistChannelID);
 
-                if (Bot.gameChatChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + chatChannelID + " does not exist!");
+                if (Bot.gameChatChannel == null) Bukkit.getLogger().warning("The game chat channel with ID " + chatChannelID + " does not exist!");
                 if (Bot.gameLogChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + logChannelID + " does not exist!");
-                if (Bot.whitelistChannel == null) Bukkit.getLogger().warning("The game log channel with ID " + whitelistChannelID + " does not exist!");
+                if (Bot.whitelistChannel == null) Bukkit.getLogger().warning("The whitelist channel with ID " + whitelistChannelID + " does not exist!");
 
                 for (int i = 0; i < 10; i++) Bot.tribeRole.add(jda.getRoleById(config.getLongList("tribeRoles").get(i)));
 
@@ -140,7 +140,13 @@ public class Bot {
     }
 
     public static void sendLog(@NotNull String message) {
-        if (!Dreamvisitor.botFailed &&!PLUGIN.getConfig().getBoolean("log-console")) Bot.getGameLogChannel().sendMessage(message).queue();
+        try {
+            if (!Dreamvisitor.botFailed &&!PLUGIN.getConfig().getBoolean("log-console")) Bot.getGameLogChannel().sendMessage(message).queue();
+        } catch (InsufficientPermissionException e) {
+            Bukkit.getLogger().warning("Dreamvisitor bot does not have sufficient permissions to send messages in game log channel!");
+        } catch (IllegalArgumentException e) {
+            if (Dreamvisitor.debugMode) Dreamvisitor.debug("Attempted to send an invalid message.");
+        }
     }
 
 
@@ -150,6 +156,6 @@ public class Bot {
      * @return the formatted {@link String}.
      */
     public static @NotNull String escapeMarkdownFormatting(@NotNull String string) {
-        return string.replaceAll("_","\\\\_").replaceAll("\\*","\\\\*").replaceAll("\\|","\\\\|");
+        return string.isEmpty() ? string : string.replaceAll("_","\\\\_").replaceAll("\\*","\\\\*").replaceAll("\\|","\\\\|");
     }
 }

@@ -12,10 +12,9 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,6 +48,8 @@ public class DCmdInfractions implements DiscordCommand {
             return;
         }
 
+
+
         EmbedBuilder embed = new EmbedBuilder();
 
         ActionRow buttons = ActionRow.of(
@@ -60,7 +61,7 @@ public class DCmdInfractions implements DiscordCommand {
             String expire = "Valid";
             if (infraction.isExpired()) expire = "Expired";
             embed.addField(
-                    infraction.getTime().format(DateTimeFormatter.ofPattern("M/d/u H:m")) + " " + ZoneId.systemDefault().getId(),
+                    TimeFormat.DATE_SHORT.format(infraction.getTime()),
                     "*Value: " + infraction.getValue() + ", " + expire + "\n**Reason:** " + infraction.getReason(),
                     false);
         }

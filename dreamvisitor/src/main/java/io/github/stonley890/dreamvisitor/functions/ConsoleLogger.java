@@ -1,7 +1,6 @@
 package io.github.stonley890.dreamvisitor.functions;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;
@@ -30,10 +29,7 @@ public class ConsoleLogger extends AbstractAppender {
 
         if (log.getThrown() != null) {
             builder.append("\n").append(log.getThrown().getMessage());
-            for (StackTraceElement stackTraceElement : log.getThrown().getStackTrace()) {
-                builder.append("\n").append(stackTraceElement.toString());
-            }
-
+            for (StackTraceElement stackTraceElement : log.getThrown().getStackTrace()) builder.append("\n").append(stackTraceElement.toString());
         }
 
         String message = builder.toString();

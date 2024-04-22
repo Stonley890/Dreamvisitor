@@ -60,16 +60,11 @@ public class DCmdAlts implements DiscordCommand {
                     event.getJDA().retrieveUserById(recordedParentOfChild).queue(user -> event.reply("The child account is already linked to " + user.getAsMention()).queue());
                     return;
                 }
-                long recordedParentOfParent = AltFamily.getParent(parent.getIdLong());
-                if (recordedParentOfParent == child.getIdLong()) {
-                    event.getJDA().retrieveUserById(recordedParentOfChild).queue(user -> event.reply("The parent account is already linked to " + user.getAsMention() + " as a child account.").queue());
-                    return;
-                }
                 AltFamily.setAlt(parent.getIdLong(), child.getIdLong());
                 event.reply("Alts recorded successfully!").queue();
 
-            } catch (AltFamily.NotChildException e) {
-                event.reply(e.getMessage()).queue();
+            } catch (AltFamily.NotParentException e) {
+                event.getJDA().retrieveUserById(parent.getIdLong()).queue(user -> event.reply("The parent account is already linked to " + user.getAsMention() + " as a child account.").queue());
             }
 
         } else if (subcommand.equals("get")) {
@@ -81,12 +76,7 @@ public class DCmdAlts implements DiscordCommand {
 
             AltFamily altFamily;
 
-            try {
-                altFamily = AltFamily.getFamily(user.getIdLong());
-            } catch (AltFamily.MismatchException e) {
-                event.reply(e.getMessage()).queue();
-                return;
-            }
+            altFamily = AltFamily.getFamily(user.getIdLong());
 
             if (altFamily.getChildren().isEmpty()) {
                 event.reply("There are no alts linked to this account.").queue();
@@ -95,9 +85,7 @@ public class DCmdAlts implements DiscordCommand {
                 parentUuid = AccountLink.getUuid(altFamily.getParent());
                 String parentUsername;
                 if (parentUuid != null) parentUsername = PlayerUtility.getUsernameOfUuid(parentUuid);
-                else {
-                    parentUsername = null;
-                }
+                else parentUsername = null;
 
                 event.getJDA().retrieveUserById(altFamily.getParent()).queue(parentUser -> {
 
@@ -119,9 +107,7 @@ public class DCmdAlts implements DiscordCommand {
                             childUuid = AccountLink.getUuid(member.getIdLong());
                             String childUsername;
                             if (childUuid != null) childUsername = PlayerUtility.getUsernameOfUuid(childUuid);
-                            else {
-                                childUsername = null;
-                            }
+                            else childUsername = null;
 
                             selectMenu.addOption(member.getEffectiveName(), member.getEffectiveName());
                             childrenEmbed.append("- ").append(member.getAsMention()).append(" (").append(childUsername).append("/`").append(childUuid).append("`)\n");
