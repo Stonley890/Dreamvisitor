@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,7 +62,7 @@ public class DCmdInfractions implements DiscordCommand {
             String expire = "Valid";
             if (infraction.isExpired()) expire = "Expired";
             embed.addField(
-                    TimeFormat.DATE_SHORT.format(infraction.getTime()),
+                    TimeFormat.DATE_SHORT.format(infraction.getTime().toEpochSecond(ZoneOffset.UTC)),
                     "*Value: " + infraction.getValue() + ", " + expire + "\n**Reason:** " + infraction.getReason(),
                     false);
         }

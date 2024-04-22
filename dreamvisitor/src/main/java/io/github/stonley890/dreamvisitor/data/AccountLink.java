@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class AccountLink {
@@ -90,6 +91,8 @@ public class AccountLink {
     public static void linkAccounts(@NotNull UUID minecraftUUID, @NotNull Long discordId) {
 
         refresh();
+
+        if (Objects.equals(getUuid(discordId), minecraftUUID) && getDiscordId(minecraftUUID) == discordId) return;
 
         // remove existing values
         for (UUID uuid : uuidToDiscordIdMap.keySet()) {
