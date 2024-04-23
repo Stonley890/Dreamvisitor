@@ -5,10 +5,8 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.commands.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,25 +64,6 @@ public class DiscCommandsManager extends ListenerAdapter {
         }
         event.reply("No commands match your request. This is a fatal error and should not be possible.\n" +
                 "*Great, everything is broken. I'm going to have to bother one of my superiors to fix this.*").queue();
-    }
-
-    // Register commands on ready
-    @Override
-    @SuppressWarnings({"null"})
-    public void onGuildReady(@NotNull GuildReadyEvent event) {
-        List<CommandData> commandData = new ArrayList<>();
-        for (DiscordCommand command : commands) {
-            commandData.add(command.getCommandData());
-            Dreamvisitor.debug("Added command " + command.getName());
-        }
-
-        // register commands
-        event.getGuild().updateCommands().addCommands(commandData).queue();
-
-        Dreamvisitor.debug("Updated commands.");
-
-        commandData.clear();
-
     }
 
     public static void addCommands(@NotNull List<DiscordCommand> commands) {
