@@ -7,17 +7,18 @@ import io.github.stonley890.dreamvisitor.discord.commands.DCmdWarn;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -206,7 +207,8 @@ public class DiscEventListener extends ListenerAdapter {
         }
     }
 
-    private static String @NotNull [] getResponses(@NotNull MessageReceivedEvent event) {
+    @NotNull
+    private static String[] getResponses(@NotNull MessageReceivedEvent event) {
         String[] responses;
         String message = event.getMessage().getContentRaw().toLowerCase();
 
@@ -405,14 +407,14 @@ You could say I have a special nostalgia with that one."""
             interaction.editButton(button.asDisabled()).queue();
         } else if (button.getId().equals("schedulerestart")) {
 
-            ActionRow undoButton = ActionRow.of(Button.primary("schedulerestart", "Undo"));
+            Button undoButton = Button.primary("schedulerestart", "Undo");
 
             if (Dreamvisitor.restartScheduled) {
                 Dreamvisitor.restartScheduled = false;
-                event.reply("✅ Canceled server restart.").addActionRows(undoButton).queue();
+                event.reply("✅ Canceled server restart.").addActionRow(undoButton).queue();
             } else {
                 Dreamvisitor.restartScheduled = true;
-                event.reply("✅ The server will restart when there are no players online").addActionRows(undoButton).queue();
+                event.reply("✅ The server will restart when there are no players online").addActionRow(undoButton).queue();
             }
 
         } else if (button.getId().equals(Infraction.actionBan) || button.getId().equals(Infraction.actionNoBan) || button.getId().equals(Infraction.actionAllBan) || button.getId().equals(Infraction.actionUserBan)) {
@@ -456,7 +458,7 @@ You could say I have a special nostalgia with that one."""
                         return;
                     }
 
-                    SelectMenu.Builder selectMenu = SelectMenu.create("infraction-expire-" + member.getId());
+                    StringSelectMenu.Builder selectMenu = StringSelectMenu.create("infraction-expire-" + member.getId());
                     selectMenu.setPlaceholder("Select an infraction to remove");
 
                     for (Infraction infraction : infractions) {
@@ -478,9 +480,9 @@ You could say I have a special nostalgia with that one."""
                         return;
                     }
 
-                    ActionRow dropdown = ActionRow.of(selectMenu.build());
+                    StringSelectMenu dropdown = selectMenu.build();
 
-                    event.reply("Select the infraction to expire.").addActionRows(dropdown).queue();
+                    event.reply("Select the infraction to expire.").addActionRow(dropdown).queue();
 
                 });
 
@@ -498,7 +500,7 @@ You could say I have a special nostalgia with that one."""
                         return;
                     }
 
-                    SelectMenu.Builder selectMenu = SelectMenu.create("infraction-remove-" + member.getId());
+                    StringSelectMenu.Builder selectMenu = StringSelectMenu.create("infraction-remove-" + member.getId());
 
                     for (Infraction infraction : infractions) {
 
@@ -513,9 +515,9 @@ You could say I have a special nostalgia with that one."""
                         );
                     }
 
-                    ActionRow dropdown = ActionRow.of(selectMenu.build());
+                    StringSelectMenu dropdown = selectMenu.build();
 
-                    event.reply("Select the infraction to remove.").addActionRows(dropdown).queue();
+                    event.reply("Select the infraction to remove.").addActionRow(dropdown).queue();
 
                 });
             }
@@ -523,7 +525,7 @@ You could say I have a special nostalgia with that one."""
     }
 
     @Override
-    public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-expire-")) {
             long id = Long.parseLong(event.getComponent().getId().substring("infraction-expire-".length()));
             Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {

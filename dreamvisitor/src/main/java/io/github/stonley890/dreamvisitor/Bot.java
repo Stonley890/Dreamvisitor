@@ -5,16 +5,16 @@ import io.github.stonley890.dreamvisitor.discord.DiscEventListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class Bot {
             Dreamvisitor.debug("Bot created.");
             Dreamvisitor.botFailed = false;
 
-        } catch (LoginException e) {
+        } catch (InvalidTokenException e) {
 
             Bukkit.getLogger().severe(
                     "BOT LOGIN FAILED: You need a valid bot token in dreamvisitor/config.yml. Dreamvisitor will not work properly unless there is a valid bot token.");

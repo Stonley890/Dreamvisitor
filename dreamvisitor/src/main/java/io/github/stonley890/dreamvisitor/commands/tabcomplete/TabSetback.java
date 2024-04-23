@@ -17,7 +17,7 @@ import java.util.List;
 public class TabSetback implements TabCompleter {
     @Nullable
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         // setback <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]
 

@@ -5,10 +5,9 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.commands.DCmdWarn;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -27,6 +26,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Infraction implements ConfigurationSerializable {
 
@@ -177,7 +177,7 @@ public class Infraction implements ConfigurationSerializable {
                 ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
                 banList.addBan(Bukkit.createPlayerProfile(uuid), infraction.reason, (Date) null, "Dreamvisitor");
             });
-            member.ban(0, infraction.reason).queue();
+            member.ban(0, TimeUnit.MINUTES).queue();
             return;
         }
 
@@ -187,7 +187,8 @@ public class Infraction implements ConfigurationSerializable {
             if (category == null) throw new InvalidObjectException("Category of infractions-category-id is null! The infraction has not been recorded.");
             category.createTextChannel("infraction-" + member.getUser().getName() + "-" + (totalInfractionCount + infraction.value)).queue(channel -> {
 
-                ActionRow buttons = ActionRow.of(Button.primary("warn-understand", "I understand"), Button.secondary("warn-explain", "I want an explanation"));
+                Button primary = Button.primary("warn-understand", "I understand");
+                Button secondary = Button.secondary("warn-explain", "I want an explanation");
 
                 channel.upsertPermissionOverride(member).setAllowed(Permission.VIEW_CHANNEL).queue();
 
@@ -223,7 +224,7 @@ public class Infraction implements ConfigurationSerializable {
 
                 embed.setTitle("Infraction Notice").setDescription(description).setFooter("See the #rules channel for more information about our rules system.").setColor(Color.getHSBColor(17, 100, 100));
 
-                channel.sendMessage(member.getAsMention()).setEmbeds(embed.build()).setActionRows(buttons).queue();
+                channel.sendMessage(member.getAsMention()).setEmbeds(embed.build()).setActionRow(primary, secondary).queue();
             }, throwable -> DCmdWarn.lastInteraction.editOriginal("There was a problem executing this command: " + throwable.getMessage()).queue());
 
         }

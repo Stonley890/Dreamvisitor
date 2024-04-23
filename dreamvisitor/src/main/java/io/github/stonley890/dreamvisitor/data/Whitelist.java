@@ -3,9 +3,8 @@ package io.github.stonley890.dreamvisitor.data;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
@@ -165,7 +164,6 @@ public class Whitelist {
             // username does not exist alert
             Dreamvisitor.debug("Username does not exist.");
             Dreamvisitor.debug("Failed whitelist.");
-            return false;
         } else {
 
             Dreamvisitor.debug("Got UUID");
@@ -179,6 +177,7 @@ public class Whitelist {
                 Dreamvisitor.debug("Already whitelisted.");
                 Dreamvisitor.debug("Resolved.");
 
+                return true;
             } else {
                 Dreamvisitor.debug("Player is not whitelisted.");
 
@@ -189,10 +188,10 @@ public class Whitelist {
 
                 report(username, uuid, null);
 
+                return true;
             }
-            return true;
         }
-
+        return false;
     }
 
     /**
@@ -209,8 +208,9 @@ public class Whitelist {
         if (systemChannel != null) {
             EmbedBuilder logEmbed = getEmbedBuilder(username, source, sourceName);
 
-            ActionRow buttons = ActionRow.of(Button.secondary("unwhitelist-" + uuid, "Unwhitelist"), Button.danger("ban-" + uuid, "Ban"));
-            systemChannel.sendMessageEmbeds(logEmbed.build()).setActionRows(buttons).queue();
+            Button ban = Button.danger("ban-" + uuid, "Ban");
+            Button unwhitelist = Button.secondary("unwhitelist-" + uuid, "Unwhitelist");
+            systemChannel.sendMessageEmbeds(logEmbed.build()).setActionRow(ban, unwhitelist).queue();
         }
     }
 

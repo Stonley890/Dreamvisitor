@@ -113,7 +113,7 @@ public class DCmdWarn implements DiscordCommand {
                 lastInfraction = new Infraction((byte) value, reason, LocalDateTime.now());
                 try {
                     event.getHook().editOriginal("This will be the user's third warn. Do you want me to also give them a ban from the Minecraft server?")
-                            .setActionRows(actionRow).queue();
+                            .setActionRow(actionRow.getComponents()).queue();
                 } catch (Exception e) {
                     Bukkit.getLogger().warning("There was a problem responding to a /warn command: " + e.getMessage());
                 }

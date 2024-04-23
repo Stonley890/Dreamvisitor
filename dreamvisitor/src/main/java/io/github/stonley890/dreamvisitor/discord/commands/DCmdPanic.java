@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,8 +20,8 @@ public class DCmdPanic implements DiscordCommand {
         EmbedBuilder replyEmbed = new EmbedBuilder();
         replyEmbed.setTitle("Are you sure?").setDescription("This will kick all players and set the player limit to 0. Click the button to confirm.");
 
-        ActionRow actionRow = ActionRow.of(Button.danger("panic", "Yes, I'm sure."));
+        Button danger = Button.danger("panic", "Yes, I'm sure.");
 
-        event.replyEmbeds(replyEmbed.build()).addActionRows(actionRow).queue();
+        event.replyEmbeds(replyEmbed.build()).addActionRow(danger).queue();
     }
 }

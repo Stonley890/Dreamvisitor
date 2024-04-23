@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,14 +17,14 @@ public class DCmdSchedulerestart implements DiscordCommand {
 
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
-        ActionRow button = ActionRow.of(Button.primary("schedulerestart", "Undo"));
+        Button button = Button.primary("schedulerestart", "Undo");
 
         if (Dreamvisitor.restartScheduled) {
             Dreamvisitor.restartScheduled = false;
-            event.reply("✅ Canceled server restart.").addActionRows(button).queue();
+            event.reply("✅ Canceled server restart.").addActionRow(button).queue();
         } else {
             Dreamvisitor.restartScheduled = true;
-            event.reply("✅ The server will restart when there are no players online").addActionRows(button).queue();
+            event.reply("✅ The server will restart when there are no players online").addActionRow(button).queue();
         }
     }
 }

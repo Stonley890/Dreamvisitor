@@ -22,7 +22,7 @@ import java.util.List;
 public class CmdDvset implements CommandExecutor {
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         // dvset [user|admin [<option> (<action>)]]
 

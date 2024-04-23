@@ -26,7 +26,7 @@ import java.util.Objects;
 
 public class CmdMoonglobe implements CommandExecutor {
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         // moonglobe [remove | create <targets> [<x> <y> <z> [max-distance]]]
 
@@ -57,7 +57,39 @@ public class CmdMoonglobe implements CommandExecutor {
     }
 
     @Contract(pure = true)
-    private static void create(CommandSender sender, String @NotNull [] args) {
+    private static void remove(CommandSender sender, @NotNull String[] args) {
+
+        if (args.length < 2) {
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must specify at least one player!");
+            return;
+        }
+
+        String targetString = args[1];
+
+        // Get players
+        List<Entity> entities = Bukkit.selectEntities(sender, targetString);
+        List<Player> players = new ArrayList<>();
+
+        for (Entity entity : entities) {
+            if (entity instanceof Player player) players.add(player);
+            else {
+                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You cannot specify non-players!");
+                return;
+            }
+        }
+
+        for (Player player : players) {
+            for (Moonglobe activeMoonglobe : Moonglobe.activeMoonglobes) {
+                if (Objects.equals(activeMoonglobe.getPlayer(), player.getUniqueId())) activeMoonglobe.remove(null);
+            }
+        }
+
+        sender.sendMessage(Dreamvisitor.PREFIX + "Removed moon globes of " + players.size() + " players.");
+
+    }
+
+    @Contract(pure = true)
+    private static void create(CommandSender sender, @NotNull String[] args) {
 
         if (args.length < 2) {
             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must specify at least one player!");
@@ -148,38 +180,6 @@ public class CmdMoonglobe implements CommandExecutor {
         }
 
         sender.sendMessage(Dreamvisitor.PREFIX + "Created moon globes for " + players.size() + " players.");
-
-    }
-
-    @Contract(pure = true)
-    private static void remove(CommandSender sender, String @NotNull [] args) {
-
-        if (args.length < 2) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must specify at least one player!");
-            return;
-        }
-
-        String targetString = args[1];
-
-        // Get players
-        List<Entity> entities = Bukkit.selectEntities(sender, targetString);
-        List<Player> players = new ArrayList<>();
-
-        for (Entity entity : entities) {
-            if (entity instanceof Player player) players.add(player);
-            else {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You cannot specify non-players!");
-                return;
-            }
-        }
-
-        for (Player player : players) {
-            for (Moonglobe activeMoonglobe : Moonglobe.activeMoonglobes) {
-                if (Objects.equals(activeMoonglobe.getPlayer(), player.getUniqueId())) activeMoonglobe.remove(null);
-            }
-        }
-
-        sender.sendMessage(Dreamvisitor.PREFIX + "Removed moon globes of " + players.size() + " players.");
 
     }
 }

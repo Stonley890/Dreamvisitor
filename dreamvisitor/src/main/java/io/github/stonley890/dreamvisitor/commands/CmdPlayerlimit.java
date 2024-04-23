@@ -15,7 +15,7 @@ public class CmdPlayerlimit implements CommandExecutor {
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         // playerlimit [new-limit]
 

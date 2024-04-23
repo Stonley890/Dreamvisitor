@@ -21,7 +21,7 @@ public class TabSoftWhitelist implements TabCompleter {
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         ArrayList<String> suggestions = new ArrayList<>();
 

@@ -13,8 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -97,7 +96,7 @@ public class DCmdAlts implements DiscordCommand {
 
                     StringBuilder childrenEmbed = new StringBuilder();
 
-                    SelectMenu.Builder selectMenu = SelectMenu.create("alts-remove-" + parentUser.getId());
+                    StringSelectMenu.Builder selectMenu = StringSelectMenu.create("alts-remove-" + parentUser.getId());
                     selectMenu.setPlaceholder("Remove an alt");
 
                     Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(altFamily.getChildren()).onSuccess(childMembers -> {
@@ -115,7 +114,7 @@ public class DCmdAlts implements DiscordCommand {
 
                         embed.addField("Children", childrenEmbed.toString(), false);
 
-                        event.replyEmbeds(embed.build()).addActionRows(ActionRow.of(selectMenu.build())).queue();
+                        event.replyEmbeds(embed.build()).addActionRow(selectMenu.build()).queue();
                     });
                 });
             }

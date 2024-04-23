@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.NotNull;
@@ -53,10 +52,8 @@ public class DCmdInfractions implements DiscordCommand {
 
         EmbedBuilder embed = new EmbedBuilder();
 
-        ActionRow buttons = ActionRow.of(
-                Button.primary("infraction-expire-"+ user.getId(), "Expire a warn"),
-                Button.danger("infraction-remove-" + user.getId(), "Remove a warn")
-        );
+        Button primary = Button.primary("infraction-expire-" + user.getId(), "Expire a warn");
+        Button danger = Button.danger("infraction-remove-" + user.getId(), "Remove a warn");
 
         for (Infraction infraction : infractions) {
             String expire = "Valid";
@@ -73,6 +70,6 @@ public class DCmdInfractions implements DiscordCommand {
                 .setFooter("The total value of valid infractions is " + Infraction.getInfractionCount(infractions, false) + ".\n" +
                         "The total value of infractions " + Infraction.getInfractionCount(infractions, true) + ".");
 
-        event.replyEmbeds(embed.build()).addActionRows(buttons).queue();
+        event.replyEmbeds(embed.build()).addActionRow(primary, danger).queue();
     }
 }
