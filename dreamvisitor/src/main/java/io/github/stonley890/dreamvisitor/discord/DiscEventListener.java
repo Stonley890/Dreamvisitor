@@ -210,7 +210,7 @@ public class DiscEventListener extends ListenerAdapter {
     @NotNull
     private static String[] getResponses(@NotNull MessageReceivedEvent event) {
         String[] responses;
-        String message = event.getMessage().getContentRaw().toLowerCase();
+        String message = "".concat(event.getMessage().getContentRaw().toLowerCase().strip()).concat(" ");
 
         if (message.contains("owo") || message.contains("uwu")) {
             responses = new String[]{"No."};

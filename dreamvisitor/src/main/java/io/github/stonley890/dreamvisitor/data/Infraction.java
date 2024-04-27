@@ -60,7 +60,8 @@ public class Infraction implements ConfigurationSerializable {
         if (!file.exists()) {
             Dreamvisitor.debug("infractions.yml does not exist. Creating one now...");
             try {
-                if (!file.createNewFile()) throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
+                if (!file.createNewFile())
+                    throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
             } catch (IOException e) {
                 throw new IOException("Dreamvisitor tried to create " + file.getName() + ", but it cannot be read/written! Does the server have read/write access?", e);
             }
@@ -116,7 +117,8 @@ public class Infraction implements ConfigurationSerializable {
     @Contract(pure = true)
     public static byte getInfractionCount(@NotNull List<Infraction> infractions, boolean countExpired) {
         byte count = 0;
-        for (Infraction infraction : infractions) if (countExpired || !infraction.isExpired()) count += infraction.value;
+        for (Infraction infraction : infractions)
+            if (countExpired || !infraction.isExpired()) count += infraction.value;
         return count;
     }
 
@@ -184,7 +186,8 @@ public class Infraction implements ConfigurationSerializable {
         if (!silent) {
 
             Category category = Bot.getGameLogChannel().getGuild().getCategoryById(Dreamvisitor.getPlugin().getConfig().getLong("infractions-category-id"));
-            if (category == null) throw new InvalidObjectException("Category of infractions-category-id is null! The infraction has not been recorded.");
+            if (category == null)
+                throw new InvalidObjectException("Category of infractions-category-id is null! The infraction has not been recorded.");
             category.createTextChannel("infraction-" + member.getUser().getName() + "-" + (totalInfractionCount + infraction.value)).queue(channel -> {
 
                 Button primary = Button.primary("warn-understand", "I understand");
@@ -199,8 +202,10 @@ public class Infraction implements ConfigurationSerializable {
 
                 if (infraction.value == 0) description.append("This infraction does not count towards a ban.");
                 else {
-                    if (infraction.value == 1) description.append("This infraction brings your total count to ").append(infractionCount + infraction.value).append(". ");
-                    else description.append("This infraction is worth ").append(infraction.value).append(" warns as opposed to one, bringing your total to ").append(totalInfractionCount).append(". ");
+                    if (infraction.value == 1)
+                        description.append("This infraction brings your total count to ").append(infractionCount + infraction.value).append(". ");
+                    else
+                        description.append("This infraction is worth ").append(infraction.value).append(" warns as opposed to one, bringing your total to ").append(infractionCount + infraction.value).append(". ");
 
                     if (banPoint) {
                         description.append("This infraction is your third warn within ")
@@ -208,9 +213,12 @@ public class Infraction implements ConfigurationSerializable {
                                 .append(" days. ");
                         if (notifyBan) {
                             if (!hasTempban) {
-                                if (doBan) description.append("You will be temporarily banned from the Minecraft server for two weeks. You cannot join until the two weeks has passed.");
-                                else description.append("You will be temporarily banned from the Minecraft server. You cannot join until your temporary ban is over.");
-                            } else description.append("You will be permanently banned from the Minecraft server. You cannot rejoin the Minecraft server.");
+                                if (doBan)
+                                    description.append("You will be temporarily banned from the Minecraft server for two weeks. You cannot join until the two weeks has passed.");
+                                else
+                                    description.append("You will be temporarily banned from the Minecraft server. You cannot join until your temporary ban is over.");
+                            } else
+                                description.append("You will be permanently banned from the Minecraft server. You cannot rejoin the Minecraft server.");
                         }
                     }
                 }
@@ -218,8 +226,10 @@ public class Infraction implements ConfigurationSerializable {
                 description.append("\n\nIf you want an explanation for this infraction, press the secondary button below and a staff member will provide more information. Press the primary button to dismiss this message.");
 
                 if (!banPoint) {
-                    if (!hasTempban) description.append("\n\n**You do not have a previous temp-ban. You will receive a temp-ban after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
-                    else description.append("\n\n**You have previously been temp-banned. You will be permanently banned after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
+                    if (!hasTempban)
+                        description.append("\n\n**You do not have a previous temp-ban. You will receive a temp-ban after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
+                    else
+                        description.append("\n\n**You have previously been temp-banned. You will be permanently banned after ").append(infractionsUntilBan - infraction.value).append(" more infractions.**");
                 }
 
                 embed.setTitle("Infraction Notice").setDescription(description).setFooter("See the #rules channel for more information about our rules system.").setColor(Color.getHSBColor(17, 100, 100));
@@ -235,8 +245,10 @@ public class Infraction implements ConfigurationSerializable {
                 String username = PlayerUtility.getUsernameOfUuid(uuid);
                 if (username != null) {
                     ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
-                    if (!hasTempban) banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
-                    else banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
+                    if (!hasTempban)
+                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
+                    else
+                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
                 }
             });
         }
