@@ -93,3 +93,13 @@ infraction-expire-time-days: 90
 # They will accumulate here.
 # Default: 1226180189604544593
 infractions-category-id: 1226180189604544593
+
+# The name of the Discord shop.
+# This will appear at the top of the embed.
+# Default: "Shop"
+shopName: "Shop"
+
+# The icon used for currency in the Discord economy system.
+# This can be any string, including symbols, letters, emojis, and Discord custom emoji.
+# Default: "$"
+currencyIcon: "$"
