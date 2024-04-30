@@ -1,10 +1,20 @@
 package io.github.stonley890.dreamvisitor.data;
 
+import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.model.group.Group;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -151,6 +161,21 @@ public class Economy {
         return new Consumer(id);
     }
 
+    public static void saveConsumers(@NotNull List<Consumer> consumerList) {
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (Consumer consumer : consumerList) {
+            mapList.add(consumer.serialize());
+        }
+        getConfig().set("users", mapList);
+    }
+
+    public static void saveConsumer(long id, Consumer newConsumer) {
+        List<Consumer> consumers = getConsumers();
+        consumers.removeIf(consumer -> consumer.id == newConsumer.id);
+        consumers.add(newConsumer);
+        saveConsumers(consumers);
+    }
+
     public static class ShopItem implements ConfigurationSerializable {
 
         private int id;
@@ -161,6 +186,7 @@ public class Economy {
         private double price = 0;
         private double salePercent = 0;
         private int quantity = -1;
+        private int maxAllowed = -1;
         private boolean enabled = true;
         private boolean giftingEnabled = true;
         private boolean useDisabled = false;
@@ -189,6 +215,7 @@ public class Economy {
             shopItem.setPrice((Double) map.get("price"));
             shopItem.setSalePercent((Double) map.get("salePercent"));
             shopItem.setQuantity((Integer) map.get("quantity"));
+            shopItem.setMaxAllowed((Integer) map.get("maxAllowed"));
             shopItem.setEnabled((Boolean) map.get("enabled"));
             shopItem.setGiftingEnabled((Boolean) map.get("giftingEnabled"));
             shopItem.setUseDisabled((Boolean) map.get("useDisabled"));
@@ -255,6 +282,10 @@ public class Economy {
         public void setQuantity(int quantity) {
             this.quantity = quantity;
         }
+
+        public int getMaxAllowed() {return maxAllowed;}
+
+        public void setMaxAllowed(int maxAllowed) {this.maxAllowed = maxAllowed;}
 
         public boolean isEnabled() {
             return enabled;
@@ -342,6 +373,7 @@ public class Economy {
                         Objects.equals(price, item.price) &&
                         Objects.equals(salePercent, item.salePercent) &&
                         Objects.equals(quantity, item.quantity) &&
+                        Objects.equals(maxAllowed, item.maxAllowed) &&
                         Objects.equals(enabled, item.enabled) &&
                         Objects.equals(giftingEnabled, item.giftingEnabled) &&
                         Objects.equals(useDisabled, item.useDisabled) &&
@@ -365,6 +397,7 @@ public class Economy {
             map.put("price", price);
             map.put("salePercent", salePercent);
             map.put("quantity", quantity);
+            map.put("maxAllowed", maxAllowed);
             map.put("enabled", enabled);
             map.put("giftingEnabled", giftingEnabled);
             map.put("useDisabled", useDisabled);
@@ -472,6 +505,78 @@ public class Economy {
 
         }
 
+        public void useItem(int itemId) throws NullPointerException, ItemNotEnabledException, ItemUseNotEnabledException {
+
+            ShopItem item = getItem(itemId);
+            if (item == null) throw new NullPointerException("Item does not exist.");
+            if (!item.enabled) throw new ItemNotEnabledException("Item is not enabled.");
+            if (item.useDisabled) throw new ItemUseNotEnabledException("Item cannot be used.");
+
+            Guild guild = Bot.getGameLogChannel().getGuild();
+            Member member = guild.retrieveMemberById(id).complete();
+
+            UUID uuid = AccountLink.getUuid(id);
+            if (uuid == null) throw new NullPointerException("No linked Minecraft account exists.");
+
+            String username = PlayerUtility.getUsernameOfUuid(uuid);
+            if (username == null) throw new NullPointerException("Linked Minecraft account could not be found.");
+
+            RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+            LuckPerms luckPerms;
+            if (provider != null) luckPerms = provider.getProvider();
+            else {
+                throw new NullPointerException("LuckPerms cannot be found.");
+            }
+
+            List<Long> rolesToAdd = item.onUseRolesAdd;
+            if (rolesToAdd != null && !rolesToAdd.isEmpty())
+                for (Long roleId : rolesToAdd) {
+                    Role role = Bot.getJda().getRoleById(roleId);
+                    if (role == null) throw new NullPointerException("Role to add " + roleId + " does not exist!");
+                    guild.addRoleToMember(member, role).queue();
+                }
+            List<Long> rolesToRemove = item.onUseRolesRemove;
+            if (rolesToRemove != null && !rolesToRemove.isEmpty())
+                for (Long roleId : rolesToRemove) {
+                    Role role = Bot.getJda().getRoleById(roleId);
+                    if (role == null) throw new NullPointerException("Role to remove " + roleId + " does not exist!");
+                    guild.removeRoleFromMember(member, role).queue();
+                }
+
+            if (item.onUseGroupsAdd != null && !item.onUseGroupsAdd.isEmpty()) {
+                luckPerms.getUserManager().loadUser(uuid).thenAcceptAsync(user -> {
+                    for (String groupName : item.onUseGroupsAdd) {
+                        Group group = luckPerms.getGroupManager().getGroup(groupName);
+                        if (group == null) throw new NullPointerException("Group to add " + groupName + " does not exist.");
+                        user.getNodes().add(InheritanceNode.builder(group).build());
+                    }
+                    luckPerms.getUserManager().saveUser(user);
+                });
+            }
+
+            if (item.onUseGroupsRemove != null && !item.onUseGroupsRemove.isEmpty()) {
+                luckPerms.getUserManager().loadUser(uuid).thenAcceptAsync(user -> {
+                    for (String groupName : item.onUseGroupsRemove) {
+                        Group group = luckPerms.getGroupManager().getGroup(groupName);
+                        if (group == null) throw new NullPointerException("Group to remove " + groupName + " does not exist.");
+                        user.getNodes().remove(InheritanceNode.builder(group).build());
+                    }
+                    luckPerms.getUserManager().saveUser(user);
+                });
+            }
+
+            if (item.onUseConsoleCommands != null && !item.onUseConsoleCommands.isEmpty()) {
+                for (String command : item.onUseConsoleCommands) {
+                    Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("$PLAYER$", username));
+                    });
+                }
+            }
+
+            setItemQuantity(itemId, getItemQuantity(itemId - 1));
+
+        }
+
         public static class ItemNotEnabledException extends Exception {
             public ItemNotEnabledException() {super();}
             public ItemNotEnabledException(String message) {super(message);}
@@ -485,6 +590,11 @@ public class Economy {
         public static class InsufficientFundsException extends Exception {
             public InsufficientFundsException() {super();}
             public InsufficientFundsException(String message) {super(message);}
+        }
+
+        public static class ItemUseNotEnabledException extends Exception {
+            public ItemUseNotEnabledException() {super();}
+            public ItemUseNotEnabledException(String message) {super(message);}
         }
     }
 
