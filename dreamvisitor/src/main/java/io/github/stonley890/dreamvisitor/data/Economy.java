@@ -63,6 +63,11 @@ public class Economy {
         return shopItems;
     }
 
+    @Nullable
+    public static ShopItem getItem(int id) {
+        return getItems().get(id);
+    }
+
     public static void setItems(@NotNull List<ShopItem> itemsToSet) {
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (ShopItem shopItem : itemsToSet) {
@@ -138,12 +143,12 @@ public class Economy {
         return consumers;
     }
 
-    @Nullable
+    @NotNull
     public static Consumer getConsumer(long id) {
         for (Consumer consumer : getConsumers()) {
             if (consumer.id == id) return consumer;
         }
-        return null;
+        return new Consumer(id);
     }
 
     public static class ShopItem implements ConfigurationSerializable {
@@ -195,6 +200,14 @@ public class Economy {
             shopItem.setOnUseGroupsRemove((List<String>) map.get("onUseGroupsRemove"));
 
             return shopItem;
+        }
+
+        public boolean isInfinite() {
+            return quantity == -1;
+        }
+
+        public double getTruePrice() {
+            return price - price*salePercent;
         }
 
         public int getId() {
@@ -421,6 +434,12 @@ public class Economy {
             items.put(itemId, quantity);
         }
 
+        public int getQuantityOfItem(int itemId) {
+            int amount = 0;
+            if (items.get(itemId) != null) amount = items.get(itemId);
+            return amount;
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
@@ -437,6 +456,35 @@ public class Economy {
             map.put("balance", balance);
             map.put("inventory", items);
             return map;
+        }
+
+        public void purchaseItem(int itemId) throws NullPointerException, ItemNotEnabledException, ItemOutOfStockException, InsufficientFundsException {
+
+            ShopItem desiredItem = getItem(itemId);
+            if (desiredItem == null) throw new NullPointerException("Item does not exist.");
+            if (!desiredItem.enabled) throw new ItemNotEnabledException("Item is not enabled.");
+            if (desiredItem.quantity == 0) throw new ItemOutOfStockException("Item is out of stock.");
+            if (balance < desiredItem.getTruePrice()) throw new InsufficientFundsException("Consumer does not have sufficient funds for item.");
+
+            setItemQuantity(itemId, getQuantityOfItem(itemId) + 1);
+            desiredItem.setQuantity(desiredItem.quantity - 1);
+            Economy.saveItem(desiredItem);
+
+        }
+
+        public static class ItemNotEnabledException extends Exception {
+            public ItemNotEnabledException() {super();}
+            public ItemNotEnabledException(String message) {super(message);}
+        }
+
+        public static class ItemOutOfStockException extends Exception {
+            public ItemOutOfStockException() {super();}
+            public ItemOutOfStockException(String message) {super(message);}
+        }
+
+        public static class InsufficientFundsException extends Exception {
+            public InsufficientFundsException() {super();}
+            public InsufficientFundsException(String message) {super(message);}
         }
     }
 

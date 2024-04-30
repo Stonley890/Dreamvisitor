@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -25,17 +26,36 @@ public class DCmdShop implements DiscordCommand {
         String currencyIcon = Dreamvisitor.getPlugin().getConfig().getString("currencyIcon");
 
         EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Shop");
         embed.setColor(Color.yellow);
         List<Economy.ShopItem> items = Economy.getItems();
         items.removeIf(item -> !item.isEnabled());
+        StringSelectMenu.Builder purchaseMenu = StringSelectMenu.create("purchase");
         if (items.isEmpty()) {
             embed.setDescription("There are no items currently for sale.");
             event.replyEmbeds(embed.build()).queue();
             return;
         }
         for (Economy.ShopItem item : items) {
-            embed.setTitle(item.getName() + " - " + currencyIcon + item.getPrice());
+            String priceString = String.valueOf(item.getPrice());
+            double truePrice = item.getTruePrice();
+            if (item.getSalePercent() > 0) {
+                priceString = "~~".concat(priceString).concat("~~ ").concat(String.valueOf(truePrice)).concat(" (").concat(String.valueOf(item.getSalePercent())).concat("% off)");
+            }
+            String header = (item.getName() + " - " + currencyIcon + priceString);
+            StringBuilder body = new StringBuilder();
+            body.append("`").append(item.getId()).append("`");
+            body.append("\n**").append(item.getDescription()).append("**");
+            if (!item.isInfinite()) body.append("\n").append(item.getQuantity()).append(" of this item remain(s).");
+            if (item.isGiftingEnabled()) body.append("\n").append("This item can be gifted.");
+            else body.append("\n").append("This item cannot be gifted.");
+
+            embed.addField(header, body.toString(), false);
+
+            purchaseMenu.addOption(item.getName(), String.valueOf(item.getId()), item.getId() + " - " + truePrice);
         }
+
+        event.reply("Here is what is currently available in the shop.").addEmbeds(embed.build()).addActionRow(purchaseMenu.build()).queue();
 
     }
 }
