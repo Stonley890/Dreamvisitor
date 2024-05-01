@@ -34,7 +34,7 @@ public class DCmdBalance implements DiscordCommand {
             Economy.Consumer consumer = Economy.getConsumer(event.getUser().getIdLong());
             double balance;
             balance = consumer.getBalance();
-            message = "You have " + Dreamvisitor.getPlugin().getConfig().getString("currencyIcon") + balance + ".";
+            message = "You have " + Economy.getCurrencySymbol() + balance + ".";
         }
 
         EmbedBuilder embed = new EmbedBuilder();

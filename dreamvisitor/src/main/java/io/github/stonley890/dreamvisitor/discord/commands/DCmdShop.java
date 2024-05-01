@@ -23,10 +23,10 @@ public class DCmdShop implements DiscordCommand {
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
 
-        String currencyIcon = Dreamvisitor.getPlugin().getConfig().getString("currencyIcon");
+        String currencySymbol = Economy.getCurrencySymbol();
 
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Shop");
+        embed.setTitle(Economy.getShopName());
         embed.setColor(Color.yellow);
         List<Economy.ShopItem> items = Economy.getItems();
         items.removeIf(item -> !item.isEnabled());
@@ -42,7 +42,7 @@ public class DCmdShop implements DiscordCommand {
             if (item.getSalePercent() > 0) {
                 priceString = "~~".concat(priceString).concat("~~ ").concat(String.valueOf(truePrice)).concat(" (").concat(String.valueOf(item.getSalePercent())).concat("% off)");
             }
-            String header = (item.getName() + " - " + currencyIcon + priceString);
+            String header = (item.getName() + " - " + currencySymbol + priceString);
             StringBuilder body = new StringBuilder();
             body.append("`").append(item.getId()).append("`");
             body.append("\n**").append(item.getDescription()).append("**");

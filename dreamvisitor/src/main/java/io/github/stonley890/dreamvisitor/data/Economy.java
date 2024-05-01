@@ -7,14 +7,13 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
-import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,6 +60,10 @@ public class Economy {
             Bukkit.getLogger().severe( file.getName() + " cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
+    }
+
+    public static String getCurrencySymbol() {
+        return Dreamvisitor.getPlugin().getConfig().getString("currencyIcon");
     }
 
     @NotNull
@@ -174,6 +177,15 @@ public class Economy {
         consumers.removeIf(consumer -> consumer.id == newConsumer.id);
         consumers.add(newConsumer);
         saveConsumers(consumers);
+    }
+
+    public static String getShopName() {
+        return Dreamvisitor.getPlugin().getConfig().getString("shopName");
+    }
+
+    public static void setShopName(String name) {
+        Dreamvisitor.getPlugin().getConfig().set("shopName", name);
+        Dreamvisitor.getPlugin().saveConfig();
     }
 
     public static class ShopItem implements ConfigurationSerializable {
@@ -491,15 +503,32 @@ public class Economy {
             return map;
         }
 
-        public void purchaseItem(int itemId) throws NullPointerException, ItemNotEnabledException, ItemOutOfStockException, InsufficientFundsException {
+        /**
+         * Make this {@link Consumer} purchase an item.
+         * @param itemId the ID of the item to purchase.
+         * @throws NullPointerException if the item does not exist.
+         * @throws ItemNotEnabledException if the item is not enabled.
+         * @throws ItemOutOfStockException if the item is out of stock.
+         * @throws InsufficientFundsException if the {@link Consumer} does not have sufficient funds to purchase the item.
+         * @throws MaxItemQuanityExceptiion if the {@link Consumer} already has the maximum allowed of this item.
+         */
+        public void purchaseItem(int itemId) throws NullPointerException, ItemNotEnabledException, ItemOutOfStockException, InsufficientFundsException, MaxItemQuanityExceptiion {
 
             ShopItem desiredItem = getItem(itemId);
             if (desiredItem == null) throw new NullPointerException("Item does not exist.");
             if (!desiredItem.enabled) throw new ItemNotEnabledException("Item is not enabled.");
             if (desiredItem.quantity == 0) throw new ItemOutOfStockException("Item is out of stock.");
             if (balance < desiredItem.getTruePrice()) throw new InsufficientFundsException("Consumer does not have sufficient funds for item.");
+            if (getItemQuantity(itemId) + 1 > desiredItem.maxAllowed) throw new MaxItemQuanityExceptiion("Consumer already has max amount of this item.");
 
-            setItemQuantity(itemId, getQuantityOfItem(itemId) + 1);
+            if (desiredItem.useOnPurchase) {
+                try {
+                    useItem(itemId);
+                } catch (ItemUseNotEnabledException e) {
+                    setItemQuantity(itemId, getQuantityOfItem(itemId) + 1);
+                }
+            }
+            else setItemQuantity(itemId, getQuantityOfItem(itemId) + 1);
             desiredItem.setQuantity(desiredItem.quantity - 1);
             Economy.saveItem(desiredItem);
 
@@ -567,9 +596,7 @@ public class Economy {
 
             if (item.onUseConsoleCommands != null && !item.onUseConsoleCommands.isEmpty()) {
                 for (String command : item.onUseConsoleCommands) {
-                    Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("$PLAYER$", username));
-                    });
+                    Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("$PLAYER$", username)));
                 }
             }
 
@@ -578,23 +605,23 @@ public class Economy {
         }
 
         public static class ItemNotEnabledException extends Exception {
-            public ItemNotEnabledException() {super();}
             public ItemNotEnabledException(String message) {super(message);}
         }
 
         public static class ItemOutOfStockException extends Exception {
-            public ItemOutOfStockException() {super();}
             public ItemOutOfStockException(String message) {super(message);}
         }
 
         public static class InsufficientFundsException extends Exception {
-            public InsufficientFundsException() {super();}
             public InsufficientFundsException(String message) {super(message);}
         }
 
         public static class ItemUseNotEnabledException extends Exception {
-            public ItemUseNotEnabledException() {super();}
             public ItemUseNotEnabledException(String message) {super(message);}
+        }
+
+        public static class MaxItemQuanityExceptiion extends Exception {
+            public MaxItemQuanityExceptiion(String message) {super(message);}
         }
     }
 

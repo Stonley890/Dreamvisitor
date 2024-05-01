@@ -520,6 +520,51 @@ You could say I have a special nostalgia with that one."""
                     event.reply("Select the infraction to remove.").addActionRow(dropdown).queue();
 
                 });
+            } else if (button.getId().startsWith("purchase-")) {
+
+                String itemIdString = button.getId().substring("purchase-".length());
+                int itemId;
+                try {
+                    itemId = Integer.parseInt(itemIdString);
+                } catch (NumberFormatException e) {
+                    event.reply("The item you selected could not be parsed.").queue();
+                    return;
+                }
+                Economy.ShopItem item = Economy.getItem(itemId);
+                if (item == null) {
+                    event.reply("That item does not exist.").queue();
+                    return;
+                }
+                Economy.Consumer consumer = Economy.getConsumer(event.getUser().getIdLong());
+                try {
+                    consumer.purchaseItem(itemId);
+                } catch (Economy.Consumer.ItemNotEnabledException | Economy.Consumer.ItemOutOfStockException |
+                         NullPointerException e) {
+                    event.reply(e.getMessage()).queue();
+                    return;
+                } catch (Economy.Consumer.InsufficientFundsException e) {
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setDescription("You do not have sufficient funds to purchase " + item.getName() + ".\nYour balance: " + consumer.getBalance() + "\nItem cost: " + item.getTruePrice());
+                    embed.setColor(Color.RED);
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    return;
+                } catch (Economy.Consumer.MaxItemQuanityExceptiion e) {
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setDescription("You already have " + item.getMaxAllowed() + " of this item, which is as many as you can have at one time.");
+                    embed.setColor(Color.RED);
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    return;
+                }
+
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Purchase successful!");
+                embed.setDescription("Purchased " + item.getName() + " for " + item.getTruePrice() + ".");
+                embed.setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item.\nYour new balance is " + consumer.getBalance());
+                embed.setColor(Color.GREEN);
+
+                event.editMessageEmbeds(embed.build()).queue();
+                event.getMessage().editMessageComponents().queue();
+
             }
         }
     }
@@ -611,6 +656,42 @@ You could say I have a special nostalgia with that one."""
                     event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
                 });
             });
+        } else if (event.getComponent().getId().equals("purchase")) {
+
+            String itemIdString = event.getValues().get(0);
+            int itemId;
+            try {
+                itemId = Integer.parseInt(itemIdString);
+            } catch (NumberFormatException e) {
+                event.reply("The item you selected could not be parsed.").queue();
+                return;
+            }
+            Economy.ShopItem item = Economy.getItem(itemId);
+            if (item == null) {
+                event.reply("That item does not exist.").queue();
+                return;
+            }
+
+            Economy.Consumer consumer = Economy.getConsumer(event.getUser().getIdLong());
+
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.setTitle(item.getName());
+
+            StringBuilder description = new StringBuilder(item.getDescription());
+            if (item.getSalePercent() == 0) description.append("\n\nThis item costs ").append(Economy.getCurrencySymbol()).append(item.getPrice());
+            else {
+                description.append("\n\nThis item regularly costs ").append(Economy.getCurrencySymbol()).append(item.getPrice()).append(".")
+                        .append("\nIt is currently **").append(item.getSalePercent()).append("% off**, bringing the total to **").append(Economy.getCurrencySymbol()).append(item.getTruePrice()).append("**.");
+            }
+            if (item.getMaxAllowed() != -1) description.append("\nYou can carry up to **").append(item.getMaxAllowed()).append("** of this item at a time.");
+            if (item.getQuantity() != -1) description.append("\n**").append(item.getQuantity()).append("** of this item remain.");
+            embed.setDescription(description);
+            embed.setFooter("Your current balance is " + consumer.getBalance() + ". After purchasing this item, it would be " + (consumer.getBalance() - item.getTruePrice()) + ".");
+
+            Button buyButton = Button.success("purchase-" + itemId, "Purchase for " + Economy.getCurrencySymbol() + item.getTruePrice());
+
+            event.replyEmbeds(embed.build()).addActionRow(buyButton).setEphemeral(true).queue();
+
         }
     }
 
