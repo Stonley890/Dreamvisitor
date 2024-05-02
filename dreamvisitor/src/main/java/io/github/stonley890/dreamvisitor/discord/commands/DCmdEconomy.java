@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class DCmdEconomy implements DiscordCommand {
     @NotNull
     @Override
@@ -70,7 +72,37 @@ public class DCmdEconomy implements DiscordCommand {
 
                 EmbedBuilder embed = new EmbedBuilder();
 
-                
+                List<Economy.ShopItem> items = Economy.getItems();
+                if (items.isEmpty()) {
+                    embed.setDescription("There are currently no items.");
+                    event.replyEmbeds(embed.build()).queue();
+                    return;
+                }
+
+                for (Economy.ShopItem item : items) {
+                    StringBuilder description = new StringBuilder();
+                    description.append(item.getDescription()).append("\n\n")
+                            .append("Price: ").append(Economy.getCurrencySymbol()).append(item.getPrice())
+                            .append("Sale Percent: ").append(item.getSalePercent()).append("%")
+                            .append("Quantity: ");
+                    if (item.isInfinite()) description.append("Infinite");
+                    else description.append(item.getQuantity());
+                    description.append("Enabled: ").append(item.isEnabled());
+                    description.append("Gifting: ").append(item.isGiftingEnabled());
+                    description.append("Usable: ").append(!item.isUseDisabled());
+                    description.append("Max Allowed: ");
+                    if (item.getMaxAllowed() == -1) description.append("Infinite");
+                    else description.append(item.getMaxAllowed());
+                    description.append("Roles Add on Use: ");
+                    List<Long> onUseRolesAdd = item.getOnUseRolesAdd();
+                    if (onUseRolesAdd == null || onUseRolesAdd.isEmpty()) description.append("None");
+                    else {
+                        for (Long roleId : onUseRolesAdd) {
+
+                        }
+                    }
+                    embed.addField(item.getName() + " - " + item.getId(), description.toString(), false);
+                }
 
             }
         } else if (subcommandGroup.equals("users")) {
