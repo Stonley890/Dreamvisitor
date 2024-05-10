@@ -1,24 +1,28 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
+import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.Infraction;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.ZoneOffset;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-public class DCmdInfractions implements DiscordCommand {
+public class DCmdInfractions extends ListenerAdapter implements DiscordCommand {
     @Override
     public @NotNull SlashCommandData getCommandData() {
         return Commands.slash("infractions", "Get the infractions of a user.")
@@ -48,8 +52,6 @@ public class DCmdInfractions implements DiscordCommand {
             return;
         }
 
-
-
         EmbedBuilder embed = new EmbedBuilder();
 
         Button primary = Button.primary("infraction-expire-" + user.getId(), "Expire a warn");
@@ -59,7 +61,7 @@ public class DCmdInfractions implements DiscordCommand {
             String expire = "Valid";
             if (infraction.isExpired()) expire = "Expired";
             embed.addField(
-                    TimeFormat.DATE_SHORT.format(infraction.getTime().toEpochSecond(ZoneOffset.UTC)),
+                    Bot.createTimestamp(infraction.getTime(), TimeFormat.DATE_SHORT).toString(),
                     "*Value: " + infraction.getValue() + ", " + expire + "\n**Reason:** " + infraction.getReason(),
                     false);
         }
@@ -71,5 +73,69 @@ public class DCmdInfractions implements DiscordCommand {
                         "The total value of infractions " + Infraction.getInfractionCount(infractions, true) + ".");
 
         event.replyEmbeds(embed.build()).addActionRow(primary, danger).queue();
+    }
+
+    @Override
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
+        if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-expire-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("infraction-expire-".length()));
+            Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+
+                @NotNull List<Infraction> infractions;
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+
+                LocalDateTime selectedTime = LocalDateTime.parse(selectOption.getValue());
+
+                infractions = Infraction.getInfractions(member.getIdLong());
+
+                if (infractions.isEmpty()) {
+                    event.reply("That user has no infractions.").queue();
+                    return;
+                }
+
+                for (Infraction infraction : infractions) {
+                    if (infraction.isExpired()) continue;
+                    if (infraction.getTime().equals(selectedTime)) {
+                        infractions.remove(infraction);
+                        infraction.expire();
+                        infractions.add(infraction);
+                        break;
+                    }
+                }
+                Infraction.setInfractions(infractions, member.getIdLong());
+
+                event.reply("Infraction expired.").queue();
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+            });
+        } else if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-remove-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("infraction-remove-".length()));
+            event.getJDA().retrieveUserById(id).queue(member -> {
+
+                @NotNull List<Infraction> infractions;
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+
+                LocalDateTime selectedTime = LocalDateTime.parse(selectOption.getValue());
+
+                infractions = Infraction.getInfractions(member.getIdLong());
+
+                if (infractions.isEmpty()) {
+                    event.reply("That user has no infractions.").queue();
+                    return;
+                }
+
+                for (Infraction infraction : infractions) {
+                    if (infraction.getTime().equals(selectedTime)) {
+                        infractions.remove(infraction);
+                        break;
+                    }
+                }
+                Infraction.setInfractions(infractions, member.getIdLong());
+
+                event.reply("Infraction removed.").queue();
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+            });
+        }
     }
 }

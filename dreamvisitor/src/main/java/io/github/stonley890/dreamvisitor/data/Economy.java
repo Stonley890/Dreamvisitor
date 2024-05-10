@@ -10,7 +10,6 @@ import net.luckperms.api.model.group.Group;
 import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -70,15 +69,16 @@ public class Economy {
     public static List<ShopItem> getItems() {
         List<Map<?, ?>> items = getConfig().getMapList("items");
         List<ShopItem> shopItems = new ArrayList<>();
-        items.forEach(item -> {
-            shopItems.add(ShopItem.deserialize((Map<String, Object>) item));
-        });
+        items.forEach(item -> shopItems.add(ShopItem.deserialize((Map<String, Object>) item)));
         return shopItems;
     }
 
     @Nullable
     public static ShopItem getItem(int id) {
-        return getItems().get(id);
+        for (ShopItem item : getItems()) {
+            if (item.getId() == id) return item;
+        }
+        return null;
     }
 
     public static void setItems(@NotNull List<ShopItem> itemsToSet) {
@@ -149,9 +149,8 @@ public class Economy {
         List<Map<?, ?>> users = getConfig().getMapList("users");
         List<Consumer> consumers = new ArrayList<>();
         for (Map<?, ?> user : users) {
-            Consumer consumer = new Consumer((long) user.get("id"));
-            consumer.setBalance((double) user.get("balance"));
-            consumer.setItems((Map<Integer, Integer>) user.get("inventory"));
+            Consumer consumer = Consumer.deserialize((Map<String, Object>) user);
+            consumers.add(consumer);
         }
         return consumers;
     }
@@ -169,10 +168,12 @@ public class Economy {
         for (Consumer consumer : consumerList) {
             mapList.add(consumer.serialize());
         }
-        getConfig().set("users", mapList);
+        YamlConfiguration config = getConfig();
+        config.set("users", mapList);
+        saveConfig(config);
     }
 
-    public static void saveConsumer(long id, Consumer newConsumer) {
+    public static void saveConsumer(Consumer newConsumer) {
         List<Consumer> consumers = getConsumers();
         consumers.removeIf(consumer -> consumer.id == newConsumer.id);
         consumers.add(newConsumer);
@@ -185,6 +186,11 @@ public class Economy {
 
     public static void setShopName(String name) {
         Dreamvisitor.getPlugin().getConfig().set("shopName", name);
+        Dreamvisitor.getPlugin().saveConfig();
+    }
+
+    public static void setCurrencySymbol(String symbol) {
+        Dreamvisitor.getPlugin().getConfig().set("currencyIcon", symbol);
         Dreamvisitor.getPlugin().saveConfig();
     }
 
@@ -246,7 +252,7 @@ public class Economy {
         }
 
         public double getTruePrice() {
-            return price - price*salePercent;
+            return price - price*salePercent*0.01;
         }
 
         public int getId() {
@@ -459,11 +465,12 @@ public class Economy {
             balance = newBalance;
         }
 
+        @NotNull
         public Map<Integer, Integer> getItems() {
             return items;
         }
 
-        public void setItems(Map<Integer, Integer> itemMap) {
+        public void setItems(@NotNull Map<Integer, Integer> itemMap) {
             items = itemMap;
         }
 
@@ -498,6 +505,7 @@ public class Economy {
         @Override
         public Map<String, Object> serialize() {
             Map<String, Object> map = new HashMap<>();
+            map.put("id", id);
             map.put("balance", balance);
             map.put("inventory", items);
             return map;
@@ -519,7 +527,7 @@ public class Economy {
             if (!desiredItem.enabled) throw new ItemNotEnabledException("Item is not enabled.");
             if (desiredItem.quantity == 0) throw new ItemOutOfStockException("Item is out of stock.");
             if (balance < desiredItem.getTruePrice()) throw new InsufficientFundsException("Consumer does not have sufficient funds for item.");
-            if (getItemQuantity(itemId) + 1 > desiredItem.maxAllowed) throw new MaxItemQuanityExceptiion("Consumer already has max amount of this item.");
+            if (desiredItem.maxAllowed != -1 && (getItemQuantity(itemId) + 1 > desiredItem.maxAllowed)) throw new MaxItemQuanityExceptiion("Consumer already has max amount of this item.");
 
             if (desiredItem.useOnPurchase) {
                 try {
@@ -529,7 +537,8 @@ public class Economy {
                 }
             }
             else setItemQuantity(itemId, getQuantityOfItem(itemId) + 1);
-            desiredItem.setQuantity(desiredItem.quantity - 1);
+            if (!desiredItem.isInfinite()) desiredItem.setQuantity(desiredItem.quantity - 1);
+            setBalance(balance - desiredItem.getTruePrice());
             Economy.saveItem(desiredItem);
 
         }

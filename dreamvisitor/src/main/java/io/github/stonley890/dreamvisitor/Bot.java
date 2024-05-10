@@ -1,7 +1,6 @@
 package io.github.stonley890.dreamvisitor;
 
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
-import io.github.stonley890.dreamvisitor.discord.DiscEventListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Role;
@@ -10,11 +9,16 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.TimeFormat;
+import net.dv8tion.jda.api.utils.Timestamp;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +66,7 @@ public class Bot {
         }
 
         if (!Dreamvisitor.botFailed) {
-            jda.addEventListener(new DiscEventListener(), new DiscCommandsManager());
+            jda.addEventListener(new DiscCommandsManager());
 
             // Wait for bot ready
             try {
@@ -157,5 +161,11 @@ public class Bot {
      */
     public static @NotNull String escapeMarkdownFormatting(@NotNull String string) {
         return string.isEmpty() ? string : string.replaceAll("_","\\\\_").replaceAll("\\*","\\\\*").replaceAll("\\|","\\\\|");
+    }
+
+    @NotNull
+    @Contract("_, _ -> fail")
+    public static Timestamp createTimestamp(@NotNull LocalDateTime dateTime, @NotNull TimeFormat format) {
+        return format.atInstant(dateTime.toInstant(OffsetDateTime.now().getOffset()));
     }
 }

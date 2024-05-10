@@ -254,6 +254,7 @@ public class Infraction implements ConfigurationSerializable {
         }
 
         if (banPoint) {
+            infraction.expire();
             List<Infraction> disabledInfractions = new ArrayList<>();
             for (Infraction existingInfraction : infractions) {
                 existingInfraction.expire();

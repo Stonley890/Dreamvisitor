@@ -48,6 +48,7 @@ public class DiscCommandsManager extends ListenerAdapter {
         addList.add(new DCmdBalance());
         addList.add(new DCmdInventory());
         addList.add(new DCmdShop());
+        addList.add(new DCmdEconomy());
 
         Dreamvisitor.debug("Ready to add to guild.");
 
@@ -85,6 +86,9 @@ public class DiscCommandsManager extends ListenerAdapter {
         for (DiscordCommand command : commands) {
             if (command != null) {
                 commandData.add(command.getCommandData());
+                try {
+                    jda.addEventListener(command);
+                } catch (IllegalArgumentException ignored) {}
                 Dreamvisitor.debug("Added command " + command.getName());
             }
         }

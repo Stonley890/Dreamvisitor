@@ -2,8 +2,13 @@ package io.github.stonley890.dreamvisitor.discord.commands;
 
 import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.Infraction;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -15,12 +20,13 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.InvalidObjectException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DCmdWarn implements DiscordCommand {
+public class DCmdWarn extends ListenerAdapter implements DiscordCommand {
 
     public static InteractionHook lastInteraction = null;
     public static Infraction lastInfraction = null;
@@ -111,6 +117,7 @@ public class DCmdWarn implements DiscordCommand {
                 memberId = member.getIdLong();
 
                 lastInfraction = new Infraction((byte) value, reason, LocalDateTime.now());
+                DCmdWarn.silent = silent;
                 try {
                     event.getHook().editOriginal("This will be the user's third warn. Do you want me to also give them a ban from the Minecraft server?")
                             .setActionRow(actionRow.getComponents()).queue();
@@ -155,5 +162,43 @@ public class DCmdWarn implements DiscordCommand {
 
         lastInteraction = newInteraction;
 
+    }
+
+    @Override
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+
+        String buttonId = event.getButton().getId();
+        if (buttonId == null) return;
+
+        switch (buttonId) {
+            case Infraction.actionBan, Infraction.actionNoBan, Infraction.actionAllBan, Infraction.actionUserBan -> {
+
+                try {
+                    event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                    Infraction.execute(DCmdWarn.lastInfraction, Objects.requireNonNull(Objects.requireNonNull(event.getGuild()).retrieveMemberById(DCmdWarn.memberId).complete()), DCmdWarn.silent, buttonId);
+                    event.reply("Infraction notice created.").queue();
+                } catch (InsufficientPermissionException e) {
+                    event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                    event.reply("Dreamvisitor does not have sufficient permissions! " + e.getMessage()).queue();
+                } catch (InvalidObjectException e) {
+                    event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                    event.reply("Something is configured incorrectly! " + e.getMessage()).queue();
+                }
+            }
+            case "warn-understand" -> {
+                TextChannel channel = (TextChannel) event.getMessageChannel();
+                try {
+                    channel.upsertPermissionOverride(Objects.requireNonNull(event.getMember())).setDenied(Permission.VIEW_CHANNEL).queue();
+                } catch (InsufficientPermissionException e) {
+                    event.reply("Dreamvisitor has insufficient permissions: " + e.getMessage()).queue();
+                }
+                event.reply("Marked as dismissed.").queue();
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+            }
+            case "warn-explain" -> {
+                event.reply("A staff member will assist you shortly.").queue();
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+            }
+        }
     }
 }

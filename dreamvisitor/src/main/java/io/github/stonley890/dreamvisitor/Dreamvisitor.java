@@ -103,6 +103,10 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Initializing alts.yml");
             AltFamily.init();
 
+            // Init eco
+            debug("Initializing economy.yml");
+            Economy.init();
+
             // Start message
             getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
 
@@ -312,7 +316,6 @@ public class Dreamvisitor extends JavaPlugin {
             Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
             Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
             Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
-            Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSandbox());
             Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
             Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
             Objects.requireNonNull(getCommand("setback")).setExecutor(new CmdSetback());

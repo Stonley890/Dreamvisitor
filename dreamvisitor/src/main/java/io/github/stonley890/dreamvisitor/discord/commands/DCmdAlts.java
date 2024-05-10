@@ -7,19 +7,23 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class DCmdAlts implements DiscordCommand {
+public class DCmdAlts extends ListenerAdapter implements DiscordCommand {
     @Override
     public @NotNull SlashCommandData getCommandData() {
         return Commands.slash("alts", "Manage the alt tracker.").addSubcommands(
@@ -118,6 +122,37 @@ public class DCmdAlts implements DiscordCommand {
                     });
                 });
             }
+        }
+    }
+
+    @Override
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
+        if (Objects.requireNonNull(event.getComponent().getId()).startsWith("alts-remove-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("alts-remove-".length()));
+            event.getJDA().retrieveUserById(id).queue(member -> {
+
+                AltFamily altFamily;
+                List<Long> childrenIds;
+
+                altFamily = AltFamily.getFamily(member.getIdLong());
+                childrenIds = altFamily.getChildren();
+
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+                Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(childrenIds).onSuccess(children -> {
+                    for (Member child : children) {
+                        if (!child.getEffectiveName().equals(selectOption.getValue())) continue;
+                        childrenIds.remove(child.getIdLong());
+                        altFamily.setChildren(childrenIds);
+                        AltFamily.updateFamily(altFamily);
+                        event.reply("Removed " + child.getEffectiveName() + " from the family.").queue();
+                        event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                        return;
+                    }
+                    event.reply("That child account could not be found.").queue();
+                    event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                });
+            });
         }
     }
 }

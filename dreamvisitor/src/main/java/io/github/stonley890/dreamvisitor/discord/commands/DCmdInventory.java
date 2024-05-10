@@ -3,15 +3,19 @@ package io.github.stonley890.dreamvisitor.discord.commands;
 import io.github.stonley890.dreamvisitor.data.Economy;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
 
-public class DCmdInventory implements DiscordCommand {
+public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
 
     @NotNull
     @Override
@@ -51,10 +55,33 @@ public class DCmdInventory implements DiscordCommand {
             return;
         }
 
-        Button useItem = Button.primary("use-item", "Use an Item");
+        Button useItem = Button.primary("inv-" + consumer.getId() + "-use", "Use an Item");
         Button giftItem = Button.success("gift-item", "Gift an Item");
 
         event.replyEmbeds(embed.build()).addActionRow(useItem, giftItem).setEphemeral(true).queue();
 
+    }
+
+    @Override
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+        String id = event.getButton().getId();
+        if (id == null) return;
+
+        String[] split = id.split("-");
+
+        if (!id.startsWith("inv-")) {
+            long consumerId = Long.parseLong(split[1]);
+            Economy.Consumer consumer = Economy.getConsumer(consumerId);
+            if (split[2].equals("use")) {
+                StringSelectMenu.Builder selectMenu = StringSelectMenu.create("inv-" + consumerId + "-use-item");
+                selectMenu.setPlaceholder("Select an item to use");
+                for (Economy.ShopItem item : Economy.getItems()) {
+                    if (consumer.getItemQuantity(item.getId()) > 0) {
+                        selectMenu.addOption(String.valueOf(item.getId()), item.getName());
+                    }
+                }
+                event.editComponents(event.getMessage().getComponents().get(0), ActionRow.of(selectMenu.build())).queue();
+            }
+        }
     }
 }

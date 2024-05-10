@@ -5,8 +5,12 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,10 +19,12 @@ import spark.Spark;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
-public class Whitelist {
+public class Whitelist extends ListenerAdapter {
 
     private static @NotNull JSONArray get() throws IOException {
 
@@ -222,6 +228,51 @@ public class Whitelist {
         if (source != null) logEmbed.setDescription(source.getAsMention() + " added " + username + " to the whitelist with Dreamvisitor. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a different member.");
         else logEmbed.setDescription("Added " + username + " to the whitelist via the web whitelist. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a Discord member.");
         return logEmbed;
+    }
+
+    @Override
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+        if (Objects.requireNonNull(event.getButton().getId()).startsWith("unwhitelist")) {
+            String uuid = Objects.requireNonNull(event.getButton().getId()).substring("unwhitelist-".length());
+            String username = PlayerUtility.getUsernameOfUuid(uuid);
+
+            try {
+                if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
+                    assert username != null;
+                    Whitelist.remove(username, UUID.fromString(uuid));
+                    event.reply("Removed `" + username + "` from the whitelist.").queue();
+                } else {
+                    event.reply("`" + username + "` is not whitelisted.").queue();
+                }
+            } catch (IOException e) {
+                event.reply("Unable to read or write the whitelist file: " + e.getMessage()).queue();
+            }
+
+            // Disable button after use
+            event.editButton(event.getButton().asDisabled()).queue();
+        } else if (event.getButton().getId().startsWith("ban")) {
+            String uuid = event.getButton().getId().substring("ban-".length());
+            String username = PlayerUtility.getUsernameOfUuid(uuid);
+
+            try {
+
+                if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
+                    assert username != null;
+                    Whitelist.remove(username, UUID.fromString(uuid));
+                }
+                BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
+                assert username != null;
+                banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
+                event.reply("Banned `" + username + "`.").queue();
+
+            } catch (IOException e) {
+                event.reply("Unable to read or write the whitelist file: " + e.getMessage()).queue();
+            }
+
+            // Disable button after use
+            event.editButton(event.getButton().asDisabled()).queue();
+        }
+
     }
 
 }
