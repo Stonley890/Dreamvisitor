@@ -95,7 +95,7 @@ public class DCmdShop extends ListenerAdapter implements DiscordCommand {
             embed.setColor(Color.RED);
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
-        } catch (Economy.Consumer.MaxItemQuanityExceptiion e) {
+        } catch (Economy.Consumer.MaxItemQualityException e) {
             EmbedBuilder embed = new EmbedBuilder();
             embed.setDescription("You already have " + item.getMaxAllowed() + " of this item, which is as many as you can have at one time.");
             embed.setColor(Color.RED);

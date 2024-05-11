@@ -103,3 +103,13 @@ shopName: "Shop"
 # This can be any string, including symbols, letters, emojis, and Discord custom emoji.
 # Default: "$"
 currencyIcon: "$"
+
+# The base amount given by the /daily Discord command.
+# This is the default amount before adding the streak bonus. The total amount is decided by dailyBaseAmount + (user's streak * this).
+# Default: 10.00
+dailyBaseAmount: 10.00
+
+# The multiplier of the streak bonus given by the /daily command.
+# This is multiplied by the streak and added to the base amount. The total amount is decided by dailyBaseAmount + (user's streak * this).
+# Default: 2.00
+dailyStreakMultiplier: 2.00

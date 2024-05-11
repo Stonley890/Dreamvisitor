@@ -5,6 +5,7 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.node.types.InheritanceNode;
@@ -12,12 +13,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class Economy {
@@ -247,6 +249,55 @@ public class Economy {
             return shopItem;
         }
 
+        public void use(@NotNull Member member) throws UnsupportedOperationException {
+            if (useDisabled) throw new UnsupportedOperationException("This item does not allow use.");
+            UUID uuid = AccountLink.getUuid(member.getIdLong());
+            if (uuid == null) throw new UnsupportedOperationException("This account is not linked to a UUID.");
+
+            Guild guild = member.getGuild();
+
+            LuckPerms luckPerms = Dreamvisitor.getLuckPerms();
+
+            if (onUseRolesAdd != null && !onUseRolesAdd.isEmpty()) {
+                for (Long roleId : onUseRolesAdd) {
+                    Role role = guild.getRoleById(roleId);
+                    if (role == null) continue;
+                    guild.addRoleToMember(member, role).queue();
+                }
+            }
+            if (onUseRolesRemove != null && !onUseRolesRemove.isEmpty()) {
+                for (Long roleId : onUseRolesRemove) {
+                    Role role = guild.getRoleById(roleId);
+                    if (role == null) continue;
+                    guild.removeRoleFromMember(member, role).queue();
+                }
+            }
+            if ((onUseGroupsAdd != null && !onUseGroupsAdd.isEmpty()) || onUseGroupsRemove != null && !onUseGroupsRemove.isEmpty()) {
+                luckPerms.getUserManager().loadUser(uuid).thenAcceptAsync(user -> {
+                    if (onUseGroupsAdd != null && !onUseGroupsAdd.isEmpty()) {
+                        for (String groupName : onUseGroupsAdd) {
+                            Group group = luckPerms.getGroupManager().getGroup(groupName);
+                            if (group == null) return;
+                            user.data().add(InheritanceNode.builder(group).build());
+                        }
+                    }
+                    if (onUseGroupsRemove != null && !onUseGroupsRemove.isEmpty()) {
+                        for (String groupName : onUseGroupsRemove) {
+                            Group group = luckPerms.getGroupManager().getGroup(groupName);
+                            if (group == null) return;
+                            user.data().remove(InheritanceNode.builder(group).build());
+                        }
+                    }
+                    luckPerms.getUserManager().saveUser(user);
+                });
+            }
+            if (onUseConsoleCommands != null && !onUseConsoleCommands.isEmpty()) {
+                for (String command : onUseConsoleCommands) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                }
+            }
+        }
+
         public boolean isInfinite() {
             return quantity == -1;
         }
@@ -437,6 +488,8 @@ public class Economy {
         @NotNull
         private Map<Integer, Integer> items = new HashMap<>();
 
+        private Economy.GameData gameData = new GameData();
+
         private Consumer(long id) {
             this.id = id;
         }
@@ -518,16 +571,16 @@ public class Economy {
          * @throws ItemNotEnabledException if the item is not enabled.
          * @throws ItemOutOfStockException if the item is out of stock.
          * @throws InsufficientFundsException if the {@link Consumer} does not have sufficient funds to purchase the item.
-         * @throws MaxItemQuanityExceptiion if the {@link Consumer} already has the maximum allowed of this item.
+         * @throws MaxItemQualityException if the {@link Consumer} already has the maximum allowed of this item.
          */
-        public void purchaseItem(int itemId) throws NullPointerException, ItemNotEnabledException, ItemOutOfStockException, InsufficientFundsException, MaxItemQuanityExceptiion {
+        public void purchaseItem(int itemId) throws NullPointerException, ItemNotEnabledException, ItemOutOfStockException, InsufficientFundsException, MaxItemQualityException {
 
             ShopItem desiredItem = getItem(itemId);
             if (desiredItem == null) throw new NullPointerException("Item does not exist.");
             if (!desiredItem.enabled) throw new ItemNotEnabledException("Item is not enabled.");
             if (desiredItem.quantity == 0) throw new ItemOutOfStockException("Item is out of stock.");
             if (balance < desiredItem.getTruePrice()) throw new InsufficientFundsException("Consumer does not have sufficient funds for item.");
-            if (desiredItem.maxAllowed != -1 && (getItemQuantity(itemId) + 1 > desiredItem.maxAllowed)) throw new MaxItemQuanityExceptiion("Consumer already has max amount of this item.");
+            if (desiredItem.maxAllowed != -1 && (getItemQuantity(itemId) + 1 > desiredItem.maxAllowed)) throw new MaxItemQualityException("Consumer already has max amount of this item.");
 
             if (desiredItem.useOnPurchase) {
                 try {
@@ -559,12 +612,7 @@ public class Economy {
             String username = PlayerUtility.getUsernameOfUuid(uuid);
             if (username == null) throw new NullPointerException("Linked Minecraft account could not be found.");
 
-            RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
-            LuckPerms luckPerms;
-            if (provider != null) luckPerms = provider.getProvider();
-            else {
-                throw new NullPointerException("LuckPerms cannot be found.");
-            }
+            LuckPerms luckPerms = Dreamvisitor.getLuckPerms();
 
             List<Long> rolesToAdd = item.onUseRolesAdd;
             if (rolesToAdd != null && !rolesToAdd.isEmpty())
@@ -629,9 +677,85 @@ public class Economy {
             public ItemUseNotEnabledException(String message) {super(message);}
         }
 
-        public static class MaxItemQuanityExceptiion extends Exception {
-            public MaxItemQuanityExceptiion(String message) {super(message);}
+        public static class MaxItemQualityException extends Exception {
+            public MaxItemQualityException(String message) {super(message);}
         }
     }
 
+    public static class GameData implements ConfigurationSerializable {
+
+        private int dailyStreak = 0;
+        @Nullable private LocalDateTime lastDaily = null;
+        @Nullable private LocalDateTime lastWork = null;
+
+        public GameData() {}
+
+        public static double getDailyBaseAmount() {
+            return Dreamvisitor.getPlugin().getConfig().getDouble("dailyBaseAmount");
+        }
+
+        public static double getDailyStreakMultiplier() {
+            return Dreamvisitor.getPlugin().getConfig().getDouble("dailyStreakMultiplier");
+        }
+
+        public void setDailyStreak(int dailyStreak) {
+            this.dailyStreak = dailyStreak;
+        }
+
+        public void setLastDaily(@Nullable LocalDateTime lastDaily) {
+            this.lastDaily = lastDaily;
+        }
+
+        public void setLastWork(@Nullable LocalDateTime lastWork) {
+            this.lastWork = lastWork;
+        }
+
+        public int getDailyStreak() {
+            return dailyStreak;
+        }
+
+        public Duration timeUntilNextDaily() {
+            if (lastDaily == null || lastDaily.plusDays(1).isBefore(LocalDateTime.now())) return Duration.ZERO;
+            return Duration.between(lastDaily.plusDays(1), LocalDateTime.now());
+        }
+
+        public Duration timeUntilDailyStreakBreak() {
+            if (lastDaily == null || lastDaily.plusDays(2).isBefore(LocalDateTime.now())) return Duration.ZERO;
+            return Duration.between(lastDaily.plusDays(2), LocalDateTime.now());
+        }
+
+        public void claim(User user) {
+            if (!timeUntilNextDaily().isZero()) throw new UnsupportedOperationException();
+
+        }
+
+        @Nullable
+        public LocalDateTime getLastDaily() {
+            return lastDaily;
+        }
+
+        @Nullable
+        public LocalDateTime getLastWork() {
+            return lastWork;
+        }
+
+        @NotNull
+        public static GameData deserialize(@NotNull Map<String, Object> map) {
+            GameData gameData = new GameData();
+            gameData.dailyStreak = (int) map.get("dailyStreak");
+            gameData.lastDaily = (LocalDateTime) map.get("lastDaily");
+            gameData.lastWork = (LocalDateTime) map.get("lastWork");
+            return gameData;
+        }
+
+        @NotNull
+        @Override
+        public Map<String, Object> serialize() {
+            Map<String, Object> map = new HashMap<>();
+            map.put("dailyStreak", dailyStreak);
+            map.put("lastDaily", lastDaily);
+            map.put("lastWork", lastWork);
+            return map;
+        }
+    }
 }

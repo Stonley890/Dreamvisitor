@@ -10,6 +10,7 @@ import io.github.stonley890.dreamvisitor.functions.Moonglobe;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.luckperms.api.LuckPerms;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,6 +18,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -62,6 +64,17 @@ public class Dreamvisitor extends JavaPlugin {
         if (getPlugin().getConfig().getBoolean("debug")){
             Bukkit.getLogger().info("DEBUG: " + message);
         }
+    }
+
+    @NotNull
+    public static LuckPerms getLuckPerms() throws NullPointerException {
+        RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        LuckPerms luckPerms;
+        if (provider != null) luckPerms = provider.getProvider();
+        else {
+            throw new NullPointerException("LuckPerms cannot be found.");
+        }
+        return luckPerms;
     }
 
     @Override
