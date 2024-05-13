@@ -502,6 +502,14 @@ public class Economy {
             return consumer;
         }
 
+        public GameData getGameData() {
+            return gameData;
+        }
+
+        public void setGameData(GameData gameData) {
+            this.gameData = gameData;
+        }
+
         public long getId() {
             return id;
         }
@@ -717,6 +725,11 @@ public class Economy {
         public Duration timeUntilNextDaily() {
             if (lastDaily == null || lastDaily.plusDays(1).isBefore(LocalDateTime.now())) return Duration.ZERO;
             return Duration.between(lastDaily.plusDays(1), LocalDateTime.now());
+        }
+
+        public Duration timeUntilNextWork() {
+            if (lastWork == null || lastWork.plusHours(1).isBefore(LocalDateTime.now())) return Duration.ZERO;
+            return Duration.between(lastWork.plusHours(1), LocalDateTime.now());
         }
 
         public Duration timeUntilDailyStreakBreak() {

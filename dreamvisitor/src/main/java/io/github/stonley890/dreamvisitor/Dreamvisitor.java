@@ -120,6 +120,10 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Initializing economy.yml");
             Economy.init();
 
+            // Init mail
+            debug("Initializing mail.yml");
+            Mail.init();
+
             // Start message
             getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
 
