@@ -3,6 +3,9 @@ package io.github.stonley890.dreamvisitor.commands;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.data.PlayerTribe;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.data.TribeUtil;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
@@ -107,39 +110,35 @@ public class CmdTribeUpdate implements CommandExecutor {
                     continue;
                 }
 
+                PlayerTribe.updateTribeOfPlayer(uuid);
+
                 // Get team
                 Team playerTeam = scoreboard.getEntryTeam(player.getName());
 
                 if (playerTeam != null) {
 
-                    // Iterate through team names to get index
-                    for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
-                        if (playerTeam.getName().equalsIgnoreCase(Bot.TRIBE_NAMES[i])) {
+                    TribeUtil.Tribe tribe = TribeUtil.parse(playerTeam.getName());
+                    if (tribe != null) {
 
-                            try {
-                                // Remove roles
-                                for (String roleId : tribeRoles) {
-                                    Bot.getGameLogChannel().getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
-                                }
-
-                                Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(i));
-
-                                if (targetRole == null) {
-                                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
-                                    break;
-                                }
-
-                                // Add role
-                                Bot.getGameLogChannel().getGuild().addRoleToMember(user, targetRole).queue();
-                            } catch (InsufficientPermissionException e) {
-                                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Dreamvisitor Bot is missing permission MANAGE_ROLES. Skipping...");
-                                continue;
-                            } catch (NullPointerException e) {
-                                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "One or more tribe roles  Skipping...");
-                                continue;
+                        try {
+                            // Remove roles
+                            for (String roleId : tribeRoles) {
+                                Bot.getGameLogChannel().getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
                             }
 
-                            break;
+                            Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(TribeUtil.indexOf(tribe)));
+
+                            if (targetRole == null) {
+                                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
+                                break;
+                            }
+
+                            // Add role
+                            Bot.getGameLogChannel().getGuild().addRoleToMember(user, targetRole).queue();
+                        } catch (InsufficientPermissionException e) {
+                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Dreamvisitor Bot is missing permission MANAGE_ROLES. Skipping...");
+                        } catch (NullPointerException e) {
+                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "One or more tribe roles  Skipping...");
                         }
                     }
                 }

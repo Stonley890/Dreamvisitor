@@ -113,3 +113,15 @@ dailyBaseAmount: 10.00
 # This is multiplied by the streak and added to the base amount. The total amount is decided by dailyBaseAmount + (user's streak * this).
 # Default: 2.00
 dailyStreakMultiplier: 2.00
+
+# The multiplier of the distance weight when choosing mail delivery locations.
+# Takes the ratio (between 0 and 1) of the distance to the maximum distance between locations,
+#   multiplies it by this value, and adds it to the mail location weight.
+# This weight is used to randomly choose a mail location to deliver to in order to provide a realistic
+#   relationship between delivery locations.
+# At 0, distance has no effect on location selection.
+# At 1, the weight will have slight effect on the location selection.
+# At 10, the weight will have significant effect on the location selection.
+# The weight is applied inversely, making closer distances worth more than further distances.
+# Default: 1.00
+mailDeliveryLocationSelectionDistanceWeightMultiplier: 1.00
