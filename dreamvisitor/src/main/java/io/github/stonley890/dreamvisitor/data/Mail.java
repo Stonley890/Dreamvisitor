@@ -23,7 +23,7 @@ import java.util.Objects;
 public class Mail {
 
     static final File file = new File(Dreamvisitor.getPlugin().getDataFolder().getPath() + "/mail.yml");
-    static List<Player> activeDeliverers = new ArrayList<>();
+    static List<Deliverer> activeDeliverers = new ArrayList<>();
     static double maxDistance;
 
     public static void init() throws IOException {
@@ -62,6 +62,10 @@ public class Mail {
             Bukkit.getLogger().severe( file.getName() + " cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
+    }
+
+    public static List<Deliverer> getDeliverers() {
+        return activeDeliverers;
     }
 
     @NotNull
@@ -246,17 +250,24 @@ public class Mail {
 
     public static class Deliverer {
 
+        @NotNull private final Player player;
         @NotNull private final MailLocation startLoc;
         @NotNull private final MailLocation endLoc;
         @Nullable private LocalDateTime startTime;
 
-        public Deliverer(@NotNull MailLocation startLoc, @NotNull MailLocation endLoc) {
+        public Deliverer(@NotNull Player player, @NotNull MailLocation startLoc, @NotNull MailLocation endLoc) {
+            this.player = player;
             this.startLoc = startLoc;
             this.endLoc = endLoc;
         }
 
         public boolean started() {
             return startTime != null;
+        }
+
+        @NotNull
+        public Player getPlayer() {
+            return player;
         }
 
         @NotNull
