@@ -139,6 +139,10 @@ public class Mail {
         return Dreamvisitor.getPlugin().getConfig().getDouble("mailDeliveryLocationSelectionDistanceWeightMultiplier");
     }
 
+    public static double getDistanceRewardMultiplier() {
+        return Dreamvisitor.getPlugin().getConfig().getDouble("mailDistanceToRewardMultiplier");
+    }
+
     @NotNull
     public static MailLocation chooseDeliveryLocation(@NotNull MailLocation startPos) throws InvalidConfigurationException {
         List<MailLocation> locations = getLocations();
@@ -295,7 +299,7 @@ public class Mail {
         }
 
         public double getReward() {
-            return Math.round((MailLocation.getDistance(startLoc, endLoc) * 0.05)/10.0) * 10;
+            return Math.round((MailLocation.getDistance(startLoc, endLoc) * getDistanceRewardMultiplier())/10.0) * 10;
         }
     }
 

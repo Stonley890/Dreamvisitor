@@ -125,3 +125,10 @@ dailyStreakMultiplier: 2.00
 # The weight is applied inversely, making closer distances worth more than further distances.
 # Default: 1.00
 mailDeliveryLocationSelectionDistanceWeightMultiplier: 1.00
+
+# Mail delivery reward is calculated by multiplying the distance by this number.
+# The result is then rounded to the nearest ten.
+# At 0, the reward given is 0.
+# At 1, the reward given will be the distance in blocks.
+# Default: 0.05
+mailDistanceToRewardMultiplier: 0.05
