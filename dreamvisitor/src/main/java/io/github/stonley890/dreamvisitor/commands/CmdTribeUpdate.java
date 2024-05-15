@@ -2,10 +2,7 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import io.github.stonley890.dreamvisitor.data.AccountLink;
-import io.github.stonley890.dreamvisitor.data.PlayerTribe;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import io.github.stonley890.dreamvisitor.data.TribeUtil;
+import io.github.stonley890.dreamvisitor.data.*;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
@@ -117,7 +114,7 @@ public class CmdTribeUpdate implements CommandExecutor {
 
                 if (playerTeam != null) {
 
-                    TribeUtil.Tribe tribe = TribeUtil.parse(playerTeam.getName());
+                    Tribe tribe = TribeUtil.parse(playerTeam.getName());
                     if (tribe != null) {
 
                         try {

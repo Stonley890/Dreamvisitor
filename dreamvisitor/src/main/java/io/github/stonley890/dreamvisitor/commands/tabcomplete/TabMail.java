@@ -1,7 +1,8 @@
 package io.github.stonley890.dreamvisitor.commands.tabcomplete;
 
-import io.github.stonley890.dreamvisitor.commands.tabcomplete.utils.TabCompleteTree;
-import io.github.stonley890.dreamvisitor.data.Mail;
+import io.github.stonley890.dreamvisitor.functions.Mail;
+import io.github.stonley890.dreamvisitor.data.Tribe;
+import io.github.stonley890.dreamvisitor.data.TribeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -21,9 +22,6 @@ public class TabMail implements TabCompleter {
         // mail [locations [add <x> <y> <z> <name> <weight> <homeTribe> | remove <name> | list] | delivery [terminal <playerSelector> | add <playerSelector> <start> <end> | remove <playerSelector> | list]]
 
         List<String> suggestions = new ArrayList<>();
-
-        TabCompleteTree tabTree = new TabCompleteTree("mail");
-
 
         if (args.length == 1) {
 
@@ -74,27 +72,40 @@ public class TabMail implements TabCompleter {
             }
         } else if (args.length == 4) {
             if (args[0].equals("locations")) {
-                if (args[1].equals(""))
-                if (sender instanceof Player player) {
-                    suggestions.add(String.valueOf(Math.round(player.getLocation().getX() * 100) / 100));
-                } else {
-                    suggestions.add("~");
+                if (args[1].equals("add")) {
+                    if (sender instanceof Player player) {
+                        suggestions.add(String.valueOf(Math.round(player.getLocation().getX() * 100) / 100));
+                    } else {
+                        suggestions.add("~");
+                    }
                 }
             }
         } else if (args.length == 5) {
             if (args[0].equals("create")) {
-                if (sender instanceof Player player) {
-                    suggestions.add(String.valueOf(Math.round(player.getLocation().getY() * 100) / 100));
-                } else {
-                    suggestions.add("~");
+                if (args[1].equals("add")) {
+                    if (sender instanceof Player player) {
+                        suggestions.add(String.valueOf(Math.round(player.getLocation().getY() * 100) / 100));
+                    } else {
+                        suggestions.add("~");
+                    }
                 }
             }
         } else if (args.length == 6) {
             if (args[0].equals("create")) {
-                if (sender instanceof Player player) {
-                    suggestions.add(String.valueOf(Math.round(player.getLocation().getZ() * 100) / 100));
-                } else {
-                    suggestions.add("~");
+                if (args[1].equals("add")) {
+                    if (sender instanceof Player player) {
+                        suggestions.add(String.valueOf(Math.round(player.getLocation().getZ() * 100) / 100));
+                    } else {
+                        suggestions.add("~");
+                    }
+                }
+            }
+        }  else if (args.length == 7) {
+            if (args[0].equals("create")) {
+                if (args[1].equals("add")) {
+                    for (Tribe tribe : TribeUtil.tribes) {
+                        suggestions.add(tribe.getName());
+                    }
                 }
             }
         }

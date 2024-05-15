@@ -32,11 +32,11 @@ public class PlayerTribe {
         }
     }
 
-    private static TribeUtil.Tribe getPlayer(@NotNull UUID uuid) {
+    private static Tribe getPlayer(@NotNull UUID uuid) {
         try {
             YamlConfiguration configuration = new YamlConfiguration();
             configuration.load(file);
-            return TribeUtil.Tribe.valueOf(configuration.getString(uuid.toString()));
+            return Tribe.valueOf(configuration.getString(uuid.toString()));
         } catch (IOException | InvalidConfigurationException e) {
             Bukkit.getLogger().severe("Unable to load " + file.getName() + "!");
             Bukkit.getPluginManager().disablePlugin(plugin);
@@ -47,7 +47,7 @@ public class PlayerTribe {
     /**
      * Saves the current file configuration to disk.
      */
-    private static void savePlayer(@NotNull UUID uuid, @NotNull TribeUtil.Tribe tribe) {
+    private static void savePlayer(@NotNull UUID uuid, @NotNull Tribe tribe) {
         try {
             YamlConfiguration configuration = new YamlConfiguration();
             configuration.load(file);
@@ -68,9 +68,9 @@ public class PlayerTribe {
      * @throws NullPointerException The given player does not have a recorded tribe.
      */
     @NotNull
-    public static TribeUtil.Tribe getTribeOfPlayer(@NotNull UUID playerUuid) throws NullPointerException {
+    public static Tribe getTribeOfPlayer(@NotNull UUID playerUuid) throws NullPointerException {
 
-        TribeUtil.Tribe tribe = getPlayer(playerUuid);
+        Tribe tribe = getPlayer(playerUuid);
 
         // If not in file, try to update
         if (tribe == null) {
@@ -111,9 +111,9 @@ public class PlayerTribe {
 
         // Check by team
         Dreamvisitor.debug("Checking by team...");
-        TribeUtil.Tribe[] tribes = TribeUtil.Tribe.values();
+        Tribe[] tribes = Tribe.values();
         for (int i = 0; i < tribes.length; i++) {
-            TribeUtil.Tribe tribe = tribes[i];
+            Tribe tribe = tribes[i];
             Team team = scoreboard.getTeam(tribe.getTeamName());
             if (team != null && team.hasEntry(username)) {
                 Dreamvisitor.debug("Found tribe " + i);
@@ -127,7 +127,7 @@ public class PlayerTribe {
             // If no matching team, check by tags
             Dreamvisitor.debug("Checking by tag...");
             for (int i = 0; i < tribes.length; i++) {
-                TribeUtil.Tribe tribe = tribes[i];
+                Tribe tribe = tribes[i];
                 if (player.getScoreboardTags().contains(tribe.getTeamName())) {
                     Dreamvisitor.debug("Found tag " + i);
                     playerTribe = i;

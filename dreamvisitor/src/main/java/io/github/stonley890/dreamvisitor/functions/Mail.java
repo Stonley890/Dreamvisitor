@@ -1,6 +1,8 @@
-package io.github.stonley890.dreamvisitor.data;
+package io.github.stonley890.dreamvisitor.functions;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.Tribe;
+import io.github.stonley890.dreamvisitor.data.TribeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -13,12 +15,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Mail {
 
@@ -171,6 +172,43 @@ public class Mail {
         return mailLocation;
     }
 
+    @NotNull
+    public static String chooseName(@NotNull MailLocation startLoc, @NotNull MailLocation endLoc) {
+
+        String placeholder = "Dreamvisitor";
+
+        InputStream namesStream = Dreamvisitor.getPlugin().getResource("names.yml");
+        if (namesStream == null) return placeholder;
+
+        Random random = new Random();
+        List<String> nameList;
+        YamlConfiguration nameConfig = new YamlConfiguration();
+        InputStreamReader inputStreamReader = new InputStreamReader(namesStream);
+        try {
+            nameConfig.load(inputStreamReader);
+        } catch (IOException | InvalidConfigurationException e) {
+            Bukkit.getLogger().warning("There was a problem accessing embedded names.yml: " + e.getMessage());
+            return placeholder;
+        }
+        int roll = random.nextInt(100);
+        if (roll < 10) {
+
+            int tribeIndex = random.nextInt(10);
+            Tribe tribe = TribeUtil.tribes[tribeIndex];
+
+            nameList = nameConfig.getStringList(tribe.getTeamName());
+
+        } else if (roll < 55) {
+            nameList = nameConfig.getStringList(startLoc.homeTribe.getTeamName());
+        } else {
+            nameList = nameConfig.getStringList(endLoc.homeTribe.getTeamName());
+        }
+
+        int name = random.nextInt(nameList.size());
+        return nameList.get(name);
+
+    }
+
     public static class MailLocation implements ConfigurationSerializable {
 
         /**
@@ -188,9 +226,9 @@ public class Mail {
         /**
          * The home tribe of this location. Mail will more like be addressed to/from this tribe.
          */
-        private TribeUtil.Tribe homeTribe;
+        private Tribe homeTribe;
 
-        public MailLocation(@NotNull Location location, @NotNull String name, int weight, @NotNull TribeUtil.Tribe homeTribe) {
+        public MailLocation(@NotNull Location location, @NotNull String name, int weight, @NotNull Tribe homeTribe) {
             this.location = location;
             this.name = name;
             this.weight = weight;
@@ -219,7 +257,7 @@ public class Mail {
             return name;
         }
 
-        public TribeUtil.Tribe getHomeTribe() {
+        public Tribe getHomeTribe() {
             return homeTribe;
         }
 
@@ -235,14 +273,14 @@ public class Mail {
             this.weight = weight;
         }
 
-        public void setHomeTribe(@NotNull TribeUtil.Tribe homeTribe) {
+        public void setHomeTribe(@NotNull Tribe homeTribe) {
             this.homeTribe = homeTribe;
         }
 
         @NotNull
         @Contract("_ -> new")
         public static MailLocation deserialize(@NotNull Map<String, Object> map) {
-            return new MailLocation((Location) map.get("location"), (String) map.get("name"), (Integer) map.get("weight"), TribeUtil.Tribe.valueOf((String) map.get("home")));
+            return new MailLocation((Location) map.get("location"), (String) map.get("name"), (Integer) map.get("weight"), Tribe.valueOf((String) map.get("home")));
         }
 
         @NotNull
@@ -293,11 +331,19 @@ public class Mail {
             startTime = LocalDateTime.now();
         }
 
+        /**
+         * The time this deliverer has spent delivering their parcel.
+         * @return The time spent or zero if not started.
+         */
         public Duration timeSpent() {
             if (startTime == null) return Duration.ZERO;
             return Duration.between(startTime, LocalDateTime.now());
         }
 
+        /**
+         * Get the expected reward for the completion of this delivery.
+         * @return a double representing the reward amount.
+         */
         public double getReward() {
             return Math.round((MailLocation.getDistance(startLoc, endLoc) * getDistanceRewardMultiplier())/10.0) * 10;
         }

@@ -33,7 +33,7 @@ public class ListenPlayerQuit implements Listener {
         if (memory.sandbox) {
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer() + " left while in sandbox mode.");
+                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer().getName() + " left while in sandbox mode.");
                 }
             }
         }

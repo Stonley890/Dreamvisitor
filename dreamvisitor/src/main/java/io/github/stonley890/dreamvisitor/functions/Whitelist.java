@@ -1,7 +1,8 @@
-package io.github.stonley890.dreamvisitor.data;
+package io.github.stonley890.dreamvisitor.functions;
 
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
