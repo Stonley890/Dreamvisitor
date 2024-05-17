@@ -4,6 +4,7 @@ import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
@@ -92,6 +93,16 @@ public class Sandbox implements Listener {
         if (memory.sandbox) {
             for (String disallowedCommand : disallowedCommands) {
                 if (event.getMessage().contains(disallowedCommand)) event.setCancelled(true);
+            }
+        } else {
+            for (String disallowedCommand : disallowedCommands) {
+                if (event.getMessage().contains(disallowedCommand))
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers())
+                        if (PlayerUtility.getPlayerMemory(onlinePlayer.getUniqueId()).sandbox && event.getMessage().contains(onlinePlayer.getName())) {
+                            event.getPlayer().sendMessage(ChatColor.RED + "That player is currently in Sandbox Mode.");
+                            event.setCancelled(true);
+                        }
+
             }
         }
     }
