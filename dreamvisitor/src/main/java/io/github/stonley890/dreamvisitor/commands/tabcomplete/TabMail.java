@@ -100,7 +100,19 @@ public class TabMail implements TabCompleter {
                     }
                 }
             }
-        }  else if (args.length == 7) {
+        } else if (args.length == 7) {
+            if (args[0].equals("create")) {
+                if (args[1].equals("add")) {
+                    suggestions.add("<name>");
+                }
+            }
+        } else if (args.length == 8) {
+            if (args[0].equals("create")) {
+                if (args[1].equals("add")) {
+                    suggestions.add("<weight>");
+                }
+            }
+        } else if (args.length == 9) {
             if (args[0].equals("create")) {
                 if (args[1].equals("add")) {
                     for (Tribe tribe : TribeUtil.tribes) {

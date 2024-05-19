@@ -79,6 +79,16 @@ public class Mail {
         return parsedLocations;
     }
 
+    public static void saveLocations(@NotNull List<MailLocation> mailLocations) {
+        YamlConfiguration config = getConfig();
+        List<Map<String, Object>> serializedMailLocations = new ArrayList<>();
+        for (MailLocation mailLocation : mailLocations) {
+            serializedMailLocations.add(mailLocation.serialize());
+        }
+        config.set("locations", serializedMailLocations);
+        saveConfig(config);
+    }
+
     /**
      * Get a {@link MailLocation} by its name.
      * @param name The name to search for.
@@ -207,6 +217,29 @@ public class Mail {
         int name = random.nextInt(nameList.size());
         return nameList.get(name);
 
+    }
+
+    public static void saveLocation(MailLocation mailLocation) {
+        List<MailLocation> locations = getLocations();
+        for (MailLocation location : locations) {
+            if (location.name.equals(mailLocation.name)) {
+                locations.remove(location);
+                break;
+            }
+        }
+        locations.add(mailLocation);
+        saveLocations(locations);
+    }
+
+    public static void removeLocation(MailLocation location) {
+        List<MailLocation> locations = getLocations();
+        for (MailLocation mailLocation : locations) {
+            if (mailLocation.name.equals(location.name)) {
+                locations.remove(mailLocation);
+                break;
+            }
+        }
+        saveLocations(locations);
     }
 
     public static class MailLocation implements ConfigurationSerializable {

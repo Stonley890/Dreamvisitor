@@ -142,9 +142,19 @@ public class Infraction implements ConfigurationSerializable {
         saveToDisk(config);
     }
 
+    public static void setBan(long memberId, boolean state) {
+        YamlConfiguration config = getConfig();
+        config.set(memberId + ".ban", state);
+        saveToDisk(config);
+    }
+
     public static boolean hasTempban(long memberId) {
         return getConfig().getBoolean(memberId + ".tempban");
     }
+    public static boolean hasBan(long memberId) {
+        return getConfig().getBoolean(memberId + ".ban");
+    }
+
 
     public static byte getInfractionsUntilBan(long memberId) {
         return (byte) (BAN_POINT - getInfractionCount(getInfractions(memberId), false));
@@ -262,6 +272,7 @@ public class Infraction implements ConfigurationSerializable {
             }
             setInfractions(disabledInfractions, member.getIdLong());
             if (!hasTempban) setTempban(member.getIdLong(), true);
+            else setBan(member.getIdLong(), true);
         }
 
         infraction.save(member.getIdLong());

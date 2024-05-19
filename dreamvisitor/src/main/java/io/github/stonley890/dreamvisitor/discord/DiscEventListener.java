@@ -61,6 +61,15 @@ public class DiscEventListener extends ListenerAdapter {
 
                 EmbedBuilder builder = new EmbedBuilder();
 
+                // banned users cannot add accounts to whitelist
+                if (Infraction.hasBan(user.getIdLong())) {
+                    builder.setColor(Color.RED).setTitle("You aren't allowed.")
+                            .setDescription("You aren't allowed to add accounts to the whitelist. Ask a staff member for help.");
+                    event.getMessage().replyEmbeds(builder.build()).queue();
+                    event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+                    return;
+                }
+
                 // Check for valid UUID
                 Dreamvisitor.debug("Checking for valid UUID");
                 UUID uuid = PlayerUtility.getUUIDOfUsername(username);
