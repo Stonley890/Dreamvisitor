@@ -1,5 +1,9 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.*;
@@ -9,7 +13,6 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -22,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class CmdTribeUpdate implements CommandExecutor {
+public class CmdTribeUpdate implements DVCommand {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
 
@@ -149,4 +152,21 @@ public class CmdTribeUpdate implements CommandExecutor {
 
     }
 
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "tribeupdate";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+        return LiteralArgumentBuilder.literal(getCommandName())
+                .then(LiteralArgumentBuilder.literal("@a"))
+                .then(LiteralArgumentBuilder.literal("@e"))
+                .then(LiteralArgumentBuilder.literal("@p"))
+                .then(LiteralArgumentBuilder.literal("@r"))
+                .then(LiteralArgumentBuilder.literal("@s"))
+                .then(RequiredArgumentBuilder.argument("selector", StringArgumentType.word()))
+                .build();
+    }
 }

@@ -1,12 +1,15 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,7 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-public class CmdSoftwhitelist implements CommandExecutor {
+public class CmdSoftwhitelist implements DVCommand {
 
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     final String playerList = "players";
@@ -153,4 +156,22 @@ public class CmdSoftwhitelist implements CommandExecutor {
         }
     }
 
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "softwhitelist";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+        return LiteralArgumentBuilder.literal(getCommandName())
+                .then(LiteralArgumentBuilder.literal("add")
+                        .then(RequiredArgumentBuilder.argument("player", StringArgumentType.word())))
+                .then(LiteralArgumentBuilder.literal("remove")
+                        .then(RequiredArgumentBuilder.argument("player", StringArgumentType.word())))
+                .then(LiteralArgumentBuilder.literal("list"))
+                .then(LiteralArgumentBuilder.literal("on"))
+                .then(LiteralArgumentBuilder.literal("off"))
+                .build();
+    }
 }

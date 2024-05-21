@@ -2,6 +2,12 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -9,7 +15,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -19,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CmdSetback implements CommandExecutor {
+public class CmdSetback implements DVCommand {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
@@ -133,5 +138,32 @@ public class CmdSetback implements CommandExecutor {
                 players.size() + " player(s).");
 
         return true;
+    }
+
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "setback";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+
+        RequiredArgumentBuilder<Object, Double> then = RequiredArgumentBuilder.argument("x", DoubleArgumentType.doubleArg())
+                .then(RequiredArgumentBuilder.argument("y", DoubleArgumentType.doubleArg())
+                        .then(RequiredArgumentBuilder.argument("z", DoubleArgumentType.doubleArg())
+                                .then(RequiredArgumentBuilder.argument("pitch", FloatArgumentType.floatArg())
+                                        .then(RequiredArgumentBuilder.argument("yaw", FloatArgumentType.floatArg())
+                                                .then(RequiredArgumentBuilder.argument("yaw", StringArgumentType.word()))))));
+
+
+        return LiteralArgumentBuilder.literal(getCommandName())
+                .then(LiteralArgumentBuilder.literal("@a")).then(then)
+                .then(LiteralArgumentBuilder.literal("@e")).then(then)
+                .then(LiteralArgumentBuilder.literal("@p")).then(then)
+                .then(LiteralArgumentBuilder.literal("@r")).then(then)
+                .then(LiteralArgumentBuilder.literal("@s")).then(then)
+                .then(RequiredArgumentBuilder.argument("selector", StringArgumentType.word())).then(then)
+                .build();
     }
 }

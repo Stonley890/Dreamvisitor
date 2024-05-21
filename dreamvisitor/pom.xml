@@ -32,6 +32,10 @@
       <id>paper-repo</id>
       <url>https://papermc.io/repo/repository/maven-public/</url>
     </repository>
+    <repository>
+      <id>minecraft-repo</id>
+      <url>https://libraries.minecraft.net/</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -44,7 +48,7 @@
     <dependency>
       <groupId>net.dv8tion</groupId>
       <artifactId>JDA</artifactId>
-      <version>5.0.0-beta.23</version>
+      <version>5.0.0-beta.24</version>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -118,6 +122,11 @@
       <artifactId>junit-jupiter</artifactId>
       <version>RELEASE</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.JorelAli</groupId>
+      <artifactId>commandapi</artifactId>
+      <version>9.4.1</version>
     </dependency>
   </dependencies>
 

@@ -1,21 +1,22 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
-public class CmdSethub implements CommandExecutor {
+public class CmdSethub implements DVCommand {
 
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         // sethub
 
@@ -30,5 +31,15 @@ public class CmdSethub implements CommandExecutor {
         }
         return true;
     }
-    
+
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "sethub";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+        return LiteralArgumentBuilder.literal(getCommandName()).build();
+    }
 }

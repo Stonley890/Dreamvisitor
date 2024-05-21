@@ -1,7 +1,6 @@
 package io.github.stonley890.dreamvisitor;
 
 import io.github.stonley890.dreamvisitor.commands.*;
-import io.github.stonley890.dreamvisitor.commands.tabcomplete.*;
 import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.functions.*;
@@ -22,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -89,11 +88,35 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Registering listeners...");
             registerListeners();
 
-            debug("Initializing command executors...");
-            registerCommands();
+            List<DVCommand> commands = new ArrayList<>();
+            commands.add(new CmdAdminRadio());
+            commands.add(new CmdDiscord());
+            commands.add(new CmdHub());
+            commands.add(new CmdPanic());
+            commands.add(new CmdPauseBypass());
+            commands.add(new CmdPausechat());
+            commands.add(new CmdPlayerlimit());
+            commands.add(new CmdRadio());
+            commands.add(new CmdSethub());
+            commands.add(new CmdSoftwhitelist());
+            commands.add(new CmdTagRadio());
+            commands.add(new CmdTogglepvp());
+            commands.add(new CmdZoop());
+            commands.add(new CmdItemBanList());
+            commands.add(new CmdUser());
+            commands.add(new CmdTribeUpdate());
+            commands.add(new CmdUnwax());
+            commands.add(new CmdScheduleRestart());
+            commands.add(new CmdInvSwap());
+            commands.add(new CmdDvset());
+            commands.add(new CmdSetmotd());
+            commands.add(new CmdSynctime());
+            commands.add(new CmdSandbox());
+            commands.add(new CmdMoonglobe());
+            commands.add(new CmdSetback());
 
-            debug("Initializing tab completers...");
-            registerTabCompletion();
+            debug("Initializing commands...");
+            registerCommands(commands);
 
             debug("Creating data folder...");
             // Create config if needed
@@ -306,49 +329,9 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new Sandbox(), this);
     }
 
-    private void registerCommands() throws NullPointerException {
-        try {
-            Objects.requireNonNull(getCommand("aradio")).setExecutor(new CmdRadio());
-            Objects.requireNonNull(getCommand("discord")).setExecutor(new CmdDiscord());
-            Objects.requireNonNull(getCommand("hub")).setExecutor(new CmdHub());
-            Objects.requireNonNull(getCommand("panic")).setExecutor(new CmdPanic());
-            Objects.requireNonNull(getCommand("pausebypass")).setExecutor(new CmdPauseBypass());
-            Objects.requireNonNull(getCommand("pausechat")).setExecutor(new CmdPausechat());
-            Objects.requireNonNull(getCommand("playerlimit")).setExecutor(new CmdPlayerlimit());
-            Objects.requireNonNull(getCommand("radio")).setExecutor(new CmdRadio());
-            Objects.requireNonNull(getCommand("sethub")).setExecutor(new CmdSethub());
-            Objects.requireNonNull(getCommand("softwhitelist")).setExecutor(new CmdSoftwhitelist());
-            Objects.requireNonNull(getCommand("tagradio")).setExecutor(new CmdRadio());
-            Objects.requireNonNull(getCommand("togglepvp")).setExecutor(new CmdTogglepvp());
-            Objects.requireNonNull(getCommand("zoop")).setExecutor(new CmdZoop());
-            Objects.requireNonNull(getCommand("itembanlist")).setExecutor(new CmdItemBanList());
-            Objects.requireNonNull(getCommand("user")).setExecutor(new CmdUser());
-            Objects.requireNonNull(getCommand("tribeupdate")).setExecutor(new CmdTribeUpdate());
-            Objects.requireNonNull(getCommand("unwax")).setExecutor(new CmdUnwax());
-            Objects.requireNonNull(getCommand("schedulerestart")).setExecutor(new CmdScheduleRestart());
-            Objects.requireNonNull(getCommand("invswap")).setExecutor(new CmdInvSwap());
-            Objects.requireNonNull(getCommand("dvset")).setExecutor(new CmdDvset());
-            Objects.requireNonNull(getCommand("setmotd")).setExecutor(new CmdSetmotd());
-            Objects.requireNonNull(getCommand("synctime")).setExecutor(new CmdSynctime());
-            Objects.requireNonNull(getCommand("sandbox")).setExecutor(new CmdSandbox());
-            Objects.requireNonNull(getCommand("moonglobe")).setExecutor(new CmdMoonglobe());
-            Objects.requireNonNull(getCommand("setback")).setExecutor(new CmdSetback());
-        } catch (NullPointerException e) {
-            throw new NullPointerException("One or more Minecraft commands intended to be registered does not exist.");
-        }
-
-    }
-
-    private void registerTabCompletion() throws NullPointerException {
-        try {
-            Objects.requireNonNull(getCommand("pausebypass")).setTabCompleter(new TabPauseBypass());
-            Objects.requireNonNull(getCommand("softwhitelist")).setTabCompleter(new TabSoftWhitelist());
-            Objects.requireNonNull(getCommand("hub")).setTabCompleter(new TabHub());
-            Objects.requireNonNull(getCommand("tribeupdate")).setTabCompleter(new TabTribeUpdate());
-            Objects.requireNonNull(getCommand("moonglobe")).setTabCompleter(new TabMoonglobe());
-            Objects.requireNonNull(getCommand("setback")).setTabCompleter(new TabSetback());
-        } catch (NullPointerException e) {
-            throw new NullPointerException("One or more Minecraft commands intended to be registered does not exist.");
+    private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {
+        for (DVCommand command : commands) {
+            command.getCommand().register();
         }
     }
 

@@ -1,15 +1,16 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
-public class CmdTogglepvp implements CommandExecutor {
+public class CmdTogglepvp implements DVCommand {
 
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     final String pvpDisabled = "disablepvp";
@@ -30,5 +31,15 @@ public class CmdTogglepvp implements CommandExecutor {
         plugin.saveConfig();
         return true;
     }
-    
+
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "togglepvp";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+        return LiteralArgumentBuilder.literal(getCommandName()).build();
+    }
 }

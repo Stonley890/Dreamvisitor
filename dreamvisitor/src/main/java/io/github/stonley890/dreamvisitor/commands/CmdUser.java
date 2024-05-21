@@ -1,5 +1,9 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
@@ -12,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class CmdUser implements CommandExecutor {
+public class CmdUser implements DVCommand {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
@@ -63,5 +67,18 @@ public class CmdUser implements CommandExecutor {
         }
 
         return true;
+    }
+
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "user";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+        return LiteralArgumentBuilder.literal("user")
+                .then(RequiredArgumentBuilder.argument("username", StringArgumentType.word()))
+                .build();
     }
 }

@@ -1,16 +1,19 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
-public class CmdPlayerlimit implements CommandExecutor {
+public class CmdPlayerlimit implements DVCommand {
 
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
@@ -45,5 +48,17 @@ public class CmdPlayerlimit implements CommandExecutor {
         }
         return true;
     }
-    
+
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "playerlimit";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+        return LiteralArgumentBuilder.literal(getCommandName())
+                .then(RequiredArgumentBuilder.argument("limit", IntegerArgumentType.integer(0, Integer.MAX_VALUE)))
+                .build();
+    }
 }

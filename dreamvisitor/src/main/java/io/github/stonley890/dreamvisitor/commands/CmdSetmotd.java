@@ -1,12 +1,15 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-public class CmdSetmotd implements CommandExecutor {
+public class CmdSetmotd implements DVCommand {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
@@ -32,5 +35,18 @@ public class CmdSetmotd implements CommandExecutor {
         }
 
         return true;
+    }
+
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "setmotd";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+        return LiteralArgumentBuilder.literal(getCommandName())
+                .then(RequiredArgumentBuilder.argument("newMotd", StringArgumentType.greedyString()))
+                .build();
     }
 }

@@ -1,5 +1,9 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
+import dev.jorel.commandapi.ExecutableCommand;
+import dev.jorel.commandapi.arguments.*;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Tribe;
 import io.github.stonley890.dreamvisitor.data.TribeUtil;
@@ -21,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Objects;
 
-public class CmdMail implements CommandExecutor {
+public class CmdMail implements DVCommand {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
@@ -34,52 +38,7 @@ public class CmdMail implements CommandExecutor {
                 return true;
             }
             if (args[1].equals("add")) {
-                if (args.length < 8) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments! /mail locations add <x> <y> <z> <name> <weight> <homeTribe>");
-                    return true;
-                }
-                String xArg = args[2];
-                String yArg = args[3];
-                String zArg = args[4];
-                String name = args[5];
-                String weightArg = args[6];
-                String tribeArg = args[7];
 
-                double x;
-                double y;
-                double z;
-                int weight;
-
-                try {
-                    x = Double.parseDouble(xArg);
-                    y = Double.parseDouble(yArg);
-                    z = Double.parseDouble(zArg);
-                    weight = Integer.parseInt(weightArg);
-                } catch (NumberFormatException e) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Numbers could not be parsed!");
-                    return true;
-                }
-
-                Tribe tribe = TribeUtil.parse(tribeArg);
-                if (tribe == null) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Not a valid tribe!");
-                    return true;
-                }
-
-                World world;
-
-                if (sender instanceof Player player) {
-                    world = player.getWorld();
-                } else {
-                    world = sender.getServer().getWorlds().get(0);
-                }
-
-                Location location = new Location(world, x, y, z);
-
-                Mail.MailLocation mailLocation = new Mail.MailLocation(location, name, weight, tribe);
-                Mail.saveLocation(mailLocation);
-
-                sender.sendMessage(Dreamvisitor.PREFIX + "Added location " + name + " at " + x + " " + y + " " + z + " in world " + world.getName() + ".");
             } else if (args[1].equals("remove")) {
                 if (args.length != 3) {
                     sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments! /mail locations remove <name>");
@@ -98,10 +57,7 @@ public class CmdMail implements CommandExecutor {
                 ComponentBuilder message = new ComponentBuilder(Dreamvisitor.PREFIX + "Mail Locations");
 
                 for (Mail.MailLocation mailLocation : locations) {
-                    Location loc = mailLocation.getLocation();
-                    TextComponent tpButton = new TextComponent("TP");
-                    tpButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockX() + " in " + Objects.requireNonNull(loc.getWorld()).getName())));
-                    tpButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/execute in " + loc.getWorld().getName() + " run tp @s " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockX()));
+                    TextComponent tpButton = getTextComponent(mailLocation);
                     message.append("\n").append(mailLocation.getName()).color(net.md_5.bungee.api.ChatColor.YELLOW)
                             .append(" [").append(tpButton).append("]");
                 }
@@ -110,5 +66,85 @@ public class CmdMail implements CommandExecutor {
         }
 
         return true;
+    }
+
+    private static @NotNull TextComponent getTextComponent(Mail.MailLocation mailLocation) {
+        Location loc = mailLocation.getLocation();
+        TextComponent tpButton = new TextComponent("TP");
+        tpButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockX() + " in " + Objects.requireNonNull(loc.getWorld()).getName())));
+        tpButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/execute in " + loc.getWorld().getName() + " run tp @s " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockX()));
+        return tpButton;
+    }
+
+    @NotNull
+    @Override
+    public ExecutableCommand<?, ?> getCommand() {
+        return new CommandAPICommand("mail")
+                .withPermission(CommandPermission.fromString("dreamvisitor.mail"))
+                .withHelp("Manage the mail system.", "Manage the mail economy mini-game system.")
+                .withSubcommand(new CommandAPICommand("location")
+                        .withSubcommand(new CommandAPICommand("add")
+                                .withArguments(new LocationArgument("location"))
+                                .withArguments(new StringArgument("name"))
+                                .withArguments(new IntegerArgument("weight", 0))
+                                .withArguments(CommandUtils.customTribeArgument("homeTribe"))
+                                .executes(((sender, args) -> {
+
+                                    Location location = (Location) args.get("location");
+
+                                    String name = (String) args.get("name");
+                                    int weight = (int) args.get("weight");
+                                    Tribe tribe = (Tribe) args.get("tribe");
+
+                                    World world;
+
+                                    if (sender instanceof Player player) {
+                                        world = player.getWorld();
+                                    } else {
+                                        world = sender.getServer().getWorlds().get(0);
+                                    }
+
+                                    Location location = new Location(world, x, y, z);
+
+                                    Mail.MailLocation mailLocation = new Mail.MailLocation(location, name, weight, tribe);
+                                    Mail.saveLocation(mailLocation);
+
+                                    sender.sendMessage(Dreamvisitor.PREFIX + "Added location " + name + " at " + x + " " + y + " " + z + " in world " + world.getName() + ".");
+                                }))
+                        )
+                        .withSubcommand(new CommandAPICommand("remove")
+                                .withArguments(new StringArgument("name")
+                                        .includeSuggestions(ArgumentSuggestions.strings(
+                                                Mail.getLocations().stream().map(Mail.MailLocation::getName).toArray(String[]::new)
+                                        ))
+                                )
+                        )
+                        .withSubcommand(new CommandAPICommand("list")
+                        )
+                )
+                .withSubcommand(new CommandAPICommand("delivery")
+                        .withSubcommand(new CommandAPICommand("terminal")
+                                .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
+                        )
+                        .withSubcommand(new CommandAPICommand("add")
+                                .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
+                                .withArguments(new StringArgument("start")
+                                        .includeSuggestions(ArgumentSuggestions.strings(
+                                                Mail.getLocations().stream().map(Mail.MailLocation::getName).toArray(String[]::new)
+                                        ))
+                                )
+                                .withArguments(new StringArgument("end")
+                                        .includeSuggestions(ArgumentSuggestions.strings(
+                                                Mail.getLocations().stream().map(Mail.MailLocation::getName).toArray(String[]::new)
+                                        ))
+                                )
+                        )
+                        .withSubcommand(new CommandAPICommand("remove")
+                                .withArguments(new EntitySelectorArgument.ManyPlayers("location")
+                                )
+                        )
+                        .withSubcommand(new CommandAPICommand("list")
+                        )
+                );
     }
 }

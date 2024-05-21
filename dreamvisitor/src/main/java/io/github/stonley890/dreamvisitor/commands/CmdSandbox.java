@@ -1,5 +1,9 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
@@ -11,7 +15,6 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -20,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CmdSandbox implements CommandExecutor {
+public class CmdSandbox implements DVCommand {
 
 
     @Override
@@ -97,5 +100,20 @@ public class CmdSandbox implements CommandExecutor {
         }
 
         return true;
+    }
+
+    @NotNull
+    @Override
+    public String getCommandName() {
+        return "hub";
+    }
+
+    @Override
+    public LiteralCommandNode<?> getNode() {
+        return LiteralArgumentBuilder.literal(getCommandName())
+                .then(RequiredArgumentBuilder.argument("player", StringArgumentType.word())
+                        .then(LiteralArgumentBuilder.literal("on"))
+                        .then(LiteralArgumentBuilder.literal("off")))
+                .build();
     }
 }

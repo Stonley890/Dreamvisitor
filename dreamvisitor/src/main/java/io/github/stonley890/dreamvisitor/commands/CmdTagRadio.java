@@ -11,10 +11,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-
 import org.jetbrains.annotations.NotNull;
 
-public class CmdRadio implements DVCommand {
+public class CmdTagRadio implements DVCommand {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -22,7 +21,8 @@ public class CmdRadio implements DVCommand {
         // radio <message>...
 
         if (args.length == 0) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /" + label + "<tag> <message>");
+            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You must attach a message! /" + label + " <message>");
+            return true;
         }
 
         if (sender instanceof Player player) {
@@ -46,6 +46,7 @@ public class CmdRadio implements DVCommand {
     @Override
     public LiteralCommandNode<?> getNode() {
         return LiteralArgumentBuilder.literal(getCommandName())
+                .then(RequiredArgumentBuilder.argument("tag", StringArgumentType.word()))
                 .then(RequiredArgumentBuilder.argument("message", StringArgumentType.greedyString()))
                 .build();
     }

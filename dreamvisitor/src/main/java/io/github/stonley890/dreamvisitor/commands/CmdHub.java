@@ -2,12 +2,13 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
+import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.*;
 import org.bukkit.command.BlockCommandSender;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -17,147 +18,150 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CmdHub implements CommandExecutor {
+public class CmdHub implements DVCommand {
 
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
+    @NotNull
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public CommandAPICommand getCommand() {
+        return new CommandAPICommand("hub")
+                .withHelp("Teleport to the hub.", "Teleport entities to the hub location.")
+                .withPermission(CommandPermission.fromString("dreamvisitor.hub"))
+                .withOptionalArguments(new EntitySelectorArgument.ManyEntities("entities")
+                        .withPermission(CommandPermission.fromString("dreamvisitor.hub.select"))
+                )
+                .executesNative(((sender, args) -> {
 
-        // hub [<targets>]
+                    String entitySelect = (String) args.get("entities");
 
-        if (sender.hasPermission("dreamvisitor.hub")) {
+                    if (entitySelect != null) {
 
-        if (args.length == 1 && sender.hasPermission("dreamvisitor.hub.select")) {
+                        List<Entity> entities;
+                        try {
+                            entities = Bukkit.selectEntities(sender, entitySelect);
+                        } catch (IllegalArgumentException e) {
+                            throw CommandAPI.failWithString("Invalid arguments!");
+                        }
 
-            List<Entity> entities;
-            try {
-                entities = Bukkit.selectEntities(sender, args[0]);
-            } catch (IllegalArgumentException e) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Invalid arguments!");
-                return true;
-            }
+                        if (entities.isEmpty()) {
+                            throw CommandAPI.failWithString("No targets selected.");
+                        } else {
+                            if (plugin.getConfig().getLocation("hubLocation") == null) {
+                                throw CommandAPI.failWithString("No hub is currently set!");
+                            } else {
 
-            if (entities.isEmpty()) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No targets selected.");
-            } else {
-                if (plugin.getConfig().getLocation("hubLocation") == null) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No hub is currently set!");
-                } else {
+                                Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
+                                assert Dreamvisitor.hubLocation != null;
 
-                    Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
-                    assert Dreamvisitor.hubLocation != null;
+                                Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
 
-                    Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                                for (Entity entity : entities) {
 
-                    for (Entity entity : entities) {
+                                    if (entity instanceof Player player) {
 
-                        if (entity instanceof Player player) {
+                                        // Set /back location
+                                        if (ess != null) {
+                                            User user = ess.getUser(player);
+                                            user.setLastLocation(player.getLocation());
+                                        }
 
-                            // Set /back location
-                            if (ess != null) {
-                                User user = ess.getUser(player);
-                                user.setLastLocation(player.getLocation());
+                                        player.teleport(Dreamvisitor.hubLocation);
+                                        player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                        player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f, 1f);
+                                    } else entity.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
+                                }
+                            }
+                            if (entities.size() == 1) {
+                                sender.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entities.get(0).getName() + " to the hub.");
+                            }
+                            else {
+                                sender.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entities.size() + " entities to the hub.");
+                            }
+                        }
+
+                    } else {
+                        if (sender instanceof Player) {
+                            if (plugin.getConfig().getLocation("hubLocation") == null) {
+                                throw CommandAPI.failWithString("No hub is currently set!");
+                            } else {
+
+                                Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
+                                assert Dreamvisitor.hubLocation != null;
+
+                                Player player = (Player) sender;
+
+                                Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                                if (ess != null) {
+                                    User user = ess.getUser(player);
+                                    user.setLastLocation(player.getLocation());
+                                }
+
+                                List<LivingEntity> leashed = new ArrayList<>();
+
+                                for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
+                                    if (entity instanceof LivingEntity livingEntity && livingEntity.isLeashed() && livingEntity.getLeashHolder().equals(player))
+                                        leashed.add(livingEntity);
+                                }
+
+                                if (leashed.isEmpty() || !player.hasPermission("dreamvisitor.hub.leash")) {
+                                    player.teleport(Dreamvisitor.hubLocation);
+                                    player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                    player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
+                                            1f);
+                                } else {
+
+                                    Location tpLocation = Dreamvisitor.hubLocation.clone().subtract(0, 14, 0);
+
+                                    player.teleport(tpLocation);
+                                    player.spawnParticle(Particle.FIREWORKS_SPARK, tpLocation, 100);
+                                    player.playSound(tpLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
+                                            1f);
+                                    for (LivingEntity entity : leashed) {
+                                        entity.teleport(tpLocation);
+                                    }
+                                }
                             }
 
-                            player.teleport(Dreamvisitor.hubLocation);
-                            player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
-                            player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,1f);
-                        } else entity.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
-                    }
-                }
-                if (entities.size() == 1)
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entities.get(0).getName() + " to the hub.");
-                else
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entities.size() + " entities to the hub.");
-            }
+                        } else if (sender instanceof BlockCommandSender cmdblock) {
 
-        } else {
-            if (sender instanceof Player) {
-                if (plugin.getConfig().getLocation("hubLocation") == null) {
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No hub is currently set!");
-                } else {
+                            // Find the closest player
+                            double lastDistance = 10;
+                            Player closest = null;
 
-                    Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
-                    assert Dreamvisitor.hubLocation != null;
+                            for (Entity entity : cmdblock.getBlock().getWorld().getNearbyEntities(cmdblock.getBlock().getLocation(), 10, 10, 10)) {
+                                if (entity instanceof Player) {
+                                    double distance = entity.getLocation().distance(cmdblock.getBlock().getLocation());
+                                    if (distance < lastDistance) {
+                                        lastDistance = distance;
+                                        closest = (Player) entity;
+                                    }
+                                }
+                            }
 
-                    Player player = (Player) sender;
+                            if (closest != null) {
+                                if (plugin.getConfig().getLocation("hubLocation") == null) {
+                                    throw CommandAPI.failWithString("No hub is currently set!");
+                                } else {
 
-                    Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-                    if (ess != null) {
-                        User user = ess.getUser(player);
-                        user.setLastLocation(player.getLocation());
-                    }
+                                    Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                                    if (ess != null) {
+                                        User user = ess.getUser(closest);
+                                        user.setLastLocation(closest.getLocation());
+                                    }
 
-                    List<LivingEntity> leashed = new ArrayList<>();
+                                    closest.teleport(Dreamvisitor.hubLocation);
+                                    closest.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
+                                    closest.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
+                                            1f);
+                                }
+                            }
 
-                    for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
-                        if (entity instanceof LivingEntity livingEntity && livingEntity.isLeashed() && livingEntity.getLeashHolder().equals(player))
-                            leashed.add(livingEntity);
-                    }
-
-                    if (leashed.isEmpty() || !player.hasPermission("dreamvisitor.hub.leash")) {
-                        player.teleport(Dreamvisitor.hubLocation);
-                        player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
-                        player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
-                                1f);
-                    } else {
-
-                        Location tpLocation = Dreamvisitor.hubLocation.clone().subtract(0, 14, 0);
-
-                        player.teleport(tpLocation);
-                        player.spawnParticle(Particle.FIREWORKS_SPARK, tpLocation, 100);
-                        player.playSound(tpLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
-                                1f);
-                        for (LivingEntity entity : leashed) {
-                            entity.teleport(tpLocation);
+                        } else {
+                            throw CommandAPI.failWithString("Missing arguments! /hub [targets]");
                         }
                     }
-                }
 
-            } else if (sender instanceof BlockCommandSender cmdblock) {
-
-                // Find the closest player
-                double lastDistance = 10;
-                Player closest = null;
-
-                for (Entity entity : cmdblock.getBlock().getWorld().getNearbyEntities(cmdblock.getBlock().getLocation(), 10, 10, 10)) {
-                    if (entity instanceof Player) {
-                        double distance = entity.getLocation().distance(cmdblock.getBlock().getLocation());
-                        if (distance < lastDistance) {
-                            lastDistance = distance;
-                            closest = (Player) entity;
-                        }
-                    }
-                }
-
-                if (closest != null) {
-                    if (plugin.getConfig().getLocation("hubLocation") == null) {
-                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No hub is currently set!");
-                    } else {
-
-                        Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-                        if (ess != null) {
-                            User user = ess.getUser(closest);
-                            user.setLastLocation(closest.getLocation());
-                        }
-
-                        closest.teleport(Dreamvisitor.hubLocation);
-                        closest.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
-                        closest.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
-                                1f);
-                    }
-                }
-
-            } else {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments! /hub [targets]");
-            }
-        }
-
-        } else sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You do not have permission to run that command!");
-
-        return true;
-
+                }));
     }
-
 }
