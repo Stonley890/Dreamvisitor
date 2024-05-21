@@ -190,3 +190,6 @@ permissions:
   dreamvisitor.moonglobes:
     description: Allows using the moonglobes command.
     default: op
+  dreamvisitor.tribeupdate:
+    description: Allows using the tribeupdate command.
+    default: op

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +28,7 @@ public class CmdMoonglobe implements DVCommand {
 
     @NotNull
     @Contract(pure = true)
-    private static String create(@NotNull List<Player> players, @NotNull Location location, float maxDistance) {
+    private static String create(@NotNull Collection<Player> players, @NotNull Location location, float maxDistance) {
 
         for (Player player : players) {
             boolean alreadyHasGlobe = false;
@@ -52,27 +53,18 @@ public class CmdMoonglobe implements DVCommand {
                         .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
                         .executes((sender, args) -> {
 
-                            String targetString = (String) args.get("players");
+                            Collection<Player> targets = (Collection<Player>) args.get("players");
 
                             // Get players
-                            assert targetString != null;
-                            List<Entity> entities = Bukkit.selectEntities(sender, targetString);
-                            List<Player> players = new ArrayList<>();
+                            assert targets != null;
 
-                            for (Entity entity : entities) {
-                                if (entity instanceof Player player) players.add(player);
-                                else {
-                                    throw CommandAPI.failWithString("You cannot specify non-players!");
-                                }
-                            }
-
-                            for (Player player : players) {
+                            for (Player player : targets) {
                                 for (Moonglobe activeMoonglobe : Moonglobe.activeMoonglobes) {
                                     if (Objects.equals(activeMoonglobe.getPlayer(), player.getUniqueId())) activeMoonglobe.remove(null);
                                 }
                             }
 
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Removed moon globes of " + players.size() + " players.");
+                            sender.sendMessage(Dreamvisitor.PREFIX + "Removed moon globes of " + targets.size() + " players.");
                         })
                 )
                 .withSubcommand(new CommandAPICommand("create")
@@ -80,19 +72,10 @@ public class CmdMoonglobe implements DVCommand {
                         .withOptionalArguments(new LocationArgument("location"))
                         .withOptionalArguments(new LongArgument("maxDistance"))
                         .executesNative((sender, args) -> {
-                            String targetString = (String) args.get("players");
+                            Collection<Player> targets = (Collection<Player>) args.get("players");
 
                             // Get players
-                            assert targetString != null;
-                            List<Entity> entities = Bukkit.selectEntities(sender, targetString);
-                            List<Player> players = new ArrayList<>();
-
-                            for (Entity entity : entities) {
-                                if (entity instanceof Player player) players.add(player);
-                                else {
-                                    throw CommandAPI.failWithString("You cannot specify non-players!");
-                                }
-                            }
+                            assert targets != null;
 
                             Location location = getLocation(sender, args);
 
@@ -102,23 +85,14 @@ public class CmdMoonglobe implements DVCommand {
                             Object maxDistanceArg = args.get("maxDistance");
                             if (maxDistanceArg != null) maxDistance = (float) maxDistanceArg;
 
-                            sender.sendMessage(create(players, location, maxDistance));
+                            sender.sendMessage(create(targets, location, maxDistance));
                         })
                         .executes((sender, args) -> {
 
-                            String targetString = (String) args.get("players");
+                            Collection<Player> targets = (Collection<Player>) args.get("players");
 
                             // Get players
-                            assert targetString != null;
-                            List<Entity> entities = Bukkit.selectEntities(sender, targetString);
-                            List<Player> players = new ArrayList<>();
-
-                            for (Entity entity : entities) {
-                                if (entity instanceof Player player) players.add(player);
-                                else {
-                                    throw CommandAPI.failWithString("You cannot specify non-players!");
-                                }
-                            }
+                            assert targets != null;
 
                             World world;
 
@@ -151,7 +125,7 @@ public class CmdMoonglobe implements DVCommand {
                             Object maxDistanceArg = args.get("maxDistance");
                             if (maxDistanceArg != null) maxDistance = (float) maxDistanceArg;
 
-                            sender.sendMessage(create(players, location, maxDistance));
+                            sender.sendMessage(create(targets, location, maxDistance));
                         })
                 );
     }

@@ -2,168 +2,82 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
+import dev.jorel.commandapi.ExecutableCommand;
+import dev.jorel.commandapi.arguments.*;
+import dev.jorel.commandapi.wrappers.Rotation;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 
 public class CmdSetback implements DVCommand {
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-
-        // setback <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]
-
-        if (args.length == 0) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Missing arguments! /setback <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]");
-            return true;
-        }
-        if ((args.length > 1 && args.length < 4) || args.length == 5) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Incomplete arguments! /setback <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]");
-            return true;
-        }
-        if (args.length > 7) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Too many arguments! /setback <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]");
-            return true;
-        }
-
-        Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-        if (ess == null) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "EssentialsX is not currently active!");
-            return true;
-        }
-
-        List<Entity> entities = Bukkit.selectEntities(sender, args[0]);
-        if (entities.isEmpty()) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No entities selected!");
-            return true;
-        }
-        List<Player> players = new ArrayList<>();
-        for (Entity entity : entities) {
-            if (entity instanceof Player player) players.add(player);
-            else {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Only players are allowed!");
-            }
-        }
-        if (players.isEmpty()) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No players selected!");
-            return true;
-        }
-
-        Location location = null;
-
-        double x; double y; double z;
-        float pitch; float yaw;
-        World world;
-
-        if (args.length == 1) {
-            if (sender instanceof Entity entity) {
-                location = entity.getLocation();
-            } else if (sender instanceof BlockCommandSender block) {
-                location = block.getBlock().getLocation();
-            }
-
-            if (location == null) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Location is null!");
-                return true;
-            }
-        }
-        if (args.length >= 4) {
-            try {
-                x = Double.parseDouble(args[1]);
-                y = Double.parseDouble(args[2]);
-                z = Double.parseDouble(args[3]);
-            } catch (NumberFormatException e) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not parse double: x, y, z; /setback <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]");
-                return true;
-            }
-            location = new Location(null, x, y, z);
-            if (sender instanceof Entity entity) {
-                location.setWorld(entity.getWorld());
-            } else if (sender instanceof BlockCommandSender block) {
-                location.setWorld(block.getBlock().getWorld());
-            }
-        }
-        if (args.length >= 6) {
-            String pitchString = args[4];
-            String yawString = args[5];
-            try {
-                pitch = Float.parseFloat(pitchString);
-                yaw = Float.parseFloat(yawString);
-            } catch (NumberFormatException e) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not parse float: pitch, yaw; /setback <playerTargets> [<x> <y> <z> [<pitch> <yaw> [<world>]]]");
-                return true;
-            }
-            location.setPitch(pitch);
-            location.setYaw(yaw);
-        }
-        if (args.length == 7) {
-            String worldName = args[6];
-            world = Bukkit.getWorld(worldName);
-            if (world == null) {
-                sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "That world is null!");
-                return true;
-            }
-            location.setWorld(world);
-        }
-
-        if (location.getWorld() == null) {
-            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "No world specified! You need to specify rotation and world. /setback <playerTargets> <x> <y> <z> <pitch> <yaw> <world>");
-            return true;
-        }
-
-        for (Player player : players) {
-            User user = ess.getUser(player);
-            user.setLastLocation(location);
-        }
-
-        sender.sendMessage(Dreamvisitor.PREFIX + "Set back location to " + location.getBlockX() + ", " + location.getBlockY() +
-                ", " + location.getBlockZ() + " of " + Objects.requireNonNull(location.getWorld()).getName() + " for " +
-                players.size() + " player(s).");
-
-        return true;
-    }
 
     @NotNull
     @Override
-    public String getCommandName() {
-        return "setback";
-    }
+    public CommandAPICommand getCommand() {
+        return new CommandAPICommand("setback")
+                .withPermission(CommandPermission.fromString("dreamvisitor.setback"))
+                .withHelp("Set a player's last location.", "Set a player's last EssentialsX location.")
+                .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
+                .withOptionalArguments(new LocationArgument("location", LocationType.PRECISE_POSITION))
+                .withOptionalArguments(new RotationArgument("rotation"))
+                .withOptionalArguments(new WorldArgument("world"))
+                .executes((sender, args) -> {
 
-    @Override
-    public LiteralCommandNode<?> getNode() {
+                    Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                    if (ess == null) {
+                        throw CommandAPI.failWithString("EssentialsX is not currently active!");
+                    }
 
-        RequiredArgumentBuilder<Object, Double> then = RequiredArgumentBuilder.argument("x", DoubleArgumentType.doubleArg())
-                .then(RequiredArgumentBuilder.argument("y", DoubleArgumentType.doubleArg())
-                        .then(RequiredArgumentBuilder.argument("z", DoubleArgumentType.doubleArg())
-                                .then(RequiredArgumentBuilder.argument("pitch", FloatArgumentType.floatArg())
-                                        .then(RequiredArgumentBuilder.argument("yaw", FloatArgumentType.floatArg())
-                                                .then(RequiredArgumentBuilder.argument("yaw", StringArgumentType.word()))))));
+                    Collection<Player> players = (Collection<Player>) args.get("players");
+                    Location location = (Location) args.get("location");
+                    Rotation rotation = (Rotation) args.get("rotation");
+                    World world = (World) args.get("world");
 
+                    assert players != null;
 
-        return LiteralArgumentBuilder.literal(getCommandName())
-                .then(LiteralArgumentBuilder.literal("@a")).then(then)
-                .then(LiteralArgumentBuilder.literal("@e")).then(then)
-                .then(LiteralArgumentBuilder.literal("@p")).then(then)
-                .then(LiteralArgumentBuilder.literal("@r")).then(then)
-                .then(LiteralArgumentBuilder.literal("@s")).then(then)
-                .then(RequiredArgumentBuilder.argument("selector", StringArgumentType.word())).then(then)
-                .build();
+                    if (location == null) {
+                        if (sender instanceof Entity entity) {
+                            location = entity.getLocation();
+                        } else if (sender instanceof BlockCommandSender block) {
+                            location = block.getBlock().getLocation();
+                        } else throw CommandAPI.failWithString("You must specify a location!");
+                    }
+
+                    if (rotation != null) {
+                        location.setPitch(rotation.getPitch());
+                        location.setYaw(rotation.getYaw());
+                    }
+
+                    if (world == null) {
+                        if (sender instanceof Entity entity) {
+                            world = entity.getWorld();
+                        } else if (sender instanceof BlockCommandSender block) {
+                            world = block.getBlock().getWorld();
+                        } else throw CommandAPI.failWithString("You must specify a world!");
+                    }
+
+                    location.setWorld(world);
+
+                    for (Player player : players) {
+                        User user = ess.getUser(player);
+                        user.setLastLocation(location);
+                    }
+
+                    sender.sendMessage(Dreamvisitor.PREFIX + "Set back location to " + location.getBlockX() + ", " + location.getBlockY() +
+                            ", " + location.getBlockZ() + " of " + Objects.requireNonNull(location.getWorld()).getName() + " for " +
+                            players.size() + " player(s).");
+
+                });
     }
 }

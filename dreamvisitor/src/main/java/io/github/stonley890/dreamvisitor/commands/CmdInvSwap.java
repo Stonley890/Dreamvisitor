@@ -16,7 +16,7 @@ public class CmdInvSwap implements DVCommand {
 
     @NotNull
     @Override
-    public ExecutableCommand<?, ?> getCommand() {
+    public CommandAPICommand getCommand() {
         return new CommandAPICommand("invswap")
                 .withHelp("Swap you inventory.", "Swap between two different inventories.")
                 .withPermission(CommandPermission.fromString("dreamvisitor.invswap"))

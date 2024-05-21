@@ -14,7 +14,7 @@ public class CmdItemBanList implements DVCommand {
 
     @NotNull
     @Override
-    public ExecutableCommand<?, ?> getCommand() {
+    public CommandAPICommand getCommand() {
         return new CommandAPICommand("itembanlist")
                 .withPermission(CommandPermission.fromString("dreamvisitor.itembanlist"))
                 .withHelp("Manage the item ban list.", "Open the item ban list inventory GUI.")

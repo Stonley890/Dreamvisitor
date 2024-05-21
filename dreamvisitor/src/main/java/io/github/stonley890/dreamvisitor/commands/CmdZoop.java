@@ -1,63 +1,46 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CmdZoop implements DVCommand {
 
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-
-        // zoop
-
-        // If cmd executor is player
-        if (sender instanceof Player player) {
-
-            PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-
-            // Change data
-            if (memory.vanished) {
-
-                memory.vanished = false;
-                String chatMessage = "**" + player.getName() + " joined the game**";
-                Bot.getGameChatChannel().sendMessage(chatMessage).queue();
-                Bot.sendLog(chatMessage);
-
-            } else {
-                memory.vanished = true;
-                String chatMessage = "**" + player.getName() + " left the game**";
-                Bot.getGameChatChannel().sendMessage(chatMessage).queue();
-                Bot.sendLog(chatMessage);
-            }
-
-            PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
-
-            player.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.vanished + ".");
-
-        } else {
-            sender.sendMessage(ChatColor.RED + "This command can only be executed by a player!");
-        }
-        return true;
-    }
-
     @NotNull
     @Override
-    public String getCommandName() {
-        return "zoop";
-    }
+    public CommandAPICommand getCommand() {
+        return new CommandAPICommand("zoop")
+                .withPermission(CommandPermission.fromString("dreamvisitor.set.zoop"))
+                .withHelp("Disappear from the Discord chat bridge.", "Sends a fake leave message to Discord and hides you from the list command.")
+                .executesPlayer((sender, args) -> {
+                    PlayerMemory memory = PlayerUtility.getPlayerMemory(sender.getUniqueId());
 
-    @Override
-    public LiteralCommandNode<?> getNode() {
-        return LiteralArgumentBuilder.literal("zoop").build();
+                    // Change data
+                    if (memory.vanished) {
+
+                        memory.vanished = false;
+                        String chatMessage = "**" + sender.getName() + " joined the game**";
+                        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                        Bot.sendLog(chatMessage);
+
+                    } else {
+                        memory.vanished = true;
+                        String chatMessage = "**" + sender.getName() + " left the game**";
+                        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                        Bot.sendLog(chatMessage);
+                    }
+
+                    PlayerUtility.setPlayerMemory(sender.getUniqueId(), memory);
+
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.vanished + ".");
+                });
     }
 }
