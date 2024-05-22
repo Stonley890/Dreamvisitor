@@ -19,7 +19,7 @@ public class CmdTogglepvp implements DVCommand {
         return new CommandAPICommand("togglepvp")
                 .withPermission(CommandPermission.fromString("dreamvisitor.togglepvp"))
                 .withHelp("Toggle global PvP.", "Toggle whether PvP is enabled or disabled.")
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     if (plugin.getConfig().getBoolean(pvpDisabled)) {
                         plugin.getConfig().set(pvpDisabled, false);
                         Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "PvP globally enabled.");

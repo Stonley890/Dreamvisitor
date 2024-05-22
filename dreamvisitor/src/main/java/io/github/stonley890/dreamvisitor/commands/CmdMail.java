@@ -41,7 +41,7 @@ public class CmdMail implements DVCommand {
                                 .withArguments(new StringArgument("name"))
                                 .withArguments(new IntegerArgument("weight", 0))
                                 .withArguments(CommandUtils.customTribeArgument("homeTribe"))
-                                .executes(((sender, args) -> {
+                                .executesNative(((sender, args) -> {
 
                                     Location location = (Location) args.get("location");
                                     if (location == null) throw CommandAPI.failWithString("Location was not provided!");
@@ -66,7 +66,7 @@ public class CmdMail implements DVCommand {
                                                 Mail.getLocations().stream().map(Mail.MailLocation::getName).toArray(String[]::new)
                                         ))
                                 )
-                                .executes((sender, args) -> {
+                                .executesNative((sender, args) -> {
 
                                     String name = (String) args.get("name");
                                     if (name == null) throw CommandAPI.failWithString("Name is null!");
@@ -78,7 +78,7 @@ public class CmdMail implements DVCommand {
                                 })
                         )
                         .withSubcommand(new CommandAPICommand("list")
-                                .executes((sender, args) -> {
+                                .executesNative((sender, args) -> {
                                     List<Mail.MailLocation> locations = Mail.getLocations();
 
                                     ComponentBuilder message = new ComponentBuilder(Dreamvisitor.PREFIX + "Mail Locations");

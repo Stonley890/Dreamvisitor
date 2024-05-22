@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import io.github.stonley890.dreamvisitor.Bot;
@@ -20,27 +21,31 @@ public class CmdZoop implements DVCommand {
         return new CommandAPICommand("zoop")
                 .withPermission(CommandPermission.fromString("dreamvisitor.set.zoop"))
                 .withHelp("Disappear from the Discord chat bridge.", "Sends a fake leave message to Discord and hides you from the list command.")
-                .executesPlayer((sender, args) -> {
-                    PlayerMemory memory = PlayerUtility.getPlayerMemory(sender.getUniqueId());
+                .executesNative((sender, args) -> {
+                    CommandSender callee = sender.getCallee();
+                    if (callee instanceof Player player) {
+                        PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
-                    // Change data
-                    if (memory.vanished) {
+                        // Change data
+                        if (memory.vanished) {
 
-                        memory.vanished = false;
-                        String chatMessage = "**" + sender.getName() + " joined the game**";
-                        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
-                        Bot.sendLog(chatMessage);
+                            memory.vanished = false;
+                            String chatMessage = "**" + callee.getName() + " joined the game**";
+                            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                            Bot.sendLog(chatMessage);
 
-                    } else {
-                        memory.vanished = true;
-                        String chatMessage = "**" + sender.getName() + " left the game**";
-                        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
-                        Bot.sendLog(chatMessage);
-                    }
+                        } else {
+                            memory.vanished = true;
+                            String chatMessage = "**" + callee.getName() + " left the game**";
+                            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                            Bot.sendLog(chatMessage);
+                        }
 
-                    PlayerUtility.setPlayerMemory(sender.getUniqueId(), memory);
+                        PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
 
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.vanished + ".");
+                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Discord vanish toggled to " + memory.vanished + ".");
+                    } else throw CommandAPI.failWithString("This command must be executed as a player!");
+
                 });
     }
 }

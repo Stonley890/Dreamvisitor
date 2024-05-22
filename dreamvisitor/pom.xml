@@ -94,8 +94,8 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.JorelAli</groupId>
-      <artifactId>commandapi</artifactId>
+      <groupId>dev.jorel</groupId>
+      <artifactId>commandapi-bukkit-shade</artifactId>
       <version>9.4.1</version>
     </dependency>
   </dependencies>

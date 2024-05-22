@@ -20,7 +20,7 @@ public class CmdPausechat implements DVCommand {
         return new CommandAPICommand("pausechat")
                 .withPermission(CommandPermission.fromString("dreamvisitor.pausechat"))
                 .withHelp("Pause the chat.", "Suppresses messages from players and the Discord chat bridge.")
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     if (Dreamvisitor.chatPaused) {
 
                         // Change settings

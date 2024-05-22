@@ -1,5 +1,9 @@
 package io.github.stonley890.dreamvisitor;
 
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIBukkitConfig;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandTree;
 import io.github.stonley890.dreamvisitor.commands.*;
 import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
@@ -116,6 +120,8 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdSetback());
 
             debug("Initializing commands...");
+            CommandAPI.onLoad(new CommandAPIBukkitConfig(this));
+            CommandAPI.onEnable();
             registerCommands(commands);
 
             debug("Creating data folder...");
@@ -143,6 +149,10 @@ public class Dreamvisitor extends JavaPlugin {
             // Init mail
             debug("Initializing mail.yml");
             Mail.init();
+
+            // Init tribes
+            debug("Initializing player-tribes.yml");
+            PlayerTribe.setup();
 
             // Start message
             getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
@@ -331,7 +341,11 @@ public class Dreamvisitor extends JavaPlugin {
 
     private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {
         for (DVCommand command : commands) {
-            command.getCommand().register();
+            if (command.getCommand() instanceof CommandAPICommand apiCommand) {
+                apiCommand.register(this);
+            } else if (command.getCommand() instanceof CommandTree apiCommand) {
+                apiCommand.register(this);
+            }
         }
     }
 
@@ -359,6 +373,8 @@ public class Dreamvisitor extends JavaPlugin {
                 if (Dreamvisitor.debugMode) throw new RuntimeException();
             }
         }
+
+        CommandAPI.onDisable();
 
         logger.removeAppender(appender);
     }

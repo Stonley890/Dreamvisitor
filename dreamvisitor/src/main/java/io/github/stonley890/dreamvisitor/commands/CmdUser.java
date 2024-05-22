@@ -20,7 +20,7 @@ public class CmdUser implements DVCommand {
                 .withPermission(CommandPermission.fromString("dreamvisitor.user"))
                 .withHelp("Get details of a player.", "Get details of a player, online or offline.")
                 .withArguments(new OfflinePlayerArgument("player"))
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
 
                     OfflinePlayer player = (OfflinePlayer) args.get("player");
 

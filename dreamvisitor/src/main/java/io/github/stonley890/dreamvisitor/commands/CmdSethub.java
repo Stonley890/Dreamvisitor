@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
@@ -30,14 +31,15 @@ public class CmdSethub implements DVCommand {
                 .withOptionalArguments(new LocationArgument("location"))
                 .withOptionalArguments(new RotationArgument("rotation"))
                 .withOptionalArguments(new WorldArgument("world"))
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     Location location = (Location) args.get("location");
                     Rotation rotation = (Rotation) args.get("rotation");
                     World world = (World) args.get("world");
+                    CommandSender callee = sender.getCallee();
                     if (location == null) {
-                        if (sender instanceof Entity entity) {
+                        if (callee instanceof Entity entity) {
                             location = entity.getLocation();
-                        } else if (sender instanceof BlockCommandSender block) {
+                        } else if (callee instanceof BlockCommandSender block) {
                             location = block.getBlock().getLocation();
                         } else {
                             throw CommandAPI.failWithString("Location must be specified when it cannot be inferred!");
@@ -48,9 +50,9 @@ public class CmdSethub implements DVCommand {
                         location.setPitch(rotation.getPitch());
                     }
                     if (world == null) {
-                        if (sender instanceof Entity entity) {
+                        if (callee instanceof Entity entity) {
                             world = entity.getLocation().getWorld();
-                        } else if (sender instanceof BlockCommandSender block) {
+                        } else if (callee instanceof BlockCommandSender block) {
                             world = block.getBlock().getLocation().getWorld();
                         } else {
                             throw CommandAPI.failWithString("World must be specified when it cannot be inferred!");

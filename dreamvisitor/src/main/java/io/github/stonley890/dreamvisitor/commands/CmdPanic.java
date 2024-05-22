@@ -23,7 +23,7 @@ public class CmdPanic implements DVCommand {
         return new CommandAPICommand("panic")
                 .withPermission("dreamvisitor.panic")
                 .withHelp("Panic!", "Kicks all non-operators from the server and sets the player limit to 0.")
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     if (!panicAsked) {
                         panicAsked = true;
                         sender.sendMessage(Dreamvisitor.PREFIX +

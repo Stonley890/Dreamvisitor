@@ -13,7 +13,7 @@ public class CmdScheduleRestart implements DVCommand {
         return new CommandAPICommand("schedulerestart")
                 .withPermission(CommandPermission.OP)
                 .withHelp("Schedule a restart.", "Schedule or unschedule the server to restart when no players are online.")
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     if (Dreamvisitor.restartScheduled) {
                         Dreamvisitor.restartScheduled = false;
                         sender.sendMessage(Dreamvisitor.PREFIX + "Canceled server restart. Run /schedulerestart again to cancel.");

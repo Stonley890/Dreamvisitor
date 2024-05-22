@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
@@ -21,9 +22,10 @@ public class CmdPauseBypass implements DVCommand {
     public CommandAPICommand getCommand() {
         return new CommandAPICommand("pausebypass")
                 .withHelp("Allow players to bypass chat pause.", "Allow players to chat even when chat is paused.")
+                .withPermission(CommandPermission.fromString("dreamvisitor.pausechat"))
                 .withSubcommand(new CommandAPICommand("add")
                         .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
                             Collection<Player> players = (Collection<Player>) args.get("players");
                             List<UUID> playersList = PauseBypass.getPlayers();
                             assert players != null;
@@ -34,7 +36,7 @@ public class CmdPauseBypass implements DVCommand {
                 )
                 .withSubcommand(new CommandAPICommand("remove")
                         .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
                             Collection<Player> players = (Collection<Player>) args.get("players");
                             List<UUID> playersList = PauseBypass.getPlayers();
                             assert players != null;
@@ -45,7 +47,7 @@ public class CmdPauseBypass implements DVCommand {
                         })
                 )
                 .withSubcommand(new CommandAPICommand("list")
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
                             // Build list
                             StringBuilder list = new StringBuilder();
 

@@ -41,7 +41,7 @@ public class Sandbox implements Listener {
         messageBuilder.append("You are now in sandbox mode.\n").bold(true)
                 .append("A staff member put you into sandbox mode. You are now in creative mode. " +
                         "Your inventory has been cleared and stored for later restore. " +
-                        "In sandbox mode, the following limitations are imposed:").bold(false)
+                        "In sandbox mode, the following limitations are imposed:\n").bold(false)
                 .append("- You cannot access containers.\n")
                 .append("- You cannot drop items.\n")
                 .append("- You cannot use spawn eggs.\n")

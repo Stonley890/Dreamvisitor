@@ -22,8 +22,8 @@ public class CmdPlayerlimit implements DVCommand {
         return new CommandAPICommand("playerlimit")
                 .withPermission(CommandPermission.fromString("dreamvisitor.playerlimit"))
                 .withHelp("Set the player limit.", "Override the server player limit")
-                .withArguments(new IntegerArgument("newLimit", -1))
-                .executes((sender, args) -> {
+                .withOptionalArguments(new IntegerArgument("newLimit", -1))
+                .executesNative((sender, args) -> {
 
                     Object newLimitArg = args.get("newLimit");
                     if (newLimitArg == null) {

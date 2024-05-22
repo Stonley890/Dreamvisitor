@@ -14,7 +14,7 @@ public class CmdSetmotd implements DVCommand {
                 .withPermission("dreamvisitor.setmotd")
                 .withHelp("Set or reset the MOTD.", "Set or reset the server MOTD.")
                 .withOptionalArguments(new GreedyStringArgument("newMotd"))
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     String newMotd = (String) args.get("newMotd");
                     if (newMotd == null) {
                         Dreamvisitor.MOTD = null;

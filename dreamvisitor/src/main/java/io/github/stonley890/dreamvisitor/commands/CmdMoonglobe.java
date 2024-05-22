@@ -4,6 +4,7 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
+import dev.jorel.commandapi.arguments.FloatArgument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LongArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
@@ -14,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
@@ -51,7 +53,7 @@ public class CmdMoonglobe implements DVCommand {
                 .withFullDescription("Create and remove moon globes to/from players.")
                 .withSubcommand(new CommandAPICommand("remove")
                         .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
 
                             Collection<Player> targets = (Collection<Player>) args.get("players");
 
@@ -70,7 +72,7 @@ public class CmdMoonglobe implements DVCommand {
                 .withSubcommand(new CommandAPICommand("create")
                         .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
                         .withOptionalArguments(new LocationArgument("location"))
-                        .withOptionalArguments(new LongArgument("maxDistance"))
+                        .withOptionalArguments(new FloatArgument("maxDistance"))
                         .executesNative((sender, args) -> {
                             Collection<Player> targets = (Collection<Player>) args.get("players");
 
@@ -87,7 +89,7 @@ public class CmdMoonglobe implements DVCommand {
 
                             sender.sendMessage(create(targets, location, maxDistance));
                         })
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
 
                             Collection<Player> targets = (Collection<Player>) args.get("players");
 
@@ -96,19 +98,20 @@ public class CmdMoonglobe implements DVCommand {
 
                             World world;
 
-                            if (sender instanceof Player player) world = player.getWorld();
-                            else if (sender instanceof BlockCommandSender block) world = block.getBlock().getWorld();
+                            CommandSender callee = sender.getCallee();
+                            if (callee instanceof Player player) world = player.getWorld();
+                            else if (callee instanceof BlockCommandSender block) world = block.getBlock().getWorld();
                             else world = Bukkit.getWorlds().get(0);
 
                             // Get location
                             Location location = (Location) args.get("location");
                             if (location == null) {
                                 double x; double y; double z;
-                                if (sender instanceof Player player) {
+                                if (callee instanceof Player player) {
                                     x = player.getLocation().getX();
                                     y = player.getLocation().getY();
                                     z = player.getLocation().getZ();
-                                } else if (sender instanceof BlockCommandSender block) {
+                                } else if (callee instanceof BlockCommandSender block) {
                                     x = block.getBlock().getX();
                                     y = block.getBlock().getY();
                                     z = block.getBlock().getZ();

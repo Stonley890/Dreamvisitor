@@ -26,7 +26,7 @@ public class Radio {
                     if (operator.isOp()) operator.sendMessage(finalMessage);
                 }
                 case "tagradio" -> {
-                    if (operator.getScoreboardTags().contains(tag)) operator.sendMessage(finalMessage);
+                    if (operator.getScoreboardTags().contains(tag) || operator.isOp()) operator.sendMessage(finalMessage);
                 }
             }
 
@@ -43,7 +43,7 @@ public class Radio {
         // Build messageBuilder
         String radioType = "[Staff Radio]";
         if (command.equals("aradio")) radioType = "[Admin Radio]";
-        else if (command.equals("tagradio")) radioType = "[Radio]";
+        else if (command.equals("tagradio")) radioType = "[Tag Radio]";
 
         return ChatColor.DARK_AQUA + radioType + nameColor + " <" + name + "> " + ChatColor.WHITE + message;
     }

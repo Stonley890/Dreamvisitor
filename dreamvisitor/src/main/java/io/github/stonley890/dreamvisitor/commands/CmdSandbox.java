@@ -31,7 +31,7 @@ public class CmdSandbox implements DVCommand {
                 .withPermission(CommandPermission.fromString("dreamvisitor.sandbox"))
                 .withOptionalArguments(new EntitySelectorArgument.ManyPlayers("players"))
                 .withOptionalArguments(new BooleanArgument("state"))
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     Collection<Player> players = (Collection<Player>) args.get("players");
                     if (players == null) {
                         List<Player> sandboxedPlayers = new ArrayList<>();

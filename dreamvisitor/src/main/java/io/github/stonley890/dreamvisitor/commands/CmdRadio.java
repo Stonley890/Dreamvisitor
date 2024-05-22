@@ -5,6 +5,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.GreedyStringArgument;
 import io.github.stonley890.dreamvisitor.functions.Radio;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
@@ -19,13 +20,14 @@ public class CmdRadio implements DVCommand {
                 .withPermission(CommandPermission.fromString("dreamvisitor.radio"))
                 .withHelp("Send a message using the radio.", "Send a message to all other players who can access the radio.")
                 .withArguments(new GreedyStringArgument("message"))
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
 
                     String message = (String) args.get("message");
 
-                    if (sender instanceof Player player) {
+                    CommandSender callee = sender.getCallee();
+                    if (callee instanceof Player player) {
                         Radio.buildMessage(message, player.getName(), getCommand().getName(), null);
-                    } else if (sender instanceof ConsoleCommandSender) {
+                    } else if (callee instanceof ConsoleCommandSender) {
                         Radio.buildMessage(message, "Console", getCommand().getName(), null);
                     } else {
                         throw CommandAPI.failWithString("This command can only be executed by a player or the console!");

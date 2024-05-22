@@ -8,6 +8,7 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,12 +21,13 @@ public class CmdSynctime implements DVCommand {
                 .withPermission(CommandPermission.fromString("dreamvisitor.synctime"))
                 .withHelp("Sync time across worlds.", "Sync time across all worlds.")
                 .withOptionalArguments(new WorldArgument("world"))
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     World worldArg = (World) args.get("world");
+                    CommandSender callee = sender.getCallee();
                     if (worldArg == null) {
-                        if (sender instanceof Entity entity) {
+                        if (callee instanceof Entity entity) {
                             worldArg = entity.getWorld();
-                        } else if (sender instanceof BlockCommandSender block) {
+                        } else if (callee instanceof BlockCommandSender block) {
                             worldArg = block.getBlock().getWorld();
                         } else throw CommandAPI.failWithString("World must be specified if it cannot be inferred!");
                     }

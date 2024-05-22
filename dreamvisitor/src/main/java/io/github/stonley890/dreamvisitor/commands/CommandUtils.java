@@ -12,7 +12,7 @@ public class CommandUtils {
 
     public static Argument<Tribe> customTribeArgument(String nodeName) {
 
-        return new CustomArgument<Tribe, String>(new StringArgument(nodeName), info -> {
+        return new CustomArgument<>(new StringArgument(nodeName), info -> {
             Tribe tribe;
             try {
                 tribe = Tribe.valueOf(info.input());

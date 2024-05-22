@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,7 @@ public class CmdSetback implements DVCommand {
                 .withOptionalArguments(new LocationArgument("location", LocationType.PRECISE_POSITION))
                 .withOptionalArguments(new RotationArgument("rotation"))
                 .withOptionalArguments(new WorldArgument("world"))
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
 
                     Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
                     if (ess == null) {
@@ -46,10 +47,11 @@ public class CmdSetback implements DVCommand {
 
                     assert players != null;
 
+                    CommandSender callee = sender.getCallee();
                     if (location == null) {
-                        if (sender instanceof Entity entity) {
+                        if (callee instanceof Entity entity) {
                             location = entity.getLocation();
-                        } else if (sender instanceof BlockCommandSender block) {
+                        } else if (callee instanceof BlockCommandSender block) {
                             location = block.getBlock().getLocation();
                         } else throw CommandAPI.failWithString("You must specify a location!");
                     }
@@ -60,9 +62,9 @@ public class CmdSetback implements DVCommand {
                     }
 
                     if (world == null) {
-                        if (sender instanceof Entity entity) {
+                        if (callee instanceof Entity entity) {
                             world = entity.getWorld();
-                        } else if (sender instanceof BlockCommandSender block) {
+                        } else if (callee instanceof BlockCommandSender block) {
                             world = block.getBlock().getWorld();
                         } else throw CommandAPI.failWithString("You must specify a world!");
                     }

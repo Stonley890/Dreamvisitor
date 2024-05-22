@@ -30,7 +30,7 @@ public class CmdTribeUpdate implements DVCommand {
                 .withHelp("Update a player's tribe.", "Update the roles of a player based on their tribe.")
                 .withPermission(CommandPermission.fromString("dreamvisitor.tribeupdate"))
                 .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
-                .executes((sender, args) -> {
+                .executesNative((sender, args) -> {
                     Collection<Player> players = (Collection<Player>) args.get("players");
                     assert players != null;
 

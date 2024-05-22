@@ -6,9 +6,11 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
+import dev.jorel.commandapi.wrappers.NativeProxyCommandSender;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.*;
 import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -16,6 +18,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class CmdHub implements DVCommand {
@@ -33,18 +36,12 @@ public class CmdHub implements DVCommand {
                 )
                 .executesNative(((sender, args) -> {
 
-                    String entitySelect = (String) args.get("entities");
+                    Collection<Entity> entitySelect = (Collection<Entity>) args.get("entities");
 
+                    CommandSender callee = sender.getCallee();
                     if (entitySelect != null) {
 
-                        List<Entity> entities;
-                        try {
-                            entities = Bukkit.selectEntities(sender, entitySelect);
-                        } catch (IllegalArgumentException e) {
-                            throw CommandAPI.failWithString("Invalid arguments!");
-                        }
-
-                        if (entities.isEmpty()) {
+                        if (entitySelect.isEmpty()) {
                             throw CommandAPI.failWithString("No targets selected.");
                         } else {
                             if (plugin.getConfig().getLocation("hubLocation") == null) {
@@ -56,7 +53,7 @@ public class CmdHub implements DVCommand {
 
                                 Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
 
-                                for (Entity entity : entities) {
+                                for (Entity entity : entitySelect) {
 
                                     if (entity instanceof Player player) {
 
@@ -72,16 +69,16 @@ public class CmdHub implements DVCommand {
                                     } else entity.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
                                 }
                             }
-                            if (entities.size() == 1) {
-                                sender.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entities.get(0).getName() + " to the hub.");
+                            if (entitySelect.size() == 1) {
+                                callee.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entitySelect.stream().findFirst().get().getName() + " to the hub.");
                             }
                             else {
-                                sender.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entities.size() + " entities to the hub.");
+                                callee.sendMessage(Dreamvisitor.PREFIX + "Teleported " + entitySelect.size() + " entities to the hub.");
                             }
                         }
 
                     } else {
-                        if (sender instanceof Player) {
+                        if (callee instanceof Player) {
                             if (plugin.getConfig().getLocation("hubLocation") == null) {
                                 throw CommandAPI.failWithString("No hub is currently set!");
                             } else {
@@ -89,7 +86,7 @@ public class CmdHub implements DVCommand {
                                 Dreamvisitor.hubLocation = plugin.getConfig().getLocation("hubLocation");
                                 assert Dreamvisitor.hubLocation != null;
 
-                                Player player = (Player) sender;
+                                Player player = (Player) callee;
 
                                 Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
                                 if (ess != null) {
@@ -123,7 +120,7 @@ public class CmdHub implements DVCommand {
                                 }
                             }
 
-                        } else if (sender instanceof BlockCommandSender cmdblock) {
+                        } else if (callee instanceof BlockCommandSender cmdblock) {
 
                             // Find the closest player
                             double lastDistance = 10;

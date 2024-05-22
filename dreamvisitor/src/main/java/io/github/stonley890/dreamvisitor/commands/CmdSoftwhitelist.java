@@ -27,7 +27,7 @@ public class CmdSoftwhitelist implements DVCommand {
                 .withHelp("Manage the softwhitelist.", "Manage the softwhitelist.")
                 .withSubcommand(new CommandAPICommand("add")
                         .withArguments(new OfflinePlayerArgument("player"))
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
                             OfflinePlayer player = (OfflinePlayer) args.get("player");
                             if (player == null) throw CommandAPI.failWithString("That player could not be found!");
                             List<UUID> players = SoftWhitelist.getPlayers();
@@ -39,7 +39,7 @@ public class CmdSoftwhitelist implements DVCommand {
                 )
                 .withSubcommand(new CommandAPICommand("remove")
                         .withArguments(new OfflinePlayerArgument("player"))
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
                             OfflinePlayer player = (OfflinePlayer) args.get("player");
                             if (player == null) throw CommandAPI.failWithString("That player could not be found!");
                             List<UUID> players = SoftWhitelist.getPlayers();
@@ -50,7 +50,7 @@ public class CmdSoftwhitelist implements DVCommand {
                         })
                 )
                 .withSubcommand(new CommandAPICommand("list")
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
                             List<UUID> players = SoftWhitelist.getPlayers();
                             StringBuilder list = new StringBuilder();
 
@@ -64,14 +64,14 @@ public class CmdSoftwhitelist implements DVCommand {
                         })
                 )
                 .withSubcommand(new CommandAPICommand("on")
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
                             plugin.getConfig().set("softwhitelist", true);
                             plugin.saveConfig();
                             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Soft whitelist enabled.");
                         })
                 )
                 .withSubcommand(new CommandAPICommand("off")
-                        .executes((sender, args) -> {
+                        .executesNative((sender, args) -> {
                             plugin.getConfig().set("softwhitelist", false);
                             plugin.saveConfig();
                             sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Soft whitelist disabled.");
