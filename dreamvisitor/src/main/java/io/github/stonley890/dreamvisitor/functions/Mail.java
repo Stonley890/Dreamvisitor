@@ -242,6 +242,10 @@ public class Mail {
         saveLocations(locations);
     }
 
+    public static void setDeliverers(List<Deliverer> deliverers) {
+        Mail.activeDeliverers.addAll(deliverers);
+    }
+
     public static class MailLocation implements ConfigurationSerializable {
 
         /**

@@ -8,14 +8,23 @@ import dev.jorel.commandapi.arguments.*;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Tribe;
 import io.github.stonley890.dreamvisitor.functions.Mail;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -95,7 +104,11 @@ public class CmdMail implements DVCommand {
                 .withSubcommand(new CommandAPICommand("delivery")
                         .withSubcommand(new CommandAPICommand("terminal")
                                 .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
+                                .executesNative((sender, args) -> {
+
+                                })
                         )
+
                         .withSubcommand(new CommandAPICommand("add")
                                 .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
                                 .withArguments(new StringArgument("start")
@@ -108,13 +121,49 @@ public class CmdMail implements DVCommand {
                                                 Mail.getLocations().stream().map(Mail.MailLocation::getName).toArray(String[]::new)
                                         ))
                                 )
+                                .executesNative((sender, args) -> {
+                                    Mail.MailLocation start = Mail.getLocationByName((String) args.get("start"));
+                                    Mail.MailLocation end = Mail.getLocationByName((String) args.get("end"));
+                                    Collection<Player> players = (Collection<Player>) args.get("players");
+                                    assert players != null;
+                                    assert start != null;
+                                    assert end != null;
+
+                                    List<Mail.Deliverer> deliverers = Mail.getDeliverers();
+
+                                    deliverers.addAll(players.stream().map(player -> new Mail.Deliverer(player, start, end)).toList());
+                                    Mail.setDeliverers(deliverers);
+
+                                    for (Player player : players) {
+                                        String name = Mail.chooseName(start, end);
+
+                                        ItemStack parcel = new ItemStack(Material.WRITTEN_BOOK);
+                                        ItemMeta itemMeta = Bukkit.getItemFactory().getItemMeta(parcel.getType());
+                                        assert itemMeta != null;
+                                        itemMeta.setDisplayName(ChatColor.RESET + name + "'s Parcel");
+                                    }
+                                })
                         )
+
                         .withSubcommand(new CommandAPICommand("remove")
                                 .withArguments(new EntitySelectorArgument.ManyPlayers("location")
                                 )
+                                .executesNative((sender, args) -> {
+
+                                })
                         )
+
                         .withSubcommand(new CommandAPICommand("list")
+                                .executesNative((sender, args) -> {
+                                    StringBuilder message = new StringBuilder(Dreamvisitor.PREFIX);
+                                    for (Mail.Deliverer deliverer : Mail.getDeliverers()) {
+                                        message.append(deliverer.getPlayer().getName()).append(" ");
+                                    }
+                                    sender.sendMessage(message.toString());
+                                })
                         )
+
+
                 );
     }
 }
