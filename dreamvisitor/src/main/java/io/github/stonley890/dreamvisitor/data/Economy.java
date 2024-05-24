@@ -669,6 +669,26 @@ public class Economy {
 
         }
 
+        /**
+         * Claim the daily reward. This method will refresh and update the streak, then add the reward to the balance.
+         * @return the amount that was rewarded.
+         * @throws CoolDownException if this consumer cannot yet claim their
+         */
+        public double claimDaily() throws CoolDownException {
+            if (!gameData.timeUntilNextDaily().isZero()) throw new CoolDownException();
+            gameData.updateStreak();
+            double dailyBaseAmount = Economy.getDailyBaseAmount();
+            double reward = dailyBaseAmount + (gameData.getDailyStreak() + getDailyStreakMultiplier());
+            setBalance(balance + reward);
+            gameData.dailyStreak++;
+            gameData.lastDaily = LocalDateTime.now();
+            return reward;
+        }
+
+        public double claimWork() {
+            if (!gameData.timeUntilNextWork().isZero()) throw new UnsupportedOperationException();
+        }
+
         public static class ItemNotEnabledException extends Exception {
             public ItemNotEnabledException(String message) {super(message);}
         }
@@ -688,6 +708,11 @@ public class Economy {
         public static class MaxItemQualityException extends Exception {
             public MaxItemQualityException(String message) {super(message);}
         }
+
+        public static class CoolDownException extends Exception {
+            public CoolDownException() {super();}
+            public CoolDownException(String message) {super(message);}
+        }
     }
 
     public static class GameData implements ConfigurationSerializable {
@@ -700,10 +725,6 @@ public class Economy {
 
         public static double getDailyBaseAmount() {
             return Dreamvisitor.getPlugin().getConfig().getDouble("dailyBaseAmount");
-        }
-
-        public static double getDailyStreakMultiplier() {
-            return Dreamvisitor.getPlugin().getConfig().getDouble("dailyStreakMultiplier");
         }
 
         public void setDailyStreak(int dailyStreak) {
@@ -737,9 +758,8 @@ public class Economy {
             return Duration.between(lastDaily.plusDays(2), LocalDateTime.now());
         }
 
-        public void claim(User user) {
-            if (!timeUntilNextDaily().isZero()) throw new UnsupportedOperationException();
-
+        public void updateStreak() {
+            if (timeUntilDailyStreakBreak().isZero()) setDailyStreak(0);
         }
 
         @Nullable
@@ -770,5 +790,13 @@ public class Economy {
             map.put("lastWork", lastWork);
             return map;
         }
+    }
+
+    private static double getDailyBaseAmount() {
+        return Dreamvisitor.getPlugin().getConfig().getDouble("dailyStreakMultiplier");
+    }
+
+    public static double getDailyStreakMultiplier() {
+        return Dreamvisitor.getPlugin().getConfig().getDouble("dailyStreakMultiplier");
     }
 }
