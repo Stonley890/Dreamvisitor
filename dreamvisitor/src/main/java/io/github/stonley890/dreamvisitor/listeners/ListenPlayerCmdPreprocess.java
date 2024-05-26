@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Mail;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -23,6 +25,11 @@ public class ListenPlayerCmdPreprocess implements Listener {
 
     final Dreamvisitor plugin = Dreamvisitor.getPlugin();
     final String[] msgAliases = {"/msg ","/tell ","/whisper ","/reply ","/t ","/w ","/r ", "/mail send "};
+    final String[] tpAliases = {
+            "/call","/ecall","/tpa","/etpa","/tpask","/etpask",
+            "/tpaccept","/etpaccept","/tpyes","/etpyes",
+            "/home", "/ehome", "/homes", "/ehomes"
+    };
 
     @EventHandler
     public void onPlayerCommandPreprocess(@NotNull PlayerCommandPreprocessEvent event) {
@@ -94,6 +101,17 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     String message = "**" + Bot.escapeMarkdownFormatting(player.getName()) + "** sent command: `" + cmd + "`";
                     Bot.sendLog(message);
                     return;
+                }
+            }
+            for (String tpAlias : tpAliases) {
+                if (cmd.startsWith(tpAlias)) {
+                    if (Mail.isPLayerDeliverer(player)) Mail.cancel(player);
+                    for (Player sandboxer : Bukkit.getOnlinePlayers()) {
+                        if (PlayerUtility.getPlayerMemory(sandboxer.getUniqueId()).sandbox && cmd.contains(sandboxer.getName())) {
+                            player.sendMessage(Dreamvisitor.PREFIX + "That player is currently in Sandbox Mode. Teleportation is not allowed.");
+                            event.setCancelled(true);
+                        }
+                    }
                 }
             }
         }

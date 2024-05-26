@@ -26,14 +26,23 @@ public class DCmdWork extends ListenerAdapter implements DiscordCommand {
         Economy.GameData gameData = consumer.getGameData();
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Daily Reward");
+        embedBuilder.setTitle("Work");
+
+        double reward;
 
         try {
-            double reward = consumer.claimDaily();
+            reward = consumer.claimWork();
         } catch (Economy.Consumer.CoolDownException e) {
-            Duration duration = gameData.timeUntilNextDaily();
-            embedBuilder.setColor(Color.red).setDescription("You cannot claim your daily reward for " + duration.toString());
+            Duration duration = gameData.timeUntilNextWork();
+            embedBuilder.setColor(Color.red).setDescription("You cannot work for " + String.valueOf(duration.toMinutes()).replaceFirst("-", "") + " minute(s).");
+            event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+            return;
         }
+        Economy.saveConsumer(consumer);
 
+        embedBuilder.setDescription("You earned " + Economy.getCurrencySymbol() + reward + " today.\nCome back in one hour for your next reward.")
+                .setFooter("Your new balance is " + Economy.getCurrencySymbol() + consumer.getBalance())
+                .setColor(Color.GREEN);
+        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
     }
 }

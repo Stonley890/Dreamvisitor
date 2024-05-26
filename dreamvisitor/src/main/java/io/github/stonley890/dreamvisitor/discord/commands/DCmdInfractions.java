@@ -38,14 +38,15 @@ public class DCmdInfractions extends ListenerAdapter implements DiscordCommand {
             return;
         }
 
-        long parent = AltFamily.getParent(user.getIdLong());
-        if (parent != user.getIdLong()) {
+        long userId = user.getIdLong();
+        long parent = AltFamily.getParent(userId);
+        if (parent != userId) {
             Objects.requireNonNull(event.getGuild()).retrieveMemberById(parent).queue(parentMember -> event.reply("That user is the child of " + parentMember.getAsMention() + ". Search their infractions instead.").queue());
             return;
         }
 
         List<Infraction> infractions;
-        infractions = Infraction.getInfractions(user.getIdLong());
+        infractions = Infraction.getInfractions(userId);
 
         if (infractions.isEmpty()) {
             event.reply(user.getName() + " has no recorded infractions.").queue();
@@ -54,8 +55,16 @@ public class DCmdInfractions extends ListenerAdapter implements DiscordCommand {
 
         EmbedBuilder embed = new EmbedBuilder();
 
-        Button primary = Button.primary("infraction-expire-" + user.getId(), "Expire a warn");
-        Button danger = Button.danger("infraction-remove-" + user.getId(), "Remove a warn");
+        Button primary = Button.primary("infraction-expire-" + userId, "Expire a warn");
+        Button danger = Button.danger("infraction-remove-" + userId, "Remove a warn");
+
+        Button noBan = Button.secondary("setban-" + userId + "-none", "Set No Ban");
+        Button tempBan = Button.secondary("setban-" + userId + "-temp", "Set Temp-Banned");
+        Button fullBan = Button.secondary("setban-" + userId + "-full", "Set Banned");
+
+        if (Infraction.hasBan(userId)) fullBan = fullBan.asDisabled();
+        else if (Infraction.hasTempban(userId)) tempBan = tempBan.asDisabled();
+        else noBan = noBan.asDisabled();
 
         for (Infraction infraction : infractions) {
             String expire = "Valid";
@@ -72,7 +81,7 @@ public class DCmdInfractions extends ListenerAdapter implements DiscordCommand {
                 .setFooter("The total value of valid infractions is " + Infraction.getInfractionCount(infractions, false) + ".\n" +
                         "The total value of infractions " + Infraction.getInfractionCount(infractions, true) + ".");
 
-        event.replyEmbeds(embed.build()).addActionRow(primary, danger).queue();
+        event.replyEmbeds(embed.build()).addActionRow(primary, danger).addActionRow(noBan, tempBan, fullBan).queue();
     }
 
     @Override

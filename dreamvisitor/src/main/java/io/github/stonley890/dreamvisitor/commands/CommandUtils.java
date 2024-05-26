@@ -15,12 +15,12 @@ public class CommandUtils {
         return new CustomArgument<>(new StringArgument(nodeName), info -> {
             Tribe tribe;
             try {
-                tribe = Tribe.valueOf(info.input());
+                tribe = Tribe.valueOf(info.input().toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw CustomArgument.CustomArgumentException.fromMessageBuilder(new CustomArgument.MessageBuilder("Unknown tribe: ").appendArgInput());
             }
             return tribe;
-        }).replaceSuggestions(ArgumentSuggestions.strings(info -> Arrays.stream(Tribe.values()).map(Tribe::getName).toArray(String[]::new)));
+        }).replaceSuggestions(ArgumentSuggestions.strings(info -> Arrays.stream(Tribe.values()).map(tribe -> tribe.name().toUpperCase()).toArray(String[]::new)));
 
     }
 

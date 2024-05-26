@@ -111,8 +111,13 @@ dailyBaseAmount: 10.00
 
 # The multiplier of the streak bonus given by the /daily command.
 # This is multiplied by the streak and added to the base amount. The total amount is decided by dailyBaseAmount + (user's streak * this).
-# Default: 2.00
-dailyStreakMultiplier: 2.00
+# Default: 5.00
+dailyStreakMultiplier: 5.00
+
+# The amount gained from the /work command.
+# /work can only be run every hour.
+# Default: 20.00
+workReward: 20.00
 
 # The multiplier of the distance weight when choosing mail delivery locations.
 # Takes the ratio (between 0 and 1) of the distance to the maximum distance between locations,

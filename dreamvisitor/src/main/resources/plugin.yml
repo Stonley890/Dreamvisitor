@@ -193,3 +193,9 @@ permissions:
   dreamvisitor.tribeupdate:
     description: Allows using the tribeupdate command.
     default: op
+  dreamvisitor.mail.play:
+    description: Allows participation in the mail minigame.
+    default: true
+  dreamvisitor.mail.manage:
+    description: Manage the mail minigame.
+    default: op

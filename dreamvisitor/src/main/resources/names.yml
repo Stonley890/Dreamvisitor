@@ -216,7 +216,6 @@ seawing:
   - Octopus
   - Shore
   - Seal
-  - Axolotl
   - Sea Turtle
   - Pufferfish
   - Splash
@@ -240,10 +239,24 @@ seawing:
   - Jade
   - Lazulite
 mudwing:
+  - Bog
+  - Fern
+  - Sediment
+  - Hippo
+  - Waterfowl
+  - Grouse
+  - Mangrove
+  - Boulder
+  - Marsh
+  - Newt
+  - Axolotl
+  - Mudslide
+  - Delta
   - Agate
   - Alligator
   - Gator
   - Anaconda
+  - Silt
   - Armadillo
   - Aster
   - Bass
@@ -302,9 +315,12 @@ mudwing:
   - Everglade
   - Swamp Rose
   - Russet
+  - Bramble
   - Branch
   - Bark
   - Catfish
+  - Fowl
+  - Bracken
   - Olive
   - Foxglove
   - Groundhog
@@ -1028,6 +1044,8 @@ rainwing:
   - Peach
   - Pomengranate
   - Berry
+  - Lily
+  - Lilypad
   - Day Lilly
   - Spider Lilly
   - Yarrow
@@ -1671,3 +1689,4 @@ leafwing:
   - Fir
   - Arrowhead
   - Aspen
+  - Mangrove

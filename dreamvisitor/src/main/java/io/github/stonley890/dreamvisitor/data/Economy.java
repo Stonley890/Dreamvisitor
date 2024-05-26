@@ -5,7 +5,6 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.node.types.InheritanceNode;
@@ -58,13 +57,18 @@ public class Economy {
         try {
             config.save(file);
         } catch (IOException e) {
-            Bukkit.getLogger().severe( file.getName() + " cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
+            Bukkit.getLogger().severe(file.getName() + " cannot be written! Does the server have read/write access? " + e.getMessage() + "\nHere is the data that was not saved:\n" + config.saveToString());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
     }
 
     public static String getCurrencySymbol() {
         return Dreamvisitor.getPlugin().getConfig().getString("currencyIcon");
+    }
+
+    public static void setCurrencySymbol(String symbol) {
+        Dreamvisitor.getPlugin().getConfig().set("currencyIcon", symbol);
+        Dreamvisitor.getPlugin().saveConfig();
     }
 
     @NotNull
@@ -75,14 +79,6 @@ public class Economy {
         return shopItems;
     }
 
-    @Nullable
-    public static ShopItem getItem(int id) {
-        for (ShopItem item : getItems()) {
-            if (item.getId() == id) return item;
-        }
-        return null;
-    }
-
     public static void setItems(@NotNull List<ShopItem> itemsToSet) {
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (ShopItem shopItem : itemsToSet) {
@@ -91,6 +87,14 @@ public class Economy {
         YamlConfiguration config = getConfig();
         config.set("items", mapList);
         saveConfig(config);
+    }
+
+    @Nullable
+    public static ShopItem getItem(int id) {
+        for (ShopItem item : getItems()) {
+            if (item.getId() == id) return item;
+        }
+        return null;
     }
 
     public static void saveItems(@NotNull List<ShopItem> itemsToSave) {
@@ -191,9 +195,16 @@ public class Economy {
         Dreamvisitor.getPlugin().saveConfig();
     }
 
-    public static void setCurrencySymbol(String symbol) {
-        Dreamvisitor.getPlugin().getConfig().set("currencyIcon", symbol);
-        Dreamvisitor.getPlugin().saveConfig();
+    private static double getDailyBaseAmount() {
+        return Dreamvisitor.getPlugin().getConfig().getDouble("dailyBaseAmount");
+    }
+
+    public static double getDailyStreakMultiplier() {
+        return Dreamvisitor.getPlugin().getConfig().getDouble("dailyStreakMultiplier");
+    }
+
+    public static double getWorkReward() {
+        return Dreamvisitor.getPlugin().getConfig().getDouble("workReward");
     }
 
     public static class ShopItem implements ConfigurationSerializable {
@@ -221,6 +232,20 @@ public class Economy {
         private List<String> onUseGroupsAdd = null;
         @Nullable
         private List<String> onUseGroupsRemove = null;
+
+        public void ensureUniqueId() {
+            boolean unique = false;
+            List<ShopItem> items = Economy.getItems();
+            while (!unique) {
+                for (ShopItem item : items) {
+                    if (item.id == this.id) {
+                        this.id = new Random().nextInt(0, 99999999);
+                        break;
+                    }
+                    unique = true;
+                }
+            }
+        }
 
         public ShopItem(@NotNull String name, @NotNull String description) {
             this.id = new Random().nextInt(0, 99999999);
@@ -303,7 +328,7 @@ public class Economy {
         }
 
         public double getTruePrice() {
-            return price - price*salePercent*0.01;
+            return price - price * salePercent * 0.01;
         }
 
         public int getId() {
@@ -352,9 +377,13 @@ public class Economy {
             this.quantity = quantity;
         }
 
-        public int getMaxAllowed() {return maxAllowed;}
+        public int getMaxAllowed() {
+            return maxAllowed;
+        }
 
-        public void setMaxAllowed(int maxAllowed) {this.maxAllowed = maxAllowed;}
+        public void setMaxAllowed(int maxAllowed) {
+            this.maxAllowed = maxAllowed;
+        }
 
         public boolean isEnabled() {
             return enabled;
@@ -488,7 +517,8 @@ public class Economy {
         @NotNull
         private Map<Integer, Integer> items = new HashMap<>();
 
-        private Economy.GameData gameData = new GameData();
+        @NotNull
+        private GameData gameData = new GameData();
 
         private Consumer(long id) {
             this.id = id;
@@ -499,14 +529,16 @@ public class Economy {
             Consumer consumer = new Consumer((Long) map.get("id"));
             consumer.setBalance((Double) map.get("balance"));
             consumer.setItems((Map<Integer, Integer>) map.get("inventory"));
+            consumer.setGameData(GameData.deserialize((Map<String, Object>) map.get("gameData")));
             return consumer;
         }
 
+        @NotNull
         public GameData getGameData() {
             return gameData;
         }
 
-        public void setGameData(GameData gameData) {
+        public void setGameData(@NotNull GameData gameData) {
             this.gameData = gameData;
         }
 
@@ -569,17 +601,19 @@ public class Economy {
             map.put("id", id);
             map.put("balance", balance);
             map.put("inventory", items);
+            map.put("gameData", gameData.serialize());
             return map;
         }
 
         /**
          * Make this {@link Consumer} purchase an item.
+         *
          * @param itemId the ID of the item to purchase.
-         * @throws NullPointerException if the item does not exist.
-         * @throws ItemNotEnabledException if the item is not enabled.
-         * @throws ItemOutOfStockException if the item is out of stock.
+         * @throws NullPointerException       if the item does not exist.
+         * @throws ItemNotEnabledException    if the item is not enabled.
+         * @throws ItemOutOfStockException    if the item is out of stock.
          * @throws InsufficientFundsException if the {@link Consumer} does not have sufficient funds to purchase the item.
-         * @throws MaxItemQualityException if the {@link Consumer} already has the maximum allowed of this item.
+         * @throws MaxItemQualityException    if the {@link Consumer} already has the maximum allowed of this item.
          */
         public void purchaseItem(int itemId) throws NullPointerException, ItemNotEnabledException, ItemOutOfStockException, InsufficientFundsException, MaxItemQualityException {
 
@@ -587,8 +621,10 @@ public class Economy {
             if (desiredItem == null) throw new NullPointerException("Item does not exist.");
             if (!desiredItem.enabled) throw new ItemNotEnabledException("Item is not enabled.");
             if (desiredItem.quantity == 0) throw new ItemOutOfStockException("Item is out of stock.");
-            if (balance < desiredItem.getTruePrice()) throw new InsufficientFundsException("Consumer does not have sufficient funds for item.");
-            if (desiredItem.maxAllowed != -1 && (getItemQuantity(itemId) + 1 > desiredItem.maxAllowed)) throw new MaxItemQualityException("Consumer already has max amount of this item.");
+            if (balance < desiredItem.getTruePrice())
+                throw new InsufficientFundsException("Consumer does not have sufficient funds for item.");
+            if (desiredItem.maxAllowed != -1 && (getItemQuantity(itemId) + 1 > desiredItem.maxAllowed))
+                throw new MaxItemQualityException("Consumer already has max amount of this item.");
 
             if (desiredItem.useOnPurchase) {
                 try {
@@ -596,8 +632,7 @@ public class Economy {
                 } catch (ItemUseNotEnabledException e) {
                     setItemQuantity(itemId, getQuantityOfItem(itemId) + 1);
                 }
-            }
-            else setItemQuantity(itemId, getQuantityOfItem(itemId) + 1);
+            } else setItemQuantity(itemId, getQuantityOfItem(itemId) + 1);
             if (!desiredItem.isInfinite()) desiredItem.setQuantity(desiredItem.quantity - 1);
             setBalance(balance - desiredItem.getTruePrice());
             Economy.saveItem(desiredItem);
@@ -641,7 +676,8 @@ public class Economy {
                 luckPerms.getUserManager().loadUser(uuid).thenAcceptAsync(user -> {
                     for (String groupName : item.onUseGroupsAdd) {
                         Group group = luckPerms.getGroupManager().getGroup(groupName);
-                        if (group == null) throw new NullPointerException("Group to add " + groupName + " does not exist.");
+                        if (group == null)
+                            throw new NullPointerException("Group to add " + groupName + " does not exist.");
                         user.getNodes().add(InheritanceNode.builder(group).build());
                     }
                     luckPerms.getUserManager().saveUser(user);
@@ -652,7 +688,8 @@ public class Economy {
                 luckPerms.getUserManager().loadUser(uuid).thenAcceptAsync(user -> {
                     for (String groupName : item.onUseGroupsRemove) {
                         Group group = luckPerms.getGroupManager().getGroup(groupName);
-                        if (group == null) throw new NullPointerException("Group to remove " + groupName + " does not exist.");
+                        if (group == null)
+                            throw new NullPointerException("Group to remove " + groupName + " does not exist.");
                         user.getNodes().remove(InheritanceNode.builder(group).build());
                     }
                     luckPerms.getUserManager().saveUser(user);
@@ -671,6 +708,7 @@ public class Economy {
 
         /**
          * Claim the daily reward. This method will refresh and update the streak, then add the reward to the balance.
+         *
          * @return the amount that was rewarded.
          * @throws CoolDownException if this consumer cannot yet claim their
          */
@@ -678,69 +716,96 @@ public class Economy {
             if (!gameData.timeUntilNextDaily().isZero()) throw new CoolDownException();
             gameData.updateStreak();
             double dailyBaseAmount = Economy.getDailyBaseAmount();
-            double reward = dailyBaseAmount + (gameData.getDailyStreak() + getDailyStreakMultiplier());
+            double reward = dailyBaseAmount + (gameData.getDailyStreak() * getDailyStreakMultiplier());
             setBalance(balance + reward);
             gameData.dailyStreak++;
             gameData.lastDaily = LocalDateTime.now();
             return reward;
         }
 
-        public double claimWork() {
-            if (!gameData.timeUntilNextWork().isZero()) throw new UnsupportedOperationException();
+        public double claimWork() throws CoolDownException {
+            if (!gameData.timeUntilNextWork().isZero()) throw new CoolDownException();
+            double workReward = Economy.getWorkReward();
+            setBalance(balance + workReward);
+            gameData.lastWork = LocalDateTime.now();
+            return workReward;
         }
 
         public static class ItemNotEnabledException extends Exception {
-            public ItemNotEnabledException(String message) {super(message);}
+            public ItemNotEnabledException(String message) {
+                super(message);
+            }
         }
 
         public static class ItemOutOfStockException extends Exception {
-            public ItemOutOfStockException(String message) {super(message);}
+            public ItemOutOfStockException(String message) {
+                super(message);
+            }
         }
 
         public static class InsufficientFundsException extends Exception {
-            public InsufficientFundsException(String message) {super(message);}
+            public InsufficientFundsException(String message) {
+                super(message);
+            }
         }
 
         public static class ItemUseNotEnabledException extends Exception {
-            public ItemUseNotEnabledException(String message) {super(message);}
+            public ItemUseNotEnabledException(String message) {
+                super(message);
+            }
         }
 
         public static class MaxItemQualityException extends Exception {
-            public MaxItemQualityException(String message) {super(message);}
+            public MaxItemQualityException(String message) {
+                super(message);
+            }
         }
 
         public static class CoolDownException extends Exception {
-            public CoolDownException() {super();}
-            public CoolDownException(String message) {super(message);}
+            public CoolDownException() {
+                super();
+            }
+
+            public CoolDownException(String message) {
+                super(message);
+            }
         }
     }
 
     public static class GameData implements ConfigurationSerializable {
 
         private int dailyStreak = 0;
-        @Nullable private LocalDateTime lastDaily = null;
-        @Nullable private LocalDateTime lastWork = null;
+        @Nullable
+        private LocalDateTime lastDaily = null;
+        @Nullable
+        private LocalDateTime lastWork = null;
 
-        public GameData() {}
+        public GameData() {
+        }
 
         public static double getDailyBaseAmount() {
             return Dreamvisitor.getPlugin().getConfig().getDouble("dailyBaseAmount");
         }
 
-        public void setDailyStreak(int dailyStreak) {
-            this.dailyStreak = dailyStreak;
-        }
-
-        public void setLastDaily(@Nullable LocalDateTime lastDaily) {
-            this.lastDaily = lastDaily;
-        }
-
-        public void setLastWork(@Nullable LocalDateTime lastWork) {
-            this.lastWork = lastWork;
+        @NotNull
+        public static GameData deserialize(@NotNull Map<String, Object> map) {
+            GameData gameData = new GameData();
+            gameData.dailyStreak = (int) map.get("dailyStreak");
+            Object lastDaily = map.get("lastDaily");
+            if (lastDaily != null) lastDaily = LocalDateTime.parse((CharSequence) lastDaily);
+            gameData.lastDaily = (LocalDateTime) lastDaily;
+            Object lastWork = map.get("lastWork");
+            if (lastWork != null) lastWork = LocalDateTime.parse((CharSequence) lastWork);
+            gameData.lastWork = (LocalDateTime) lastWork;
+            return gameData;
         }
 
         public int getDailyStreak() {
             return dailyStreak;
+        }
+
+        public void setDailyStreak(int dailyStreak) {
+            this.dailyStreak = dailyStreak;
         }
 
         public Duration timeUntilNextDaily() {
@@ -767,18 +832,17 @@ public class Economy {
             return lastDaily;
         }
 
+        public void setLastDaily(@Nullable LocalDateTime lastDaily) {
+            this.lastDaily = lastDaily;
+        }
+
         @Nullable
         public LocalDateTime getLastWork() {
             return lastWork;
         }
 
-        @NotNull
-        public static GameData deserialize(@NotNull Map<String, Object> map) {
-            GameData gameData = new GameData();
-            gameData.dailyStreak = (int) map.get("dailyStreak");
-            gameData.lastDaily = (LocalDateTime) map.get("lastDaily");
-            gameData.lastWork = (LocalDateTime) map.get("lastWork");
-            return gameData;
+        public void setLastWork(@Nullable LocalDateTime lastWork) {
+            this.lastWork = lastWork;
         }
 
         @NotNull
@@ -786,17 +850,9 @@ public class Economy {
         public Map<String, Object> serialize() {
             Map<String, Object> map = new HashMap<>();
             map.put("dailyStreak", dailyStreak);
-            map.put("lastDaily", lastDaily);
-            map.put("lastWork", lastWork);
+            map.put("lastDaily", lastDaily != null ? lastDaily.toString() : null);
+            map.put("lastWork", lastWork != null ? lastWork.toString() : null);
             return map;
         }
-    }
-
-    private static double getDailyBaseAmount() {
-        return Dreamvisitor.getPlugin().getConfig().getDouble("dailyStreakMultiplier");
-    }
-
-    public static double getDailyStreakMultiplier() {
-        return Dreamvisitor.getPlugin().getConfig().getDouble("dailyStreakMultiplier");
     }
 }

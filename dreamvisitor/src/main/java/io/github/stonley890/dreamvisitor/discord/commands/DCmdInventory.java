@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.discord.commands;
 
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Economy;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -96,27 +97,29 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             selectMenu.setPlaceholder("Select an item to use");
             for (Economy.ShopItem item : Economy.getItems()) {
                 if (consumer.getItemQuantity(item.getId()) > 0 && !item.isUseDisabled()) {
-                    selectMenu.addOption(String.valueOf(item.getId()), item.getName());
+                    selectMenu.addOption(item.getName(), String.valueOf(item.getId()));
                 }
             }
             if (selectMenu.getOptions().isEmpty()) {
                 event.reply("You do not have any items you can use.").setEphemeral(true).queue();
                 return;
             }
-            event.editComponents(event.getMessage().getComponents().get(0), ActionRow.of(selectMenu.build())).queue();
+            event.replyComponents(ActionRow.of(selectMenu.build())).setEphemeral(true).queue();
         } else if (split[2].equals("gift")) {
             StringSelectMenu.Builder selectMenu = StringSelectMenu.create("inv-" + consumerId + "-gift");
             selectMenu.setPlaceholder("Select an item to gift");
             for (Economy.ShopItem item : Economy.getItems()) {
                 if (consumer.getItemQuantity(item.getId()) > 0 && item.isGiftingEnabled()) {
-                    selectMenu.addOption(String.valueOf(item.getId()), item.getName());
+                    Dreamvisitor.debug("adding " + item.getId() + " to gift list");
+                    selectMenu.addOption(item.getName(), String.valueOf(item.getId()));
                 }
             }
+            Dreamvisitor.debug("selectmenu size: " + selectMenu.getOptions().size());
             if (selectMenu.getOptions().isEmpty()) {
                 event.reply("You do not have any items you can gift.").setEphemeral(true).queue();
                 return;
             }
-            event.editComponents(event.getMessage().getComponents().get(0), ActionRow.of(selectMenu.build())).queue();
+            event.replyComponents(ActionRow.of(selectMenu.build())).setEphemeral(true).queue();
         }
     }
 
@@ -204,7 +207,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
                     return;
                 }
 
-                EntitySelectMenu.Builder selectMenu = EntitySelectMenu.create("inv-" + consumerId + "-giftTo-" + id, EntitySelectMenu.SelectTarget.USER);
+                EntitySelectMenu.Builder selectMenu = EntitySelectMenu.create("inv-" + consumerId + "-giftItem-" + item.getId(), EntitySelectMenu.SelectTarget.USER);
                 selectMenu.setPlaceholder("Select a user to gift to").setRequiredRange(1, 1);
 
                 event.editComponents(event.getMessage().getComponents().get(0), ActionRow.of(selectMenu.build())).queue();
@@ -216,6 +219,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
     public void onEntitySelectInteraction(@NotNull EntitySelectInteractionEvent event) {
         String id = event.getSelectMenu().getId();
         if (id == null) return;
+        Dreamvisitor.debug("EntitySelectMenu with ID " + id);
         Mentions mentions = event.getMentions();
 
         String[] split = id.split("-");
@@ -224,7 +228,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
 
         long consumerId = Long.parseLong(split[1]);
         Economy.Consumer consumer = Economy.getConsumer(consumerId);
-        if (split[2].equals("giftTo")) {
+        if (split[2].equals("giftItem")) {
             EmbedBuilder embed = new EmbedBuilder();
             embed.setColor(Color.RED);
 
@@ -252,14 +256,14 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
 
             Member member = members.get(0);
 
-            Economy.Consumer consumer1 = Economy.getConsumer(event.getUser().getIdLong());
+            Economy.Consumer consumer1 = Economy.getConsumer(member.getIdLong());
             consumer1.setItemQuantity(itemId, consumer1.getQuantityOfItem(itemId) + 1);
             consumer.setItemQuantity(itemId, consumer.getQuantityOfItem(itemId) - 1);
 
             Economy.saveConsumer(consumer);
             Economy.saveConsumer(consumer1);
 
-            embed.setDescription("Gifted one " + item.getName() + " to " + member.getAsMention() + ".")
+            embed.setDescription(event.getUser().getAsMention() + " gifted one " + item.getName() + " to " + member.getAsMention() + ".")
                     .setColor(Color.GREEN).setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item left.");
             event.reply(member.getAsMention() + ", you were gifted an item!").addEmbeds(embed.build()).queue();
 
@@ -276,9 +280,6 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
                     invEmbed.setDescription("You do not currently have any items. You can purchase items from the shop.");
                 }
             }
-
-            event.getMessage().editMessageEmbeds(invEmbed.build()).queue();
-
         }
     }
 }

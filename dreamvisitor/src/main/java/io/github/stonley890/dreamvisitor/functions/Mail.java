@@ -1,14 +1,26 @@
 package io.github.stonley890.dreamvisitor.functions;
 
+import com.earth2me.essentials.Essentials;
+import com.earth2me.essentials.User;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Tribe;
 import io.github.stonley890.dreamvisitor.data.TribeUtil;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -39,7 +52,20 @@ public class Mail {
             }
         }
         calculateMaxDistance();
+
+        Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
+            if (activeDeliverers.isEmpty()) return;
+
+            for (Deliverer activeDeliverer : activeDeliverers) {
+                ComponentBuilder builder = new ComponentBuilder("You are currently delivering a parcel to ").color(ChatColor.WHITE);
+                double distance = Math.round(calculateDistanceWithPantalaOffset(activeDeliverer.player.getLocation(), activeDeliverer.endLoc.location));
+                builder.append(activeDeliverer.endLoc.name.replace("_", " ")).color(ChatColor.AQUA).append(", ").color(ChatColor.WHITE)
+                        .append(String.valueOf(distance)).color(ChatColor.AQUA).append(" meters away.").color(ChatColor.WHITE);
+                activeDeliverer.player.spigot().sendMessage(ChatMessageType.ACTION_BAR, builder.create());
+            }
+        }, 20, 20);
     }
+
 
     @NotNull
     private static YamlConfiguration getConfig() {
@@ -108,13 +134,21 @@ public class Mail {
      * @return The closest {@link MailLocation} in the same dimension, or null if none are found.
      */
     @Nullable
-    public static MailLocation getNearestLocation(Location queryLocation) {
+    public static MailLocation getNearestLocation(@NotNull Location queryLocation) {
         double shortestDistance = 50000.0;
         MailLocation nearest = null;
+        Dreamvisitor.debug("Getting nearest MailLocation to " + queryLocation);
         for (MailLocation location : getLocations()) {
+            Dreamvisitor.debug("Checking " + location.getName());
             if (!Objects.equals(location.getLocation().getWorld(), queryLocation.getWorld())) continue;
+            Dreamvisitor.debug("Same world.");
             double distance = location.getLocation().distance(queryLocation);
-            if (distance < shortestDistance) nearest = location;
+            Dreamvisitor.debug("Distance: " + distance);
+            if (distance < shortestDistance) {
+                Dreamvisitor.debug("New nearest!");
+                nearest = location;
+                shortestDistance = distance;
+            }
         }
         return nearest;
     }
@@ -131,6 +165,16 @@ public class Mail {
         return location;
     }
 
+    public static double calculateDistanceWithPantalaOffset(@NotNull Location location1, @NotNull Location location2) {
+        if (Objects.requireNonNull(location1.getWorld()).getName().contains("pantala")) {
+            location1 = pantalaTransform(location1.clone());
+        }
+        if (Objects.requireNonNull(location2.getWorld()).getName().contains("pantala")) {
+            location2 = pantalaTransform(location2.clone());
+        }
+        return location1.distance(location2);
+    }
+
     public static void calculateMaxDistance() {
         List<MailLocation> locations = getLocations();
         double maxDistance = 0;
@@ -138,8 +182,7 @@ public class Mail {
             for (MailLocation mailLocation : locations) {
                 Location location1 = location.location;
                 Location location2 = mailLocation.location;
-                if (Objects.requireNonNull(location2.getWorld()).getName().contains("pantala")) location2 = pantalaTransform(mailLocation.location.clone());
-                double distance = location1.distance(location2);
+                double distance = calculateDistanceWithPantalaOffset(location1, location2);
                 if (distance > maxDistance) maxDistance = distance;
             }
         }
@@ -154,32 +197,93 @@ public class Mail {
         return Dreamvisitor.getPlugin().getConfig().getDouble("mailDistanceToRewardMultiplier");
     }
 
+    /**
+     * Complete a mail delivery.
+     * A player must be within 10 blocks of the nearest {@link MailLocation} to complete a delivery.
+     * They also must have the mail parcel.
+     * If they are, the reward amount will be given to them, and they will be removed from the active deliverers list.
+     * @param player the player to complete this as.
+     * @return the amount rewarded.
+     * @throws Exception check message.
+     */
+    public static double complete(Player player) throws Exception {
+        Deliverer deliverer = null;
+        for (Deliverer activeDeliverer : activeDeliverers) {
+            if (activeDeliverer.player.equals(player)) {
+                deliverer = activeDeliverer;
+                break;
+            }
+        }
+        if (deliverer == null) throw new Exception("Player is not an active deliverer!");
+        MailLocation nearestLocation = Mail.getNearestLocation(player.getLocation());
+        if (nearestLocation == null) throw new Exception("No nearest location found!");
+        if (!player.getWorld().equals(nearestLocation.location.getWorld())) throw new Exception("Not in same world!");
+        double distance = player.getLocation().distance(nearestLocation.location);
+        Dreamvisitor.debug("Distance to nearest: " + distance);
+        if (distance > 10) throw new Exception("Not close enough to MailLocation!");
+
+        PlayerInventory inventory = player.getInventory();
+        if (!inventory.contains(deliverer.parcel)) throw new Exception("Player does not have parcel!");
+
+        if (!nearestLocation.equals(deliverer.endLoc)) throw new Exception("Not at the destination location!");
+
+        double reward = deliverer.getReward();
+        Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+        if (ess == null) throw new Exception("EssentialsX is not currently active!");
+
+        User user = ess.getUser(player);
+        user.giveMoney(BigDecimal.valueOf(reward));
+
+        player.getInventory().remove(deliverer.parcel);
+
+        Dreamvisitor.debug("Removed from activeDeliverers: " + activeDeliverers.remove(deliverer));
+
+        return reward;
+    }
+
+    public static void cancel(@NotNull Player player) {
+        activeDeliverers.removeIf(deliverer -> deliverer.player.equals(player));
+        player.sendMessage(Dreamvisitor.PREFIX + "You canceled your delivery.");
+    }
+
+    public static boolean isPLayerDeliverer(@NotNull Player player) {
+        return activeDeliverers.stream().map(Deliverer::getPlayer).toList().contains(player);
+    }
+
     @NotNull
     public static MailLocation chooseDeliveryLocation(@NotNull MailLocation startPos) throws InvalidConfigurationException {
+        Dreamvisitor.debug("Max distance:" + maxDistance);
         List<MailLocation> locations = getLocations();
-        locations.remove(startPos);
+        Dreamvisitor.debug("Removed start pos:" + locations.remove(startPos));
         if (locations.isEmpty()) throw new InvalidConfigurationException("There aren't enough mail locations!");
 
         // Compute the total weight of all items together.
         // This can be skipped of course if sum is already 1.
         double totalWeight = 0.0;
         for (MailLocation location : locations) {
-            totalWeight += location.getWeight();
-            double distance = MailLocation.getDistance(startPos, location);
-            double distanceWeight = distance / maxDistance; // get distance ratio
-            totalWeight += distanceWeight * -1 * getDistanceWeightMultiplier();
+            Dreamvisitor.debug("Evaluating " + location.getName());
+            double weight = calculateWeight(startPos, location);
+            totalWeight += weight;
+            Dreamvisitor.debug("Weight: " + weight);
         }
+        Dreamvisitor.debug("Total weight: " + totalWeight);
 
         // Now choose a random item.
         int index = 0;
-        MailLocation mailLocation = locations.get(index);
+        MailLocation evalLocation = locations.get(index);
         for (double r = Math.random() * totalWeight; index < locations.size() - 1; ++index) {
-            double weight = mailLocation.getWeight();
-            weight += (MailLocation.getDistance(startPos, mailLocation) / maxDistance) * -1 * getDistanceWeightMultiplier();
+            evalLocation = locations.get(index);
+            Dreamvisitor.debug("Location at index " + index + ":" + evalLocation.getName());
+            Dreamvisitor.debug("random: " + r);
+            double weight = calculateWeight(startPos, evalLocation);
             r -= weight;
             if (r <= 0.0) break;
         }
-        return mailLocation;
+        return evalLocation;
+    }
+
+    private static double calculateWeight(@NotNull MailLocation startLoc, @NotNull MailLocation location) {
+        return location.getWeight() + getDistanceWeightMultiplier() * ((maxDistance - MailLocation.getDistance(startLoc, location)) / maxDistance);
     }
 
     @NotNull
@@ -206,12 +310,12 @@ public class Mail {
             int tribeIndex = random.nextInt(10);
             Tribe tribe = TribeUtil.tribes[tribeIndex];
 
-            nameList = nameConfig.getStringList(tribe.getTeamName());
+            nameList = nameConfig.getStringList(tribe.getTeamName().toLowerCase());
 
         } else if (roll < 55) {
-            nameList = nameConfig.getStringList(startLoc.homeTribe.getTeamName());
+            nameList = nameConfig.getStringList(startLoc.homeTribe.getTeamName().toLowerCase());
         } else {
-            nameList = nameConfig.getStringList(endLoc.homeTribe.getTeamName());
+            nameList = nameConfig.getStringList(endLoc.homeTribe.getTeamName().toLowerCase());
         }
 
         int name = random.nextInt(nameList.size());
@@ -243,7 +347,7 @@ public class Mail {
     }
 
     public static void setDeliverers(List<Deliverer> deliverers) {
-        Mail.activeDeliverers.addAll(deliverers);
+        activeDeliverers = deliverers;
     }
 
     public static class MailLocation implements ConfigurationSerializable {
@@ -273,11 +377,7 @@ public class Mail {
         }
 
         public static double getDistance(@NotNull MailLocation location1, @NotNull MailLocation location2) {
-            if (Objects.equals(location1.location.getWorld(), location2.location.getWorld())) return location1.location.distance(location2.location);
-
-            if (Objects.requireNonNull(location1.location.getWorld()).getName().contains("pantala")) return pantalaTransform(location1.location).distance(location2.location);
-            else if (Objects.requireNonNull(location2.location.getWorld()).getName().contains("pantala")) return pantalaTransform(location2.location).distance(location1.location);
-            return location1.location.distance(location2.location);
+            return calculateDistanceWithPantalaOffset(location1.location, location2.location);
         }
 
         @NotNull
@@ -325,6 +425,19 @@ public class Mail {
         public Map<String, Object> serialize() {
             return Map.of("location", location, "name", name, "weight", weight, "home", homeTribe.toString());
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MailLocation that = (MailLocation) o;
+            return weight == that.weight && Objects.equals(location, that.location) && Objects.equals(name, that.name) && homeTribe == that.homeTribe;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(location, name, weight, homeTribe);
+        }
     }
 
     public static class Deliverer {
@@ -333,11 +446,72 @@ public class Mail {
         @NotNull private final MailLocation startLoc;
         @NotNull private final MailLocation endLoc;
         @Nullable private LocalDateTime startTime;
+        @Nullable private ItemStack parcel;
 
         public Deliverer(@NotNull Player player, @NotNull MailLocation startLoc, @NotNull MailLocation endLoc) {
             this.player = player;
             this.startLoc = startLoc;
             this.endLoc = endLoc;
+        }
+
+        static final String[] lore = {
+                "It's a letter with a heart on it.",
+                "It's a very official-looking letter.",
+                "It's a small package that has been hand-wrapped.",
+                "It's a surprisingly heavy package.",
+                "It's just a plain, folded letter.",
+                "It's a letter with color drawings scribbled on the outside.",
+                "It seems to be some kind of government letter.",
+                "It's a letter with a wax seal.",
+                "It's a package covered in festive wrapping paper.",
+                "It's a thick envelope with multiple stamps.",
+                "It's a letter with a return address in an unfamiliar language.",
+                "It's a small box with fragile stickers on it.",
+                "It's a postcard with a scenic picture.",
+                "It's a letter with a faint scent that reminds you of candy.",
+                "It's a package with a handwritten label.",
+                "It's a letter with glitter on the envelope.",
+                "It's an envelope with a window showing part of a neatly-printed document inside.",
+                "It's a padded envelope with a soft bulge inside.",
+                "It's a letter with a gold emblem on the top left corner.",
+                "It's a package tied with a string.",
+                "It's a letter with a metallic sheen to the paper.",
+                "It's an envelope that has been hastily taped shut.",
+                "It's a letter with colorful stamps.",
+                "It's a letter with an urgent red stamp on it.",
+                "It's a small box that makes rattling sound when shaken."
+        };
+
+        @NotNull
+        private ItemStack createParcel() {
+
+            if (!started()) throw new NullPointerException("This delivery has not been started!");
+            assert startTime != null;
+
+            String name = Mail.chooseName(startLoc, endLoc);
+
+            ItemStack parcel = new ItemStack(Material.ENCHANTED_BOOK);
+            ItemMeta itemMeta = Bukkit.getItemFactory().getItemMeta(parcel.getType());
+            assert itemMeta != null;
+
+            itemMeta.setDisplayName(ChatColor.RESET + "Parcel for " + name);
+            itemMeta.setLore(Collections.singletonList(lore[new Random().nextInt(lore.length)]));
+            PersistentDataContainer data = itemMeta.getPersistentDataContainer();
+            data.set(new NamespacedKey(Dreamvisitor.getPlugin(), "mail_deliverer"), PersistentDataType.STRING, player.getUniqueId().toString());
+            data.set(new NamespacedKey(Dreamvisitor.getPlugin(), "mail_deliver_start"), PersistentDataType.STRING, startTime.toString());
+
+            parcel.setItemMeta(itemMeta);
+
+            return parcel;
+        }
+
+        @NotNull
+        public ItemStack getParcel() {
+            return parcel;
+        }
+
+        public String getParcelName() {
+            return Objects.requireNonNull(createParcel().getItemMeta()).getDisplayName().split(" ")[2];
         }
 
         public boolean started() {
@@ -361,11 +535,16 @@ public class Mail {
 
         /**
          * Starts the time for this Deliverer.
+         * This also gives them their parcel.
          * This will throw {@link UnsupportedOperationException} if already started.
          */
         public void start() {
             if (startTime != null) throw new UnsupportedOperationException("Already started time!");
             startTime = LocalDateTime.now();
+
+            ItemStack parcel = createParcel();
+            this.parcel = parcel;
+            player.getInventory().addItem(parcel);
         }
 
         /**
@@ -378,11 +557,24 @@ public class Mail {
         }
 
         /**
-         * Get the expected reward for the completion of this delivery.
+         * Get the expected for the completion of this delivery.
          * @return a double representing the reward amount.
          */
         public double getReward() {
             return Math.round((MailLocation.getDistance(startLoc, endLoc) * getDistanceRewardMultiplier())/10.0) * 10;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Deliverer deliverer = (Deliverer) o;
+            return Objects.equals(player, deliverer.player) && Objects.equals(startLoc, deliverer.startLoc) && Objects.equals(endLoc, deliverer.endLoc) && Objects.equals(startTime, deliverer.startTime);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(player, startLoc, endLoc, startTime);
         }
     }
 

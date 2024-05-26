@@ -254,6 +254,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                             return;
                         }
                         Economy.ShopItem shopItem = new Economy.ShopItem(name, description);
+                        shopItem.ensureUniqueId();
                         int itemId = shopItem.getId();
                         shopItem.setEnabled(false);
                         Economy.saveItem(shopItem);

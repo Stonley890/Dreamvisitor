@@ -6,8 +6,8 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import dev.jorel.commandapi.wrappers.NativeProxyCommandSender;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.Mail;
 import org.bukkit.*;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -57,6 +57,8 @@ public class CmdHub implements DVCommand {
 
                                     if (entity instanceof Player player) {
 
+                                        if (Mail.isPLayerDeliverer(player)) Mail.cancel(player);
+
                                         // Set /back location
                                         if (ess != null) {
                                             User user = ess.getUser(player);
@@ -87,6 +89,7 @@ public class CmdHub implements DVCommand {
                                 assert Dreamvisitor.hubLocation != null;
 
                                 Player player = (Player) callee;
+                                if (Mail.isPLayerDeliverer(player)) Mail.cancel(player);
 
                                 Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
                                 if (ess != null) {
@@ -140,6 +143,8 @@ public class CmdHub implements DVCommand {
                                 if (plugin.getConfig().getLocation("hubLocation") == null) {
                                     throw CommandAPI.failWithString("No hub is currently set!");
                                 } else {
+
+                                    if (Mail.isPLayerDeliverer(closest)) Mail.cancel(closest);
 
                                     Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
                                     if (ess != null) {
