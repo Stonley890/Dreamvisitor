@@ -69,10 +69,9 @@ public class PlayerTribe {
      *
      * @param playerUuid The player UUID to search for.
      * @return The index of their tribe.
-     * @throws NullPointerException The given player does not have a recorded tribe.
      */
     @Nullable
-    public static Tribe getTribeOfPlayer(@NotNull UUID playerUuid) throws NullPointerException {
+    public static Tribe getTribeOfPlayer(@NotNull UUID playerUuid) {
 
         Tribe tribe = getPlayer(playerUuid);
 
