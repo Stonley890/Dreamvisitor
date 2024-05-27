@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -34,7 +35,7 @@ public class DCmdAlts extends ListenerAdapter implements DiscordCommand {
                 new SubcommandData("get", "Get the alts of an account.").addOptions(
                         new OptionData(OptionType.USER, "user", "The user to get the alts of.", true)
                 )
-        );
+        ).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
     }
 
     @Override

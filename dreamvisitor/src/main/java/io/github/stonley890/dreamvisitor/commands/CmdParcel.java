@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class CmdDelivery implements DVCommand {
+public class CmdParcel implements DVCommand {
 
     @NotNull
     @Override

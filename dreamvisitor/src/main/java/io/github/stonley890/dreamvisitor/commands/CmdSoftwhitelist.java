@@ -3,7 +3,6 @@ package io.github.stonley890.dreamvisitor.commands;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
-import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.OfflinePlayerArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
@@ -24,7 +23,7 @@ public class CmdSoftwhitelist implements DVCommand {
     public CommandAPICommand getCommand() {
         return new CommandAPICommand("softwhitelist")
                 .withPermission(CommandPermission.fromString("dreamvisitor.softwhitelist"))
-                .withHelp("Manage the softwhitelist.", "Manage the softwhitelist.")
+                .withHelp("Manage the soft whitelist.", "Manage the soft whitelist.")
                 .withSubcommand(new CommandAPICommand("add")
                         .withArguments(new OfflinePlayerArgument("player"))
                         .executesNative((sender, args) -> {

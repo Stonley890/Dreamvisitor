@@ -5,8 +5,6 @@ import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
@@ -21,7 +19,7 @@ public class CmdPlayerlimit implements DVCommand {
     public CommandAPICommand getCommand() {
         return new CommandAPICommand("playerlimit")
                 .withPermission(CommandPermission.fromString("dreamvisitor.playerlimit"))
-                .withHelp("Set the player limit.", "Override the server player limit")
+                .withHelp("Set the player limit.", "Override the server player limit.")
                 .withOptionalArguments(new IntegerArgument("newLimit", -1))
                 .executesNative((sender, args) -> {
 

@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class PlayerTribe {
         }
     }
 
+    @Nullable
     private static Tribe getPlayer(@NotNull UUID uuid) {
         try {
             YamlConfiguration configuration = new YamlConfiguration();
@@ -41,6 +43,8 @@ public class PlayerTribe {
             Bukkit.getLogger().severe("Unable to load " + file.getName() + "!");
             Bukkit.getPluginManager().disablePlugin(plugin);
             throw new RuntimeException();
+        } catch (IllegalArgumentException e) {
+            return null;
         }
     }
 
@@ -67,7 +71,7 @@ public class PlayerTribe {
      * @return The index of their tribe.
      * @throws NullPointerException The given player does not have a recorded tribe.
      */
-    @NotNull
+    @Nullable
     public static Tribe getTribeOfPlayer(@NotNull UUID playerUuid) throws NullPointerException {
 
         Tribe tribe = getPlayer(playerUuid);
@@ -78,7 +82,7 @@ public class PlayerTribe {
                 updateTribeOfPlayer(playerUuid);
                 tribe = getPlayer(playerUuid);
             } catch (Exception e) {
-                throw new NullPointerException("The given player does not have a recorded tribe.");
+                return tribe;
             }
         }
 

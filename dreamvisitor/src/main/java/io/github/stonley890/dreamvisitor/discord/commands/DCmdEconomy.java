@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -29,6 +30,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
     @Override
     public SlashCommandData getCommandData() {
         return Commands.slash("economy", "Manage the Discord economy.")
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
                 .addSubcommandGroups(
                         new SubcommandGroupData("shop", "Manage the shop.").addSubcommands(
                                 new SubcommandData("name","Get or set the name of the shop.")
@@ -65,7 +68,10 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                                 new SubcommandData("set-items", "Set the quantity of an item held by a user.")
                                         .addOption(OptionType.USER, "user", "The user whose items to get.", true)
                                         .addOption(OptionType.INTEGER, "id", "The ID of the item to modify the quantity of.", true)
-                                        .addOption(OptionType.INTEGER, "new-quantity", "The number of this item the user should have.", true)
+                                        .addOption(OptionType.INTEGER, "new-quantity", "The number of this item the user should have.", true),
+                                new SubcommandData("daily-streak", "Get or set the daily streak of a user.")
+                                        .addOption(OptionType.USER, "user", "The user whose streak to get.", true)
+                                        .addOption(OptionType.INTEGER, "new-value", "The streak to set for this player.", false)
                         )
                 );
     }
@@ -472,6 +478,35 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                         Economy.saveConsumer(consumer);
 
                         event.reply("Set quantity of " + item.getName() + " owned by " + user.getAsMention() + " to " + quantity + ".").queue();
+                    } case "daily-streak" -> {
+                        User user = event.getOption("user", OptionMapping::getAsUser);
+                        Integer value = event.getOption("new-value", OptionMapping::getAsInt);
+
+                        if (user == null) {
+                            event.reply("User cannot be null!").setEphemeral(true).queue();
+                            return;
+                        }
+
+                        Economy.Consumer consumer = Economy.getConsumer(user.getIdLong());
+
+                        if (value == null) {
+                            EmbedBuilder embed = new EmbedBuilder();
+                            embed.setDescription(user.getAsMention() + " has a daily streak of " + consumer.getGameData().getDailyStreak());
+
+                            event.replyEmbeds(embed.build()).queue();
+                            return;
+                        }
+
+                        Economy.GameData gameData = consumer.getGameData();
+                        gameData.setDailyStreak(value);
+                        gameData.setLastDaily(LocalDateTime.now().minusHours(24));
+                        consumer.setGameData(gameData);
+                        Economy.saveConsumer(consumer);
+
+                        EmbedBuilder embed = new EmbedBuilder();
+                        embed.setDescription(user.getAsMention() + "'s streak has been set to " + value + " and their cooldown has been reset.");
+
+                        event.replyEmbeds(embed.build()).queue();
                     }
                 }
             }
