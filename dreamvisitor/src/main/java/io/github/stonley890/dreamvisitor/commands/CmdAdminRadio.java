@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.commands;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
+import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.GreedyStringArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.Radio;
@@ -15,7 +16,7 @@ public class CmdAdminRadio implements DVCommand {
 
     @NotNull
     @Override
-    public CommandAPICommand getCommand() {
+    public ExecutableCommand<?, ?> getCommand() {
         return new CommandAPICommand("aradio")
                 .withPermission(CommandPermission.OP)
                 .withHelp("Use the admin radio.", "Sends a message to all operators.")

@@ -21,7 +21,6 @@ public class CommandUtils {
             }
             return tribe;
         }).replaceSuggestions(ArgumentSuggestions.strings(info -> Arrays.stream(Tribe.values()).map(tribe -> tribe.name().toUpperCase()).toArray(String[]::new)));
-
     }
 
 }
