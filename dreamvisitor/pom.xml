@@ -144,7 +144,12 @@
                   <pattern>dev.jorel.commandapi</pattern>
                   <shadedPattern>io.github.stonley890.dreamvisitor.shaded.dev.jorel.commandapi</shadedPattern>
                   <includes>
+                    <include>dev.jorel.commandapi.arguments.*</include>
                     <include>dev.jorel.commandapi.*</include>
+                    <include>dev.jorel.commandapi.commandsenders.*</include>
+                    <include>dev.jorel.commandapi.exceptions.*</include>
+                    <include>dev.jorel.commandapi.nms.*</include>
+                    <include>dev.jorel.commandapi.wrappers.*</include>
                   </includes>
                 </relocation>
               </relocations>
