@@ -3,15 +3,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.stonley890</groupId>
   <artifactId>dreamvisitor</artifactId>
-  <version>2.13.1</version>
+  <version>2.13.1-hotfix-2</version>
   <packaging>jar</packaging>
 
   <name>Dreamvisitor</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
   </properties>
   
   <repositories>
@@ -40,63 +40,68 @@
 
   <dependencies>
     <dependency>
+      <!--Bukkit/Spigot API-->
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
       <version>1.20.1-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <!--Discord Bot-->
       <groupId>net.dv8tion</groupId>
       <artifactId>JDA</artifactId>
       <version>5.0.0-beta.24</version>
     </dependency>
     <dependency>
+      <!--Console logger-->
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
       <version>2.23.1</version>
     </dependency>
     <dependency>
+      <!--Console logger-->
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>2.20.0</version>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>4.0.1</version> <!-- Use the appropriate version -->
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
+      <!--Web whitelist-->
       <groupId>com.sparkjava</groupId>
       <artifactId>spark-core</artifactId>
       <version>2.9.4</version>
     </dependency>
     <dependency>
+      <!--back and eco-->
       <groupId>net.essentialsx</groupId>
       <artifactId>EssentialsX</artifactId>
       <version>2.20.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <!--whitelist.json editing-->
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20240303</version>
     </dependency>
     <dependency>
+      <!--Mojang API-->
       <groupId>com.github.SparklingComet</groupId>
       <artifactId>java-mojang-api</artifactId>
       <version>592fabf3e2</version>
     </dependency>
     <dependency>
+      <!--Permissions-->
       <groupId>net.luckperms</groupId>
       <artifactId>api</artifactId>
       <version>5.4</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <!--Brigadier Command API-->
       <groupId>dev.jorel</groupId>
       <artifactId>commandapi-bukkit-shade</artifactId>
       <version>9.4.1</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
@@ -126,13 +131,21 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.3</version>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>dev.jorel.commandapi</pattern>
+                  <shadedPattern>io.github.stonley890.dreamvisitor.shaded.dev.jorel.commandapi</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
           </execution>
         </executions>
         <configuration>

@@ -63,7 +63,8 @@ public class CmdDvset implements DVCommand {
 
     /**
      * Creates a {@link TextComponent} representing a {@code boolean} value with a command to change it.
-     * @param value the {@code boolean} to display.
+     *
+     * @param value   the {@code boolean} to display.
      * @param cmdName the command to run. This will be formatted as {@code /dvset <state> <cmdName> !value}
      * @return a {@link TextComponent} representing the value with a command to change it.
      */
@@ -100,95 +101,107 @@ public class CmdDvset implements DVCommand {
                     } else throw CommandAPI.failWithString("No options specified.");
                 }))
                 .then(new StringArgument("option")
-                    .setOptional(true)
-                    .executesNative(((sender, args) -> {
-                        String option = (String) args.get("option");
+                        .setOptional(true)
+                        .executesNative(((sender, args) -> {
+                            String option = (String) args.get("option");
 
-                        CommandSender callee = sender.getCallee();
-                        if (!callee.hasPermission("dreamvisitor.userset")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                            CommandSender callee = sender.getCallee();
+                            if (!callee.hasPermission("dreamvisitor.userset"))
+                                throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
 
-                        PlayerMemory playerMemory;
+                            PlayerMemory playerMemory;
 
-                        if (callee instanceof Player player) {
-                            playerMemory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-                        } else throw CommandAPI.failWithString("This can only be executed by a player!");
+                            if (callee instanceof Player player) {
+                                playerMemory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+                            } else throw CommandAPI.failWithString("This can only be executed by a player!");
 
-                        switch (Objects.requireNonNull(option)) {
-                            case "discord" -> {
-                                if (!player.hasPermission("dreamvisitor.set.discord")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility is currently set to " + ChatColor.WHITE + playerMemory.discordToggled);
-                            }
-                            case "vanished" -> {
-                                if (!player.hasPermission("dreamvisitor.set.zoop")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish is currently set to " + ChatColor.WHITE + playerMemory.vanished);
-                            }
-                            case "autoinvswap" -> {
-                                if (!player.hasPermission("dreamvisitor.set.autoinvswap")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap is currently set to " + ChatColor.WHITE + playerMemory.autoinvswap);
-                            }
-                            case "autoradio" -> {
-                                if (!player.hasPermission("dreamvisitor.set.autoradio")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Radio is currently set to " + ChatColor.WHITE + playerMemory.autoRadio);
-                            }
-                            default -> throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                        }
-                    }))
-                    .then(new StringArgument("modification")
-                            .setOptional(true)
-                            .executesNative(((sender, args) -> {
-                                String option = (String) args.get("option");
-                                String modification = (String) args.get("modification");
-
-                                CommandSender callee = sender.getCallee();
-                                if (!callee.hasPermission("dreamvisitor.userset")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-
-                                PlayerMemory playerMemory;
-
-                                if (callee instanceof Player player) {
-                                    playerMemory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-                                } else throw CommandAPI.failWithString("This can only be executed by a player!");
-
-                                if (option == null || modification == null) {
-                                    sendUserGui(player);
-                                    return;
+                            switch (Objects.requireNonNull(option)) {
+                                case "discord" -> {
+                                    if (!player.hasPermission("dreamvisitor.set.discord"))
+                                        throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                    callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility is currently set to " + ChatColor.WHITE + playerMemory.discordToggled);
                                 }
+                                case "vanished" -> {
+                                    if (!player.hasPermission("dreamvisitor.set.zoop"))
+                                        throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                    callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish is currently set to " + ChatColor.WHITE + playerMemory.vanished);
+                                }
+                                case "autoinvswap" -> {
+                                    if (!player.hasPermission("dreamvisitor.set.autoinvswap"))
+                                        throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                    callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap is currently set to " + ChatColor.WHITE + playerMemory.autoinvswap);
+                                }
+                                case "autoradio" -> {
+                                    if (!player.hasPermission("dreamvisitor.set.autoradio"))
+                                        throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                    callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Radio is currently set to " + ChatColor.WHITE + playerMemory.autoRadio);
+                                }
+                                default ->
+                                        throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                            }
+                        }))
+                        .then(new StringArgument("modification")
+                                .setOptional(true)
+                                .executesNative(((sender, args) -> {
+                                    String option = (String) args.get("option");
+                                    String modification = (String) args.get("modification");
 
-                                switch (option) {
-                                    case "discord" -> {
-                                        if (!player.hasPermission("dreamvisitor.set.discord")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                        playerMemory.discordToggled = Boolean.parseBoolean(modification);
-                                        callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility toggled to " + ChatColor.WHITE + playerMemory.discordToggled);
+                                    CommandSender callee = sender.getCallee();
+                                    if (!callee.hasPermission("dreamvisitor.userset"))
+                                        throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+
+                                    PlayerMemory playerMemory;
+
+                                    if (callee instanceof Player player) {
+                                        playerMemory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+                                    } else throw CommandAPI.failWithString("This can only be executed by a player!");
+
+                                    if (option == null || modification == null) {
+                                        sendUserGui(player);
+                                        return;
                                     }
-                                    case "vanished" -> {
-                                        if (!player.hasPermission("dreamvisitor.set.zoop")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                        playerMemory.vanished = Boolean.parseBoolean(modification);
 
-                                        String chatMessage;
-                                        if (playerMemory.vanished) {
-                                            chatMessage = "**" + player.getName() + " left the game**";
-                                        } else {
-                                            chatMessage = "**" + player.getName() + " joined the game**";
+                                    switch (option) {
+                                        case "discord" -> {
+                                            if (!player.hasPermission("dreamvisitor.set.discord"))
+                                                throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                            playerMemory.discordToggled = Boolean.parseBoolean(modification);
+                                            callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility toggled to " + ChatColor.WHITE + playerMemory.discordToggled);
                                         }
-                                        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
-                                        Bot.sendLog(chatMessage);
+                                        case "vanished" -> {
+                                            if (!player.hasPermission("dreamvisitor.set.zoop"))
+                                                throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                            playerMemory.vanished = Boolean.parseBoolean(modification);
 
-                                        callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish toggled to " + ChatColor.WHITE + playerMemory.vanished);
+                                            String chatMessage;
+                                            if (playerMemory.vanished) {
+                                                chatMessage = "**" + player.getName() + " left the game**";
+                                            } else {
+                                                chatMessage = "**" + player.getName() + " joined the game**";
+                                            }
+                                            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                                            Bot.sendLog(chatMessage);
+
+                                            callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Vanish toggled to " + ChatColor.WHITE + playerMemory.vanished);
+                                        }
+                                        case "autoinvswap" -> {
+                                            if (!player.hasPermission("dreamvisitor.set.autoinvswap"))
+                                                throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                            playerMemory.autoinvswap = Boolean.parseBoolean(modification);
+                                            callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap toggled to " + ChatColor.WHITE + playerMemory.autoinvswap);
+                                        }
+                                        case "autoradio" -> {
+                                            if (!player.hasPermission("dreamvisitor.set.autoradio"))
+                                                throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                            playerMemory.autoRadio = Boolean.parseBoolean(modification);
+                                            callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Radio toggled to " + ChatColor.WHITE + playerMemory.autoRadio);
+                                        }
+                                        default ->
+                                                throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
                                     }
-                                    case "autoinvswap" -> {
-                                        if (!player.hasPermission("dreamvisitor.set.autoinvswap")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                        playerMemory.autoinvswap = Boolean.parseBoolean(modification);
-                                        callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Inventory Swap toggled to " + ChatColor.WHITE + playerMemory.autoinvswap);
-                                    }
-                                    case "autoradio" -> {
-                                        if (!player.hasPermission("dreamvisitor.set.autoradio")) throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                        playerMemory.autoRadio = Boolean.parseBoolean(modification);
-                                        callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Automatic Radio toggled to " + ChatColor.WHITE + playerMemory.autoRadio);
-                                    }
-                                    default -> throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                }
-                                sendUserGui(player);
-                            }))
-                    )
+                                    sendUserGui(player);
+                                }))
+                        )
                 );
     }
 }
