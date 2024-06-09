@@ -43,7 +43,7 @@ public class PlayerTribe {
             Bukkit.getLogger().severe("Unable to load " + file.getName() + "!");
             Bukkit.getPluginManager().disablePlugin(plugin);
             throw new RuntimeException();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             return null;
         }
     }

@@ -244,6 +244,8 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                     }
                     case "add" -> {
 
+                        Dreamvisitor.debug("Call to add.");
+
                         String name = event.getOption("name", OptionMapping::getAsString);
                         if (name == null) {
                             event.reply("name cannot be null!").setEphemeral(true).queue();
@@ -254,21 +256,28 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                             event.reply("description cannot be null!").setEphemeral(true).queue();
                             return;
                         }
+                        Dreamvisitor.debug("Got args.");
 
                         if (Economy.getItems().size() >= 25) {
                             event.reply("Only 25 items can exist at a time!").setEphemeral(true).queue();
                             return;
                         }
                         Economy.ShopItem shopItem = new Economy.ShopItem(name, description);
+                        Dreamvisitor.debug("Created new item.");
                         shopItem.ensureUniqueId();
+                        Dreamvisitor.debug("ID is unique.");
                         int itemId = shopItem.getId();
                         shopItem.setEnabled(false);
+                        Dreamvisitor.debug("Disabled.");
                         Economy.saveItem(shopItem);
+                        Dreamvisitor.debug("Saves.");
 
                         EmbedBuilder embed = getEditEmbed(shopItem, Objects.requireNonNull(event.getGuild()));
+                        Dreamvisitor.debug("Got embed.");
 
                         event.reply("The item has been created, but not enabled. Edit it below and set it to enabled when ready.")
                                 .addEmbeds(embed.build()).setEphemeral(true).addActionRow(getEditDropdown(itemId).build()).queue();
+                        Dreamvisitor.debug("Reply queued..");
 
                     }
                     case "remove" -> {

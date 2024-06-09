@@ -236,6 +236,7 @@ public class Economy {
         public void ensureUniqueId() {
             boolean unique = false;
             List<ShopItem> items = Economy.getItems();
+            if (items.isEmpty()) return;
             while (!unique) {
                 for (ShopItem item : items) {
                     if (item.id == this.id) {

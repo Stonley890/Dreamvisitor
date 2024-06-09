@@ -84,7 +84,7 @@ public class CmdParcel implements DVCommand {
                                                 .append("\n").reset().append(String.valueOf(mailLocation.getLocation().getX()))
                                                 .append(" ").append(String.valueOf(mailLocation.getLocation().getY()))
                                                 .append(" ").append(String.valueOf(mailLocation.getLocation().getZ()))
-                                                .append(" in world ").append(String.valueOf(mailLocation.getLocation().getWorld()))
+                                                .append(" in world ").append(Objects.requireNonNull(mailLocation.getLocation().getWorld()).getName())
                                                 .append("\n Weight: ").append(String.valueOf(mailLocation.getWeight()))
                                                 .append("\n Home Tribe: ").append(mailLocation.getHomeTribe().getName());
                                     }

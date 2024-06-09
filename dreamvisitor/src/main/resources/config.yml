@@ -48,6 +48,20 @@ triberoles:
   - 964773212321882132
   - 660599708145942581
 
+# Images for each of the tribes.
+# Used for the royalty board and log messages.
+tribe-emblems:
+  - https://cdn.discordapp.com/emojis/1059550841939431434.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/848783045960269855.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/1059550991025971342.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/848783194912587798.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/848782864060514395.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/848783641080233984.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/848781744315826196.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/848783311815573554.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/1059550024704463019.webp?size=44&quality=lossless
+  - https://cdn.discordapp.com/emojis/848781745038163978.webp?size=44&quality=lossless
+
 # Whether chat is paused or not.
 # This can be toggled in Minecraft with /pausechat
 # Default: false

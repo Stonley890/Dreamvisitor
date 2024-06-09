@@ -58,9 +58,12 @@ public class Mail {
 
             for (Deliverer activeDeliverer : activeDeliverers) {
                 ComponentBuilder builder = new ComponentBuilder("You are currently delivering a parcel to ").color(ChatColor.WHITE);
-                double distance = Math.round(calculateDistanceWithPantalaOffset(activeDeliverer.player.getLocation(), activeDeliverer.endLoc.location));
+                String distance = "unknown";
+                try {
+                    distance = String.valueOf(Math.round(calculateDistanceWithPantalaOffset(activeDeliverer.player.getLocation(), activeDeliverer.endLoc.location)));
+                } catch (IllegalArgumentException ignored) {}
                 builder.append(activeDeliverer.endLoc.name.replace("_", " ")).color(ChatColor.AQUA).append(", ").color(ChatColor.WHITE)
-                        .append(String.valueOf(distance)).color(ChatColor.AQUA).append(" meters away.").color(ChatColor.WHITE);
+                        .append(distance).color(ChatColor.AQUA).append(" meters away.").color(ChatColor.WHITE);
                 activeDeliverer.player.spigot().sendMessage(ChatMessageType.ACTION_BAR, builder.create());
             }
         }, 20, 20);
@@ -261,7 +264,7 @@ public class Mail {
         // This can be skipped of course if sum is already 1.
         double totalWeight = 0.0;
         for (MailLocation location : locations) {
-            Dreamvisitor.debug("Evaluating " + location.getName());
+            Dreamvisitor.debug("\nEvaluating " + location.getName());
             double weight = calculateWeight(startPos, location);
             totalWeight += weight;
             Dreamvisitor.debug("Weight: " + weight);
@@ -269,21 +272,35 @@ public class Mail {
         Dreamvisitor.debug("Total weight: " + totalWeight);
 
         // Now choose a random item.
-        int index = 0;
-        MailLocation evalLocation = locations.get(index);
-        for (double r = Math.random() * totalWeight; index < locations.size() - 1; ++index) {
-            evalLocation = locations.get(index);
-            Dreamvisitor.debug("Location at index " + index + ":" + evalLocation.getName());
-            Dreamvisitor.debug("random: " + r);
+        double countWeight = 0.0;
+        double r = Math.random() * totalWeight;
+        Dreamvisitor.debug("random value: " + r);
+        for (int index = 0; index < locations.size() - 1; ++index) {
+            MailLocation evalLocation = locations.get(index);
+            Dreamvisitor.debug("\nLocation at index " + index + ": " + evalLocation.getName());
             double weight = calculateWeight(startPos, evalLocation);
-            r -= weight;
-            if (r <= 0.0) break;
+            countWeight += weight;
+            Dreamvisitor.debug("New countWeight: " + countWeight);
+            if (countWeight >= r) {
+                Dreamvisitor.debug(countWeight + " >= " + r + ", returning.");
+                return evalLocation;
+            }
+            Dreamvisitor.debug("countWeight < random");
+
         }
-        return evalLocation;
+        Dreamvisitor.debug("Selecting last, " + locations.get(locations.size() -1).getName());
+        return locations.get(locations.size() -1);
     }
 
     private static double calculateWeight(@NotNull MailLocation startLoc, @NotNull MailLocation location) {
-        return location.getWeight() + getDistanceWeightMultiplier() * ((maxDistance - MailLocation.getDistance(startLoc, location)) / maxDistance);
+        Dreamvisitor.debug("Base weight: " + location.getWeight());
+        Dreamvisitor.debug("Distance weight multiplier: " + getDistanceWeightMultiplier());
+        Dreamvisitor.debug("Maxdist: " + maxDistance);
+        double distance = MailLocation.getDistance(startLoc, location);
+        Dreamvisitor.debug("distance: " + distance);
+        Dreamvisitor.debug("Maxdist - distance: " + (maxDistance - distance));
+        Dreamvisitor.debug("that divided by maxdist: " + ((maxDistance - distance) / maxDistance));
+        return location.getWeight() + getDistanceWeightMultiplier() * ((maxDistance - distance) / maxDistance);
     }
 
     @NotNull
@@ -460,26 +477,26 @@ public class Mail {
                 "It's a small package that has been hand-wrapped.",
                 "It's a surprisingly heavy package.",
                 "It's just a plain, folded letter.",
-                "It's a letter with color drawings scribbled on the outside.",
+                "It's a letter with color drawings\nscribbled on the outside.",
                 "It seems to be some kind of government letter.",
                 "It's a letter with a wax seal.",
                 "It's a package covered in festive wrapping paper.",
                 "It's a thick envelope with multiple stamps.",
-                "It's a letter with a return address in an unfamiliar language.",
+                "It's a letter with a return address\nin an unfamiliar language.",
                 "It's a small box with fragile stickers on it.",
                 "It's a postcard with a scenic picture.",
-                "It's a letter with a faint scent that reminds you of candy.",
+                "It's a letter with a faint scent\nthat reminds you of candy.",
                 "It's a package with a handwritten label.",
                 "It's a letter with glitter on the envelope.",
-                "It's an envelope with a window showing part of a neatly-printed document inside.",
+                "It's an envelope with a window showing\npart of a neatly-printed document inside.",
                 "It's a padded envelope with a soft bulge inside.",
-                "It's a letter with a gold emblem on the top left corner.",
+                "It's a letter with a gold emblem\non the top left corner.",
                 "It's a package tied with a string.",
                 "It's a letter with a metallic sheen to the paper.",
                 "It's an envelope that has been hastily taped shut.",
                 "It's a letter with colorful stamps.",
                 "It's a letter with an urgent red stamp on it.",
-                "It's a small box that makes rattling sound when shaken."
+                "It's a small box that makes a\nrattling sound when shaken."
         };
 
         @NotNull
@@ -495,7 +512,7 @@ public class Mail {
             assert itemMeta != null;
 
             itemMeta.setDisplayName(ChatColor.RESET + "Parcel for " + name);
-            itemMeta.setLore(Collections.singletonList(lore[new Random().nextInt(lore.length)]));
+            itemMeta.setLore(Arrays.stream(lore[new Random().nextInt(lore.length)].split("\n")).toList());
             PersistentDataContainer data = itemMeta.getPersistentDataContainer();
             data.set(new NamespacedKey(Dreamvisitor.getPlugin(), "mail_deliverer"), PersistentDataType.STRING, player.getUniqueId().toString());
             data.set(new NamespacedKey(Dreamvisitor.getPlugin(), "mail_deliver_start"), PersistentDataType.STRING, startTime.toString());
@@ -505,7 +522,7 @@ public class Mail {
             return parcel;
         }
 
-        @NotNull
+        @Nullable
         public ItemStack getParcel() {
             return parcel;
         }
