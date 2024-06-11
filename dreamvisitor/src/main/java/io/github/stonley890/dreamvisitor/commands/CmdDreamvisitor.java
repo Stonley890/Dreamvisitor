@@ -49,7 +49,7 @@ public class CmdDreamvisitor implements DVCommand {
                                         .withOptionalArguments(new BooleanArgument("debug"))
                                         .executes((sender, args) -> {
                                             @Nullable String key = "debug";
-                                            configInt(sender, args, key);
+                                            configBoolean(sender, args, key);
                                         }),
                                 new CommandAPICommand("website-url")
                                         .withHelp("Set website-url.", "Website URL\n" +
@@ -67,7 +67,7 @@ public class CmdDreamvisitor implements DVCommand {
                                         .withOptionalArguments(new BooleanArgument("web-whitelist"))
                                         .executes((sender, args) -> {
                                             @Nullable String key = "web-whitelist";
-                                            configInt(sender, args, key);
+                                            configBoolean(sender, args, key);
                                         }),
                                 new CommandAPICommand("chatChannelID")
                                         .withHelp("Set chatChannelID.", "The channel ID of the game chat.\n" +
@@ -121,7 +121,7 @@ public class CmdDreamvisitor implements DVCommand {
                                         .withOptionalArguments(new BooleanArgument("chatPaused"))
                                         .executes((sender, args) -> {
                                             @Nullable String key = "chatPaused";
-                                            configInt(sender, args, key);
+                                            configBoolean(sender, args, key);
                                         }),
                                 new CommandAPICommand("softwhitelist")
                                         .withHelp("Set softwhitelist.", "Whether the soft whitelist is enabled or not\n" +
@@ -130,7 +130,7 @@ public class CmdDreamvisitor implements DVCommand {
                                         .withOptionalArguments(new BooleanArgument("softwhitelist"))
                                         .executes((sender, args) -> {
                                             @Nullable String key = "softwhitelist";
-                                            configInt(sender, args, key);
+                                            configBoolean(sender, args, key);
                                         }),
                                 new CommandAPICommand("playerlimit")
                                         .withHelp("Set playerlimit.", "Player limit override. This will override the player limit, both over and under.\n" +
@@ -148,7 +148,7 @@ public class CmdDreamvisitor implements DVCommand {
                                         .withOptionalArguments(new BooleanArgument("disablepvp"))
                                         .executes((sender, args) -> {
                                             @Nullable String key = "disablepvp";
-                                            configInt(sender, args, key);
+                                            configBoolean(sender, args, key);
                                         }),
                                 new CommandAPICommand("hubLocation")
                                         .withHelp("Get hubLocation.", "The location of the recorded hub.\n" +
@@ -160,6 +160,115 @@ public class CmdDreamvisitor implements DVCommand {
                                             String reply = "none";
                                             if (location != null) reply = location.toString();
                                             sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + reply);
+                                        }),
+                                new CommandAPICommand("log-console")
+                                        .withHelp("Set log-console.", "Whether to copy the output of the console to the Discord log channel.\n" +
+                                                "This will disable the default Dreamvisitor logging in place of the Minecraft server console.\n" +
+                                                "Default: false")
+                                        .withOptionalArguments(new BooleanArgument("log-console"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "log-console";
+                                            configBoolean(sender, args, key);
+                                        }),
+                                new CommandAPICommand("enable-log-console-commands")
+                                        .withHelp("Set enable-log-console-commands.", "Whether to pass messages in the log channel as console commands.\n" +
+                                                "If log-console is enabled, this will take messages sent by users with the Discord administrator permission and pass\n" +
+                                                "  them as console commands.\n" +
+                                                "Default: false")
+                                        .withOptionalArguments(new BooleanArgument("enable-log-console-commands"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "enable-log-console-commands";
+                                            configBoolean(sender, args, key);
+                                        }),
+                                new CommandAPICommand("infraction-expire-time-days")
+                                        .withHelp("Set infraction-expire-time-days.", "The amount of time in days (as an integer) that infractions take to expire.\n" +
+                                                "Expired infractions are not deleted, but they do not count toward a total infraction count.\n" +
+                                                "Default: 90")
+                                        .withOptionalArguments(new IntegerArgument("infraction-expire-time-days", 0))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "infraction-expire-time-days";
+                                            configInt(sender, args, key);
+                                        }),
+                                new CommandAPICommand("infractions-category-id")
+                                        .withHelp("Set infractions-category-id.", "The ID of the category to create infractions channels.\n" +
+                                                "They will accumulate here.\n" +
+                                                "Default: 1226180189604544593")
+                                        .withOptionalArguments(new LongArgument("infractions-category-id"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "infractions-category-id";
+                                            configLong(sender, args, key);
+                                        }),
+                                new CommandAPICommand("shopName")
+                                        .withHelp("Set shopName.", "The name of the Discord shop.\n" +
+                                                "This will appear at the top of the embed.\n" +
+                                                "Default: \"Shop\"")
+                                        .withOptionalArguments(new TextArgument("shopName"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "shopName";
+                                            configString(sender, args, key);
+                                        }),
+                                new CommandAPICommand("currencyIcon")
+                                        .withHelp("Set currencyIcon.", "The icon used for currency in the Discord economy system.\n" +
+                                                "This can be any string, including symbols, letters, emojis, and Discord custom emoji.\n" +
+                                                "Default: \"$\"")
+                                        .withOptionalArguments(new TextArgument("currencyIcon"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "currencyIcon";
+                                            configString(sender, args, key);
+                                        }),
+                                new CommandAPICommand("dailyBaseAmount")
+                                        .withHelp("Set dailyBaseAmount.", "The base amount given by the /daily Discord command.\n" +
+                                                "This is the default amount before adding the streak bonus. The total amount is decided by dailyBaseAmount + (user's streak * this).\n" +
+                                                "Default: 10.00")
+                                        .withOptionalArguments(new LongArgument("dailyBaseAmount"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "dailyBaseAmount";
+                                            configLong(sender, args, key);
+                                        }),
+                                new CommandAPICommand("dailyStreakMultiplier")
+                                        .withHelp("Set dailyStreakMultiplier.", "The multiplier of the streak bonus given by the /daily command.\n" +
+                                                "This is multiplied by the streak and added to the base amount. The total amount is decided by dailyBaseAmount + (user's streak * this).\n" +
+                                                "Default: 5.00")
+                                        .withOptionalArguments(new LongArgument("dailyStreakMultiplier"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "dailyStreakMultiplier";
+                                            configLong(sender, args, key);
+                                        }),
+                                new CommandAPICommand("workReward")
+                                        .withHelp("Set workReward.", "The amount gained from the /work command.\n" +
+                                                "/work can only be run every hour.\n" +
+                                                "Default: 20.00")
+                                        .withOptionalArguments(new LongArgument("workReward"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "workReward";
+                                            configLong(sender, args, key);
+                                        }),
+                                new CommandAPICommand("mailDeliveryLocationSelectionDistanceWeightMultiplier")
+                                        .withHelp("Set mailDeliveryLocationSelectionDistanceWeightMultiplier.", "The multiplier of the distance weight when choosing mail delivery locations.\n" +
+                                                "Takes the ratio (between 0 and 1) of the distance to the maximum distance between locations,\n" +
+                                                "  multiplies it by this value, and adds it to the mail location weight.\n" +
+                                                "This weight is used to randomly choose a mail location to deliver to provide a realistic\n" +
+                                                "  relationship between delivery locations.\n" +
+                                                "At 0, distance has no effect on location selection.\n" +
+                                                "At 1, the weight will have a slight effect on the location selection.\n" +
+                                                "At 10, the weight will have a significant effect on the location selection.\n" +
+                                                "The weight is applied inversely, making closer distances worth more than further distances.\n" +
+                                                "Default: 1.00")
+                                        .withOptionalArguments(new LongArgument("mailDeliveryLocationSelectionDistanceWeightMultiplier"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "mailDeliveryLocationSelectionDistanceWeightMultiplier";
+                                            configLong(sender, args, key);
+                                        }),
+                                new CommandAPICommand("mailDistanceToRewardMultiplier")
+                                        .withHelp("Set mailDistanceToRewardMultiplier.", "Mail delivery reward is calculated by multiplying the distance by this number.\n" +
+                                                "The result is then rounded to the nearest ten.\n" +
+                                                "At 0, the reward given is 0.\n" +
+                                                "At 1, the reward given will be the distance in blocks.\n" +
+                                                "Default: 0.05")
+                                        .withOptionalArguments(new LongArgument("mailDistanceToRewardMultiplier"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "mailDistanceToRewardMultiplier";
+                                            configLong(sender, args, key);
                                         })
                         )
                 );

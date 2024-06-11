@@ -41,10 +41,10 @@ public class DCmdShop extends ListenerAdapter implements DiscordCommand {
             return;
         }
         for (Economy.ShopItem item : items) {
-            String priceString = String.valueOf(item.getPrice());
+            String priceString = Economy.formatDouble(item.getPrice());
             double truePrice = item.getTruePrice();
             if (item.getSalePercent() > 0) {
-                priceString = "~~".concat(priceString).concat("~~ ").concat(String.valueOf(truePrice)).concat(" (").concat(String.valueOf(item.getSalePercent())).concat("% off)");
+                priceString = "~~".concat(priceString).concat("~~ ").concat(Economy.formatDouble(truePrice)).concat(" (").concat(String.valueOf(item.getSalePercent())).concat("% off)");
             }
             String header = (item.getName() + " - " + currencySymbol + priceString);
             StringBuilder body = new StringBuilder();
@@ -91,7 +91,7 @@ public class DCmdShop extends ListenerAdapter implements DiscordCommand {
             return;
         } catch (Economy.Consumer.InsufficientFundsException e) {
             EmbedBuilder embed = new EmbedBuilder();
-            embed.setDescription("You do not have sufficient funds to purchase " + item.getName() + ".\nYour balance: " + Economy.getCurrencySymbol() + consumer.getBalance() + "\nItem cost: " + Economy.getCurrencySymbol() + item.getTruePrice());
+            embed.setDescription("You do not have sufficient funds to purchase " + item.getName() + ".\nYour balance: " + Economy.getCurrencySymbol() + Economy.formatDouble(consumer.getBalance()) + "\nItem cost: " + Economy.getCurrencySymbol() + item.getTruePrice());
             embed.setColor(Color.RED);
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
@@ -107,8 +107,8 @@ public class DCmdShop extends ListenerAdapter implements DiscordCommand {
 
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Purchase successful!");
-        embed.setDescription("Purchased " + item.getName() + " for " + Economy.getCurrencySymbol() + item.getTruePrice() + ".");
-        embed.setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item.\nYour new balance is " + Economy.getCurrencySymbol() + consumer.getBalance());
+        embed.setDescription("Purchased " + item.getName() + " for " + Economy.getCurrencySymbol() + Economy.formatDouble(item.getTruePrice()) + ".");
+        embed.setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item.\nYour new balance is " + Economy.formatDouble(consumer.getBalance()));
         embed.setColor(Color.GREEN);
 
         event.editMessageEmbeds(embed.build()).queue();
@@ -124,12 +124,12 @@ public class DCmdShop extends ListenerAdapter implements DiscordCommand {
             try {
                 itemId = Integer.parseInt(itemIdString);
             } catch (NumberFormatException e) {
-                event.reply("The item you selected could not be parsed.").queue();
+                event.reply("The item you selected could not be parsed.").setEphemeral(true).queue();
                 return;
             }
             Economy.ShopItem item = Economy.getItem(itemId);
             if (item == null) {
-                event.reply("That item does not exist.").queue();
+                event.reply("That item does not exist.").setEphemeral(true).queue();
                 return;
             }
 
@@ -139,19 +139,19 @@ public class DCmdShop extends ListenerAdapter implements DiscordCommand {
             embed.setTitle(item.getName());
 
             StringBuilder description = new StringBuilder(item.getDescription());
-            if (item.getSalePercent() == 0) description.append("\n\nThis item costs ").append(Economy.getCurrencySymbol()).append(item.getPrice());
+            if (item.getSalePercent() == 0) description.append("\n\nThis item costs ").append(Economy.getCurrencySymbol()).append(Economy.formatDouble(item.getPrice()));
             else {
-                description.append("\n\nThis item regularly costs ").append(Economy.getCurrencySymbol()).append(item.getPrice()).append(".")
-                        .append("\nIt is currently **").append(item.getSalePercent()).append("% off**, bringing the total to **").append(Economy.getCurrencySymbol()).append(item.getTruePrice()).append("**.");
+                description.append("\n\nThis item regularly costs ").append(Economy.getCurrencySymbol()).append(Economy.formatDouble(item.getPrice())).append(".")
+                        .append("\nIt is currently **").append(item.getSalePercent()).append("% off**, bringing the total to **").append(Economy.getCurrencySymbol()).append(Economy.formatDouble(item.getTruePrice())).append("**.");
             }
-            if (item.getMaxAllowed() != -1) description.append("\nYou can carry up to **").append(item.getMaxAllowed()).append("** of this item at a time.");
-            if (item.getQuantity() != -1) description.append("\n**").append(item.getQuantity()).append("** of this item remain.");
+            if (item.getMaxAllowed() != -1) description.append("\nYou can carry up to **").append(Economy.formatDouble(item.getMaxAllowed())).append("** of this item at a time.");
+            if (item.getQuantity() != -1) description.append("\n**").append(Economy.formatDouble(item.getQuantity())).append("** of this item remain.");
             embed.setDescription(description);
-            embed.setFooter("Your current balance is " + Economy.getCurrencySymbol() + consumer.getBalance() + ". After purchasing this item, it would be " + Economy.getCurrencySymbol() + (consumer.getBalance() - item.getTruePrice()) + ".");
+            embed.setFooter("Your current balance is " + Economy.formatDouble(consumer.getBalance()) + ". After purchasing this item, it would be " + Economy.formatDouble(consumer.getBalance() - item.getTruePrice()) + ".");
 
-            net.dv8tion.jda.api.interactions.components.buttons.Button buyButton = Button.success("purchase-" + itemId, "Purchase for " + Economy.getCurrencySymbol() + item.getTruePrice());
+            net.dv8tion.jda.api.interactions.components.buttons.Button buyButton = Button.success("purchase-" + itemId, "Purchase for " + Economy.getCurrencySymbol() + Economy.formatDouble(item.getTruePrice()));
 
-            event.replyEmbeds(embed.build()).addActionRow(buyButton).setEphemeral(true).queue();
+            event.replyEmbeds(embed.build()).addActionRow(buyButton).queue();
 
         }
     }

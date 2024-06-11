@@ -10,6 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class DCmdDaily implements DiscordCommand {
     @NotNull
@@ -32,16 +35,16 @@ public class DCmdDaily implements DiscordCommand {
         try {
             reward = consumer.claimDaily();
         } catch (Economy.Consumer.CoolDownException e) {
-            Duration duration = gameData.timeUntilNextDaily();
-            embedBuilder.setColor(Color.red).setDescription("You cannot claim your daily reward for " + String.valueOf(duration.toHoursPart()).replaceFirst("-", "") + " hour(s), " + String.valueOf(duration.toMinutesPart()).replaceFirst("-", "") + " minute(s).");
+            Duration duration = Duration.between(LocalDateTime.now(), LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT));
+            embedBuilder.setColor(Color.red).setDescription("You have already claimed your daily reward for today. You cannot claim your daily reward for " + String.valueOf(duration.toHoursPart()).replaceFirst("-", "") + " hour(s), " + String.valueOf(duration.toMinutesPart()).replaceFirst("-", "") + " minute(s).");
             event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
             return;
         }
         Economy.saveConsumer(consumer);
 
-        embedBuilder.setDescription("You earned " + Economy.getCurrencySymbol() + reward + " today.\nCome back in 24 hours for your next reward.")
-                .setFooter("Your new balance is " + Economy.getCurrencySymbol() + consumer.getBalance() + "\nThis brings your streak to " + gameData.getDailyStreak() + " day(s).")
+        embedBuilder.setDescription("You earned " + Economy.getCurrencySymbol() + reward + " today.\nCome back tomorrow for your next reward.")
+                .setFooter("Your new balance is " + consumer.getBalance() + "\nThis brings your streak to " + gameData.getDailyStreak() + " day(s).")
                 .setColor(Color.GREEN);
-        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+        event.replyEmbeds(embedBuilder.build()).queue();
     }
 }

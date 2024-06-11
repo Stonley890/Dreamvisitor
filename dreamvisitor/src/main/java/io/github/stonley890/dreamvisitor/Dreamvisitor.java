@@ -119,6 +119,7 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdMoonglobe());
             commands.add(new CmdSetback());
             commands.add(new CmdParcel());
+            commands.add(new CmdDreamvisitor());
 
             debug("Initializing commands...");
             CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));

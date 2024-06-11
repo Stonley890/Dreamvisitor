@@ -34,13 +34,13 @@ public class DCmdBalance implements DiscordCommand {
             Economy.Consumer consumer = Economy.getConsumer(event.getUser().getIdLong());
             double balance;
             balance = consumer.getBalance();
-            message = "You have " + Economy.getCurrencySymbol() + balance + ".";
+            message = "You have " + Economy.getCurrencySymbol() + Economy.formatDouble(balance) + ".";
         }
 
         EmbedBuilder embed = new EmbedBuilder();
         embed.setDescription(message);
 
-        event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+        event.replyEmbeds(embed.build()).queue();
 
     }
 }

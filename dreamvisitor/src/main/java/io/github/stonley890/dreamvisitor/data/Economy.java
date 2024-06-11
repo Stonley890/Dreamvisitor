@@ -17,7 +17,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -36,6 +38,11 @@ public class Economy {
                 throw new IOException("Dreamvisitor tried to create " + file.getName() + ", but it cannot be read/written! Does the server have read/write access?", e);
             }
         }
+    }
+
+    public static String formatDouble(double number) {
+        DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
+        return decimalFormat.format(number);
     }
 
     @NotNull
@@ -587,12 +594,16 @@ public class Economy {
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj instanceof Consumer consumer) {
-                return (consumer.balance == balance && Objects.equals(consumer.items, items));
-            }
-            return false;
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Consumer consumer = (Consumer) o;
+            return id == consumer.id && Double.compare(balance, consumer.balance) == 0 && Objects.equals(items, consumer.items) && Objects.equals(gameData, consumer.gameData);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, balance, items, gameData);
         }
 
         @NotNull
@@ -714,7 +725,7 @@ public class Economy {
          * @throws CoolDownException if this consumer cannot yet claim their
          */
         public double claimDaily() throws CoolDownException {
-            if (!gameData.timeUntilNextDaily().isZero()) throw new CoolDownException();
+            if (gameData.lastDaily != null && !Objects.equals(gameData.lastDaily.plusHours(24).getDayOfYear(), LocalDateTime.now().getDayOfYear())) throw new CoolDownException();
             gameData.updateStreak();
             double dailyBaseAmount = Economy.getDailyBaseAmount();
             double reward = dailyBaseAmount + (gameData.getDailyStreak() * getDailyStreakMultiplier());
@@ -809,23 +820,13 @@ public class Economy {
             this.dailyStreak = dailyStreak;
         }
 
-        public Duration timeUntilNextDaily() {
-            if (lastDaily == null || lastDaily.plusDays(1).isBefore(LocalDateTime.now())) return Duration.ZERO;
-            return Duration.between(lastDaily.plusDays(1), LocalDateTime.now());
-        }
-
         public Duration timeUntilNextWork() {
             if (lastWork == null || lastWork.plusHours(1).isBefore(LocalDateTime.now())) return Duration.ZERO;
             return Duration.between(lastWork.plusHours(1), LocalDateTime.now());
         }
 
-        public Duration timeUntilDailyStreakBreak() {
-            if (lastDaily == null || lastDaily.plusDays(2).isBefore(LocalDateTime.now())) return Duration.ZERO;
-            return Duration.between(lastDaily.plusDays(2), LocalDateTime.now());
-        }
-
         public void updateStreak() {
-            if (timeUntilDailyStreakBreak().isZero()) setDailyStreak(0);
+            if (lastDaily == null || LocalDate.from(lastDaily).plusDays(2).equals(LocalDate.now())) setDailyStreak(0);
         }
 
         @Nullable
@@ -854,6 +855,19 @@ public class Economy {
             map.put("lastDaily", lastDaily != null ? lastDaily.toString() : null);
             map.put("lastWork", lastWork != null ? lastWork.toString() : null);
             return map;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GameData gameData = (GameData) o;
+            return dailyStreak == gameData.dailyStreak && Objects.equals(lastDaily, gameData.lastDaily) && Objects.equals(lastWork, gameData.lastWork);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(dailyStreak, lastDaily, lastWork);
         }
     }
 }

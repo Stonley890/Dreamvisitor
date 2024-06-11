@@ -138,6 +138,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                             description.append("\nEnabled: ").append(item.isEnabled());
                             description.append("\nGifting: ").append(item.isGiftingEnabled());
                             description.append("\nUsable: ").append(!item.isUseDisabled());
+                            description.append("\nUse on Purchase: ").append(item.isUseOnPurchase());
                             description.append("\nMax Allowed: ");
                             if (item.getMaxAllowed() == -1) description.append("Infinite");
                             else description.append(item.getMaxAllowed());

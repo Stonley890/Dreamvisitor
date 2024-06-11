@@ -52,6 +52,7 @@ public class DiscCommandsManager extends ListenerAdapter {
         addList.add(new DCmdEcostats());
         addList.add(new DCmdDaily());
         addList.add(new DCmdWork());
+        addList.add(new DCmdBaltop());
 
         Dreamvisitor.debug("Ready to add to guild.");
 

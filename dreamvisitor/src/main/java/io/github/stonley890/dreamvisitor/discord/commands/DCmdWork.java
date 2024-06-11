@@ -25,8 +25,8 @@ public class DCmdWork extends ListenerAdapter implements DiscordCommand {
         Economy.Consumer consumer = Economy.getConsumer(user.getIdLong());
         Economy.GameData gameData = consumer.getGameData();
 
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Work");
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Work");
 
         double reward;
 
@@ -34,15 +34,15 @@ public class DCmdWork extends ListenerAdapter implements DiscordCommand {
             reward = consumer.claimWork();
         } catch (Economy.Consumer.CoolDownException e) {
             Duration duration = gameData.timeUntilNextWork();
-            embedBuilder.setColor(Color.red).setDescription("You cannot work for " + String.valueOf(duration.toMinutes()).replaceFirst("-", "") + " minute(s).");
-            event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+            embed.setColor(Color.red).setDescription("You cannot work for " + String.valueOf(duration.toMinutes()).replaceFirst("-", "") + " minute(s).");
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
         Economy.saveConsumer(consumer);
 
-        embedBuilder.setDescription("You earned " + Economy.getCurrencySymbol() + reward + " today.\nCome back in one hour for your next reward.")
-                .setFooter("Your new balance is " + Economy.getCurrencySymbol() + consumer.getBalance())
+        embed.setDescription("You earned " + Economy.getCurrencySymbol() + reward + " today.\nCome back in one hour for your next reward.")
+                .setFooter("Your new balance is " + Economy.formatDouble(consumer.getBalance()))
                 .setColor(Color.GREEN);
-        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+        event.replyEmbeds(embed.build()).queue();
     }
 }

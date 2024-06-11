@@ -31,13 +31,9 @@ public class DCmdEcostats implements DiscordCommand {
                 .addField("Balance", Economy.getCurrencySymbol() + consumer.getBalance(), true)
                 .addField("Daily Streak", gameData.getDailyStreak() + " days", true);
 
-        String dailyHours = String.valueOf(gameData.timeUntilNextDaily().toHoursPart()).replaceFirst("-","");
-        String dailyMinutes = String.valueOf(gameData.timeUntilNextDaily().toMinutesPart()).replaceFirst("-", "");
-
         String workMinutes = String.valueOf(gameData.timeUntilNextWork().toMinutes()).replaceFirst("-", "");
 
-        embed.addField("Time Until Next Daily", dailyHours + " hours, " + dailyMinutes + " minutes.", false)
-                .addField("Time Until Next Work", workMinutes + " minutes.", false);
+        embed.addField("Time Until Next Work", workMinutes + " minutes.", false);
 
         event.replyEmbeds(embed.build()).queue();
 

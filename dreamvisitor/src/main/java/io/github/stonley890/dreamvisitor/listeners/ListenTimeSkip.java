@@ -13,7 +13,7 @@ public class ListenTimeSkip implements Listener {
     @EventHandler
     public void onTimeSkipEvent(TimeSkipEvent event) {
         // Sync time skips
-        for (World world : Bukkit.getWorlds()) if (!Objects.equals(world, event.getWorld())) new TimeSkipEvent(world, event.getSkipReason(), event.getSkipAmount());
+        for (World world : Bukkit.getWorlds()) if (!Objects.equals(world, event.getWorld())) world.setFullTime(event.getWorld().getFullTime());
 
     }
 

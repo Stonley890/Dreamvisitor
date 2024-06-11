@@ -58,7 +58,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
         Button useItem = Button.primary("inv-" + consumer.getId() + "-use", "Use an Item");
         Button giftItem = Button.success("inv-" + consumer.getId() + "-gift", "Gift an Item");
 
-        event.replyEmbeds(embed.build()).addActionRow(useItem, giftItem).setEphemeral(true).queue();
+        event.replyEmbeds(embed.build()).addActionRow(useItem, giftItem).queue();
 
     }
 
@@ -75,7 +75,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             String giftNotice = "This item cannot be gifted.";
             if (shopItem.isUseDisabled()) useNotice = "This item cannot be used.";
             if (shopItem.isGiftingEnabled()) giftNotice = "This item cannot be gifted.";
-            embed.addField("**" + quantityOfItem + "** " + shopItem.getName(), useNotice + "\n" + giftNotice, true);
+            embed.addField("**" + Economy.formatDouble(quantityOfItem) + "** " + shopItem.getName(), useNotice + "\n" + giftNotice, true);
         }
 
         return embed;
@@ -91,6 +91,12 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
         if (!id.startsWith("inv-")) return;
 
         long consumerId = Long.parseLong(split[1]);
+
+        if (consumerId != event.getUser().getIdLong()) {
+            event.reply("Only the invoker of this command can interact with this.").setEphemeral(true).queue();
+            return;
+        }
+
         Economy.Consumer consumer = Economy.getConsumer(consumerId);
         if (split[2].equals("use")) {
             StringSelectMenu.Builder selectMenu = StringSelectMenu.create("inv-" + consumerId + "-use");
@@ -119,7 +125,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
                 event.reply("You do not have any items you can gift.").setEphemeral(true).queue();
                 return;
             }
-            event.replyComponents(ActionRow.of(selectMenu.build())).setEphemeral(true).queue();
+            event.replyComponents(ActionRow.of(selectMenu.build())).queue();
         }
     }
 
@@ -134,6 +140,12 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
         if (!id.startsWith("inv-")) return;
 
         long consumerId = Long.parseLong(split[1]);
+
+        if (consumerId != event.getUser().getIdLong()) {
+            event.reply("Only the invoker of this command can interact with this.").setEphemeral(true).queue();
+            return;
+        }
+
         Economy.Consumer consumer = Economy.getConsumer(consumerId);
         switch (split[2]) {
             case "use" -> {
@@ -167,7 +179,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
                 Economy.saveConsumer(consumer);
 
                 embed.setColor(Color.GREEN).setDescription("Used one " + item.getName() + "!")
-                        .setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item left.");
+                        .setFooter("You now have " + Economy.formatDouble(consumer.getQuantityOfItem(itemId)) + " of this item left.");
                 event.replyEmbeds(embed.build()).queue();
 
                 EmbedBuilder invEmbed = new EmbedBuilder();
@@ -227,6 +239,12 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
         if (!id.startsWith("inv-")) return;
 
         long consumerId = Long.parseLong(split[1]);
+
+        if (consumerId != event.getUser().getIdLong()) {
+            event.reply("Only the invoker of this command can interact with this.").setEphemeral(true).queue();
+            return;
+        }
+
         Economy.Consumer consumer = Economy.getConsumer(consumerId);
         if (split[2].equals("giftItem")) {
             EmbedBuilder embed = new EmbedBuilder();
@@ -264,7 +282,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             Economy.saveConsumer(consumer1);
 
             embed.setDescription(event.getUser().getAsMention() + " gifted one " + item.getName() + " to " + member.getAsMention() + ".")
-                    .setColor(Color.GREEN).setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item left.");
+                    .setColor(Color.GREEN).setFooter("You now have " + Economy.formatDouble(consumer.getQuantityOfItem(itemId)) + " of this item left.");
             event.reply(member.getAsMention() + ", you were gifted an item!").addEmbeds(embed.build()).queue();
 
             EmbedBuilder invEmbed = new EmbedBuilder();
