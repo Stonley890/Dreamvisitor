@@ -40,7 +40,7 @@ public class DCmdWork extends ListenerAdapter implements DiscordCommand {
         }
         Economy.saveConsumer(consumer);
 
-        embed.setDescription("You earned " + Economy.getCurrencySymbol() + reward + " today.\nCome back in one hour for your next reward.")
+        embed.setDescription("You earned " + Economy.getCurrencySymbol() + reward + " by working.\nCome back in one hour to work again.")
                 .setFooter("Your new balance is " + Economy.formatDouble(consumer.getBalance()))
                 .setColor(Color.GREEN);
         event.replyEmbeds(embed.build()).queue();

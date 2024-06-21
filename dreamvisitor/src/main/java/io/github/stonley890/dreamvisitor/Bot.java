@@ -148,6 +148,7 @@ public class Bot {
     public static void sendLog(@NotNull String message) {
         try {
             if (!Dreamvisitor.botFailed &&!PLUGIN.getConfig().getBoolean("log-console")) Bot.getGameLogChannel().sendMessage(message).queue();
+            else gameLogChannel.sendMessage(message).queue();
         } catch (InsufficientPermissionException e) {
             Bukkit.getLogger().warning("Dreamvisitor bot does not have sufficient permissions to send messages in game log channel!");
         } catch (IllegalArgumentException e) {

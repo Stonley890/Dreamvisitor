@@ -187,16 +187,17 @@ public class DCmdWarn extends ListenerAdapter implements DiscordCommand {
             }
             case "warn-understand" -> {
                 TextChannel channel = (TextChannel) event.getMessageChannel();
+                event.reply("Marked as dismissed. View permission removed.").queue();
                 try {
                     channel.upsertPermissionOverride(Objects.requireNonNull(event.getMember())).setDenied(Permission.VIEW_CHANNEL).queue();
                 } catch (InsufficientPermissionException e) {
                     event.reply("Dreamvisitor has insufficient permissions: " + e.getMessage()).queue();
+                    return;
                 }
-                event.reply("Marked as dismissed.").queue();
                 event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
             }
             case "warn-explain" -> {
-                event.reply("A staff member will assist you shortly.").queue();
+                event.reply("A staff member will explain the reason for your warn. Please be patient. This could take some time.").queue();
                 event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
             }
         }

@@ -23,6 +23,9 @@ public class DCmdEcostats implements DiscordCommand {
 
         Economy.Consumer consumer = Economy.getConsumer(event.getUser().getIdLong());
         Economy.GameData gameData = consumer.getGameData();
+        gameData.updateStreak();
+        consumer.setGameData(gameData);
+        Economy.saveConsumer(consumer);
 
         EmbedBuilder embed = new EmbedBuilder();
 

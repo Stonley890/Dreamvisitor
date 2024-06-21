@@ -3,12 +3,10 @@ package io.github.stonley890.dreamvisitor.discord;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.*;
-import io.github.stonley890.dreamvisitor.discord.commands.DCmdWarn;
 import io.github.stonley890.dreamvisitor.functions.Whitelist;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -31,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
-import java.io.InvalidObjectException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -57,7 +54,11 @@ public class DiscEventListener extends ListenerAdapter {
 
         // If in the whitelist channel and username is "legal"
         try {
-            if (channel.equals(Bot.getWhitelistChannel()) && !user.isBot() && !p.matcher(username).find()) {
+            Dreamvisitor.debug("Channel ID: " + channel.getId());
+            Dreamvisitor.debug("Whitelist ID: " + Bot.getWhitelistChannel().getId());
+            Dreamvisitor.debug("Game chat ID: " + Bot.getGameChatChannel().getId());
+            Dreamvisitor.debug("Log chat ID: " + Bot.getGameLogChannel().getId());
+            if (channel.getId().equals(Bot.getWhitelistChannel().getId()) && !user.isBot() && !p.matcher(username).find()) {
 
                 EmbedBuilder builder = new EmbedBuilder();
 
@@ -131,7 +132,7 @@ public class DiscEventListener extends ListenerAdapter {
                     }
                 }
 
-            } else if (channel.equals(Bot.getWhitelistChannel()) && !user.isBot()) {
+            } else if (channel.getId().equals(Bot.getWhitelistChannel().getId()) && !user.isBot()) {
 
                 EmbedBuilder builder = new EmbedBuilder();
 
@@ -148,7 +149,7 @@ public class DiscEventListener extends ListenerAdapter {
         }
 
         // If in the chat channel and the chat is not paused, send to Minecraft
-        if (channel.equals(Bot.getGameChatChannel()) && !user.isBot()
+        if (channel.getId().equals(Bot.getGameChatChannel().getId()) && !user.isBot()
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             // Build message
@@ -170,7 +171,7 @@ public class DiscEventListener extends ListenerAdapter {
             }
         }
 
-        if (event.getChannel().equals(Bot.getGameLogChannel())) {
+        if (event.getChannel().getId().equals(Bot.getGameLogChannel().getId())) {
 
             if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
 
@@ -198,7 +199,7 @@ public class DiscEventListener extends ListenerAdapter {
                 Bukkit.getLogger().warning("Dreamvisitor was mentioned, but doesn't have permission to respond! " + e.getMessage());
             }
 
-            if (channel.equals(Bot.getGameChatChannel()) && !user.isBot()
+            if (channel.getId().equals(Bot.getGameChatChannel().getId()) && !user.isBot()
                     && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
                 // Build message
@@ -254,7 +255,7 @@ public class DiscEventListener extends ListenerAdapter {
                     "What can I do for you this time?", "Why have you summoned me, mortal?", "Not now.", "What will it take to get you to stop?",
                     "I've seen a lot of things, but your persistence is something I have not encountered before.",
                     "Have you heard of the dark triad?", "I'm not a NightWing, but I can see that you will regret talking to me.",
-                    "If I were a SandWing, you'd have poison in your blood by now.",
+                    "If I were a SandWing, you'd have venom in your blood by now.",
                     "If I were an IceWing, I'd freeze your tongue.", "If I were a SilkWing, I'd tie you up far, far away.",
                     "You have nothing to gain talking to me.", "Are you sure this can't wait?", "I'm not your therapist.",
                     "Why don't you talk to Kinkajou instead?", "If it's the Dreamvisitor you want, I'm not giving it up. " +
@@ -452,32 +453,6 @@ You could say I have a special nostalgia with that one."""
                 event.reply("✅ The server will restart when there are no players online").addActionRow(undoButton).queue();
             }
 
-        } else if (button.getId().equals(Infraction.actionBan) || button.getId().equals(Infraction.actionNoBan) || button.getId().equals(Infraction.actionAllBan) || button.getId().equals(Infraction.actionUserBan)) {
-
-            try {
-                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
-                Infraction.execute(DCmdWarn.lastInfraction, Objects.requireNonNull(Objects.requireNonNull(event.getGuild()).retrieveMemberById(DCmdWarn.memberId).complete()), DCmdWarn.silent, button.getId());
-                event.reply("Infraction notice created.").queue();
-            } catch (InsufficientPermissionException e) {
-                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
-                event.reply("Dreamvisitor does not have sufficient permissions! " + e.getMessage()).queue();
-            } catch (InvalidObjectException e) {
-                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
-                event.reply("Something is configured incorrectly! " + e.getMessage()).queue();
-            }
-
-        } else if (button.getId().equals("warn-understand")) {
-            TextChannel channel = (TextChannel) event.getMessageChannel();
-            try {
-                channel.upsertPermissionOverride(Objects.requireNonNull(event.getMember())).setDenied(Permission.VIEW_CHANNEL).queue();
-            } catch (InsufficientPermissionException e) {
-                event.reply("Dreamvisitor has insufficient permissions: " + e.getMessage()).queue();
-            }
-            event.reply("Marked as dismissed.").queue();
-            event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
-        } else if (button.getId().equals("warn-explain")) {
-            event.reply("A staff member will assist you shortly.").queue();
-            event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
         } else if (button.getId().startsWith("infraction-")) {
             if (button.getId().startsWith("infraction-expire-")) {
 

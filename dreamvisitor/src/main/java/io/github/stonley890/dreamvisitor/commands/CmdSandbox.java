@@ -14,12 +14,14 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class CmdSandbox implements DVCommand {
 
@@ -50,10 +52,14 @@ public class CmdSandbox implements DVCommand {
                         HoverEvent tooltip = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to remove."));
 
                         for (Player player : sandboxedPlayers) {
-                            messageBuilder.append("[").color(ChatColor.WHITE)
-                                    .append(player.getName()).color(ChatColor.YELLOW)
+                            Location location = player.getLocation();
+                            messageBuilder.append(player.getName()).color(ChatColor.YELLOW)
+                                    .append(" [").color(ChatColor.WHITE)
+                                    .append("Remove").color(ChatColor.RED)
                                     .event(tooltip).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sandbox " + player.getName() + " off"))
-                                    .append("] ").color(ChatColor.WHITE).event((ClickEvent) null);
+                                    .append("]\n").color(ChatColor.WHITE).event((ClickEvent) null)
+                                    .append(String.valueOf(location.getBlockX())).append(", ").append(String.valueOf(location.getBlockY())).append(", ").append(String.valueOf(location.getBlockZ()))
+                                    .append(" in world ").append(Objects.requireNonNull(location.getWorld()).getName()).append(".\n\n");
                         }
 
                         sender.spigot().sendMessage(messageBuilder.create());

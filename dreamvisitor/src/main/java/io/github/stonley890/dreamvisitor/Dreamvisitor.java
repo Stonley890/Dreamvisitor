@@ -24,9 +24,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 /*
@@ -289,6 +287,42 @@ public class Dreamvisitor extends JavaPlugin {
                 }
             };
 
+            Runnable remindWarns = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Dreamvisitor.debug("Checking warns to be reminded.");
+                    Map<Long, List<Infraction>> infractions = Infraction.getAllInfractions();
+                    Dreamvisitor.debug("Got list of " + infractions.keySet().size() + " members.");
+                    for (Long l : infractions.keySet()) {
+                        Dreamvisitor.debug("Checking infractions of user " + l);
+                        List<Infraction> userInfractions = Infraction.getInfractions(l);
+                        for (Infraction userInfraction : userInfractions) {
+                            Dreamvisitor.debug("Attempting remind...");
+                            userInfraction.remind(l);
+                        }
+                    }
+                }
+            };
+
+            Runnable checkBannedItems = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        if (!player.isOp() && ItemBanList.badItems != null) {
+
+                            for (ItemStack item : ItemBanList.badItems) {
+                                if (item == null) continue;
+                                for (ItemStack content : player.getInventory().getContents()) {
+                                    if (content == null || !content.isSimilar(item)) continue;
+                                    player.getInventory().remove(item);
+                                    Bot.sendLog("Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
             Bukkit.getScheduler().runTaskTimer(this, tick, 0, 0);
 
             // Push console every two seconds
@@ -296,6 +330,12 @@ public class Dreamvisitor extends JavaPlugin {
 
             // Check for scheduled restart every minute
             Bukkit.getScheduler().runTaskTimer(this, scheduledRestarts, 200, 1200);
+
+            // Check for warns that need to be reminded every hour
+            Bukkit.getScheduler().runTaskTimer(this, remindWarns, 200, 20*60*60);
+
+            // Check for banned items every ten seconds
+            Bukkit.getScheduler().runTaskTimer(this, checkBannedItems, 40, 20*10);
 
             debug("Enable finished.");
         } catch (Exception e) {

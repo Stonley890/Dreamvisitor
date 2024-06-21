@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.BanList;
@@ -17,6 +18,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.io.File;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +45,8 @@ public class Infraction implements ConfigurationSerializable {
     @NotNull
     private final LocalDateTime time;
     private boolean expired = false;
+    @Nullable
+    private Long warnChannelID = null;
 
     /**
      * Creates and saves an infraction to disk.
@@ -105,6 +110,19 @@ public class Infraction implements ConfigurationSerializable {
         List<Infraction> infractions = new ArrayList<>();
         for (Map<?, ?> map : infractionsMap) infractions.add(deserialize((Map<String, Object>) map));
         return infractions;
+    }
+
+    public static @NotNull Map<Long, List<Infraction>> getAllInfractions() {
+        Set<String> keys = getConfig().getKeys(false);
+        Map<Long, List<Infraction>> infractionList = new HashMap<>();
+        for (String key : keys) {
+            List<Map<?, ?>> infractionsMap = getConfig().getMapList(key);
+            List<Infraction> infractions = new ArrayList<>();
+            for (Map<?, ?> map : infractionsMap) infractions.add(deserialize((Map<String, Object>) map));
+            infractionList.put(Long.parseLong(key), infractions);
+        }
+
+        return infractionList;
     }
 
     /**
@@ -193,6 +211,32 @@ public class Infraction implements ConfigurationSerializable {
             return;
         }
 
+        if (doBan) {
+            UUID uuid = AccountLink.getUuid(member.getIdLong());
+            if (uuid != null) Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), bukkitTask -> {
+                String username = PlayerUtility.getUsernameOfUuid(uuid);
+                if (username != null) {
+                    ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
+                    if (!hasTempban)
+                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
+                    else
+                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
+                }
+            });
+        }
+
+        if (banPoint) {
+            infraction.expire();
+            List<Infraction> disabledInfractions = new ArrayList<>();
+            for (Infraction existingInfraction : infractions) {
+                existingInfraction.expire();
+                disabledInfractions.add(existingInfraction);
+            }
+            setInfractions(disabledInfractions, member.getIdLong());
+            if (!hasTempban) setTempban(member.getIdLong(), true);
+            else setBan(member.getIdLong(), true);
+        }
+
         if (!silent) {
 
             Category category = Bot.getGameLogChannel().getGuild().getCategoryById(Dreamvisitor.getPlugin().getConfig().getLong("infractions-category-id"));
@@ -201,7 +245,7 @@ public class Infraction implements ConfigurationSerializable {
             category.createTextChannel("infraction-" + member.getUser().getName() + "-" + (totalInfractionCount + infraction.value)).queue(channel -> {
 
                 Button primary = Button.primary("warn-understand", "I understand");
-                Button secondary = Button.secondary("warn-explain", "I want an explanation");
+                Button secondary = Button.secondary("warn-explain", "I'm confused");
 
                 channel.upsertPermissionOverride(member).setAllowed(Permission.VIEW_CHANNEL).queue();
 
@@ -245,37 +289,11 @@ public class Infraction implements ConfigurationSerializable {
                 embed.setTitle("Infraction Notice").setDescription(description).setFooter("See the #rules channel for more information about our rules system.").setColor(Color.getHSBColor(17, 100, 100));
 
                 channel.sendMessage(member.getAsMention()).setEmbeds(embed.build()).setActionRow(primary, secondary).queue();
+                infraction.warnChannelID = channel.getIdLong();
+                infraction.save(member.getIdLong());
             }, throwable -> DCmdWarn.lastInteraction.editOriginal("There was a problem executing this command: " + throwable.getMessage()).queue());
 
-        }
-
-        if (doBan) {
-            UUID uuid = AccountLink.getUuid(member.getIdLong());
-            if (uuid != null) Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), bukkitTask -> {
-                String username = PlayerUtility.getUsernameOfUuid(uuid);
-                if (username != null) {
-                    ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
-                    if (!hasTempban)
-                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
-                    else
-                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
-                }
-            });
-        }
-
-        if (banPoint) {
-            infraction.expire();
-            List<Infraction> disabledInfractions = new ArrayList<>();
-            for (Infraction existingInfraction : infractions) {
-                existingInfraction.expire();
-                disabledInfractions.add(existingInfraction);
-            }
-            setInfractions(disabledInfractions, member.getIdLong());
-            if (!hasTempban) setTempban(member.getIdLong(), true);
-            else setBan(member.getIdLong(), true);
-        }
-
-        infraction.save(member.getIdLong());
+        } else infraction.save(member.getIdLong());
 
     }
 
@@ -285,6 +303,7 @@ public class Infraction implements ConfigurationSerializable {
     public static @NotNull Infraction deserialize(@NotNull Map<String, Object> map) {
         Infraction infraction = new Infraction(Byte.parseByte(String.valueOf((int) map.get("value"))), (String) map.get("reason"), LocalDateTime.parse((CharSequence) map.get("time")));
         if (map.get("expired") != null && (boolean) map.get("expired")) infraction.expire();
+        infraction.warnChannelID = (Long) map.get("warnChannelID");
         return infraction;
     }
 
@@ -327,6 +346,29 @@ public class Infraction implements ConfigurationSerializable {
         if (time.plusDays(expireTimeDays).isBefore(LocalDateTime.now())) expired = true;
     }
 
+    @Nullable
+    public TextChannel getWarnChannel() {
+        if (warnChannelID == null) return null;
+        return Bot.getJda().getTextChannelById(warnChannelID);
+    }
+
+    public void remind(long user) {
+        Dreamvisitor.debug("Remind warn. warnChannelId: " + warnChannelID);
+        if (warnChannelID == null) return;
+        TextChannel warnChannel = getWarnChannel();
+        if (warnChannel == null) return;
+
+        Dreamvisitor.debug("Attempting to retrieve last message.");
+        warnChannel.retrieveMessageById(warnChannel.getLatestMessageId()).queue(message -> {
+            Dreamvisitor.debug("Retrieved last message.");
+            Dreamvisitor.debug("Message author is bot? " + message.getAuthor().equals(Bot.getJda().getSelfUser()));
+            Dreamvisitor.debug("Time is passed? " + message.getTimeCreated().plusDays(1).isBefore(OffsetDateTime.now()));
+            if (message.getAuthor().equals(Bot.getJda().getSelfUser()) && message.getTimeCreated().plusDays(1).isBefore(OffsetDateTime.now())) {
+                warnChannel.getGuild().retrieveMemberById(user).queue(member -> warnChannel.sendMessage(member.getAsMention() + ", you have not yet responded to this thread. On the first message in this thread, press **I understand** to close the thread or **I'm confused** if you're confused.").queue());
+            }
+        });
+    }
+
     @NotNull
     @Override
     public Map<String, Object> serialize() {
@@ -336,7 +378,21 @@ public class Infraction implements ConfigurationSerializable {
         objectMap.put("reason", reason);
         objectMap.put("time", time.toString());
         objectMap.put("expired", expired);
+        objectMap.put("warnChannelID", warnChannelID);
 
         return objectMap;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Infraction that = (Infraction) o;
+        return value == that.value && expired == that.expired && Objects.equals(reason, that.reason) && Objects.equals(time, that.time) && Objects.equals(warnChannelID, that.warnChannelID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, reason, time, expired, warnChannelID);
     }
 }

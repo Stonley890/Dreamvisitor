@@ -725,8 +725,8 @@ public class Economy {
          * @throws CoolDownException if this consumer cannot yet claim their
          */
         public double claimDaily() throws CoolDownException {
-            if (gameData.lastDaily != null && !Objects.equals(gameData.lastDaily.plusHours(24).getDayOfYear(), LocalDateTime.now().getDayOfYear())) throw new CoolDownException();
             gameData.updateStreak();
+            if (gameData.lastDaily != null && Objects.equals(gameData.lastDaily.toLocalDate(), LocalDate.now())) throw new CoolDownException();
             double dailyBaseAmount = Economy.getDailyBaseAmount();
             double reward = dailyBaseAmount + (gameData.getDailyStreak() * getDailyStreakMultiplier());
             setBalance(balance + reward);
@@ -778,9 +778,6 @@ public class Economy {
                 super();
             }
 
-            public CoolDownException(String message) {
-                super(message);
-            }
         }
     }
 
@@ -826,7 +823,7 @@ public class Economy {
         }
 
         public void updateStreak() {
-            if (lastDaily == null || LocalDate.from(lastDaily).plusDays(2).equals(LocalDate.now())) setDailyStreak(0);
+            if (lastDaily == null || !LocalDate.from(lastDaily).plusDays(1).equals(LocalDate.now())) setDailyStreak(0);
         }
 
         @Nullable
