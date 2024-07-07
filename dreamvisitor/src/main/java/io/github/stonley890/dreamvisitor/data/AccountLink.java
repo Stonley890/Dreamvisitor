@@ -54,7 +54,6 @@ public class AccountLink {
             Bukkit.getLogger().severe("There was an error reading from accountLink.txt! " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(Dreamvisitor.getPlugin());
         }
-
     }
 
     public static void saveFile() {
@@ -82,15 +81,9 @@ public class AccountLink {
 
     }
 
-    private static void refresh() {
-        if (uuidToDiscordIdMap.isEmpty()) {
-            loadFromFile();
-        }
-    }
-
     public static void linkAccounts(@NotNull UUID minecraftUUID, @NotNull Long discordId) {
 
-        refresh();
+        loadFromFile();
 
         if (Objects.equals(getUuid(discordId), minecraftUUID) && getDiscordId(minecraftUUID) == discordId) return;
 
@@ -119,7 +112,7 @@ public class AccountLink {
      * @throws NullPointerException if the given {@link UUID} does not have an associated Discord ID.
      */
     public static long getDiscordId(@NotNull UUID minecraftUUID) {
-        refresh();
+        loadFromFile();
         return uuidToDiscordIdMap.get(minecraftUUID);
     }
 
@@ -129,7 +122,7 @@ public class AccountLink {
      * @return the {@link UUID} associated with this Discord ID or {@code null} if it does not exist.
      */
     public static @Nullable UUID getUuid(long discordId) {
-        refresh();
+        loadFromFile();
         return discordIdToUuidMap.get(discordId);
     }
 }

@@ -60,7 +60,7 @@ public class DCmdSeen implements DiscordCommand {
         EmbedBuilder embed = new EmbedBuilder();
         String status = "offline";
         if (online) status = "online";
-        embed.setDescription(user.getAsMention() + " has been " + status + " since " + duration.toDaysPart() + " days, " + duration.toHoursPart() + " hours, " + duration.toMinutesPart() + " minutes, " + duration.toSecondsPart() + " and seconds ago.");
+        embed.setDescription(user.getAsMention() + " has been " + status + " since " + duration.toDaysPart() + " days, " + duration.toHoursPart() + " hours, " + duration.toMinutesPart() + " minutes, and " + duration.toSecondsPart() + " seconds ago.");
         embed.setColor(Color.BLUE);
         embed.setTimestamp(Instant.now());
 

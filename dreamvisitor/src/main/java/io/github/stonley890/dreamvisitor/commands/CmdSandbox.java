@@ -56,7 +56,7 @@ public class CmdSandbox implements DVCommand {
                             messageBuilder.append(player.getName()).color(ChatColor.YELLOW)
                                     .append(" [").color(ChatColor.WHITE)
                                     .append("Remove").color(ChatColor.RED)
-                                    .event(tooltip).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sandbox " + player.getName() + " off"))
+                                    .event(tooltip).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sandbox " + player.getName() + " false"))
                                     .append("]\n").color(ChatColor.WHITE).event((ClickEvent) null)
                                     .append(String.valueOf(location.getBlockX())).append(", ").append(String.valueOf(location.getBlockY())).append(", ").append(String.valueOf(location.getBlockZ()))
                                     .append(" in world ").append(Objects.requireNonNull(location.getWorld()).getName()).append(".\n\n");

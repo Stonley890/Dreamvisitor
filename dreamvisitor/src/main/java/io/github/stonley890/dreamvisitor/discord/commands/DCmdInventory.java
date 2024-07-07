@@ -75,7 +75,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             String giftNotice = "This item cannot be gifted.";
             if (shopItem.isUseDisabled()) useNotice = "This item cannot be used.";
             if (shopItem.isGiftingEnabled()) giftNotice = "This item cannot be gifted.";
-            embed.addField("**" + Economy.formatDouble(quantityOfItem) + "** " + shopItem.getName(), useNotice + "\n" + giftNotice, true);
+            embed.addField("**" + quantityOfItem + "** " + shopItem.getName(), useNotice + "\n" + giftNotice, true);
         }
 
         return embed;
@@ -179,7 +179,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
                 Economy.saveConsumer(consumer);
 
                 embed.setColor(Color.GREEN).setDescription("Used one " + item.getName() + "!")
-                        .setFooter("You now have " + Economy.formatDouble(consumer.getQuantityOfItem(itemId)) + " of this item left.");
+                        .setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item left.");
                 event.replyEmbeds(embed.build()).queue();
 
                 EmbedBuilder invEmbed = new EmbedBuilder();
@@ -282,7 +282,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             Economy.saveConsumer(consumer1);
 
             embed.setDescription(event.getUser().getAsMention() + " gifted one " + item.getName() + " to " + member.getAsMention() + ".")
-                    .setColor(Color.GREEN).setFooter("You now have " + Economy.formatDouble(consumer.getQuantityOfItem(itemId)) + " of this item left.");
+                    .setColor(Color.GREEN).setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item left.");
             event.reply(member.getAsMention() + ", you were gifted an item!").addEmbeds(embed.build()).queue();
 
             EmbedBuilder invEmbed = new EmbedBuilder();

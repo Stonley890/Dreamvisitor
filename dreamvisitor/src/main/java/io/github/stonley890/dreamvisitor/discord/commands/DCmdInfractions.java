@@ -76,7 +76,8 @@ public class DCmdInfractions extends ListenerAdapter implements DiscordCommand {
         }
 
         embed
-                .setTitle("Infractions of " + user.getAsMention())
+                .setTitle("Infractions")
+                .setDescription("Infractions of " + user.getAsMention() + ":")
                 .setAuthor(user.getName(), null, user.getAvatarUrl())
                 .setFooter("The total value of valid infractions is " + Infraction.getInfractionCount(infractions, false) + ".\n" +
                         "The total value of infractions " + Infraction.getInfractionCount(infractions, true) + ".");

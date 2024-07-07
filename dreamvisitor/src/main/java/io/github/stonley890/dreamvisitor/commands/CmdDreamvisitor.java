@@ -269,6 +269,33 @@ public class CmdDreamvisitor implements DVCommand {
                                         .executes((sender, args) -> {
                                             @Nullable String key = "mailDistanceToRewardMultiplier";
                                             configLong(sender, args, key);
+                                        }),
+                                new CommandAPICommand("currentYear")
+                                        .withHelp("Set currentYear.", "The current in-universe year.\n" +
+                                                "This will be incremented by Dreamvisitor automatically.\n" +
+                                                "Default: 0")
+                                        .withOptionalArguments(new LongArgument("currentYear"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "currentYear";
+                                            configLong(sender, args, key);
+                                        }),
+                                new CommandAPICommand("minutesPerYear")
+                                        .withHelp("Set minutesPerYear.", "The number of minutes in an in-universe year.\n" +
+                                                "Default: 43200")
+                                        .withOptionalArguments(new LongArgument("minutesPerYear"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "minutesPerYear";
+                                            configLong(sender, args, key);
+                                        }),
+                                new CommandAPICommand("lastUpdateMilli")
+                                        .withHelp("Set lastUpdateMilli.", "The last time the year was updated.\n" +
+                                                "This is used to keep time accurately, even if the server goes offline.\n" +
+                                                "Do not change this value.\n" +
+                                                "Default: 0")
+                                        .withOptionalArguments(new LongArgument("lastUpdateMilli"))
+                                        .executes((sender, args) -> {
+                                            @Nullable String key = "lastUpdateMilli";
+                                            configLong(sender, args, key);
                                         })
                         )
                 );
