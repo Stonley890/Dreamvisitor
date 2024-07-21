@@ -23,6 +23,15 @@ public class ListenSignChangeEvent implements Listener {
         Block block = event.getBlock();
         String[] lines = event.getLines();
 
+        boolean empty = true;
+        for (String line : lines) {
+            if (!line.isBlank()) {
+                empty = false;
+                break;
+            }
+        }
+        if (empty) return;
+
         String message = ChatColor.GOLD + editor.getName() + " placed or edited a sign at " + block.getX() + ", " + block.getY() + ", " + block.getZ() + " in " + block.getWorld().getName() + ":\n" + ChatColor.RESET
                 + lines[0] + "\n" + lines[1] + "\n" + lines[2] + "\n" + lines[3] + "\n";
 

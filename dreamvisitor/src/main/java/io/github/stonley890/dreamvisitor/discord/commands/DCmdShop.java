@@ -149,7 +149,7 @@ public class DCmdShop extends ListenerAdapter implements DiscordCommand {
             embed.setDescription(description);
             embed.setFooter("Your current balance is " + Economy.formatDouble(consumer.getBalance()) + ". After purchasing this item, it would be " + Economy.formatDouble(consumer.getBalance() - item.getTruePrice()) + ".");
 
-            net.dv8tion.jda.api.interactions.components.buttons.Button buyButton = Button.success("purchase-" + itemId, "Purchase for " + Economy.getCurrencySymbol() + Economy.formatDouble(item.getTruePrice()));
+            net.dv8tion.jda.api.interactions.components.buttons.Button buyButton = Button.success("purchase-" + itemId, "Purchase for " + Economy.formatDouble(item.getTruePrice()));
 
             event.replyEmbeds(embed.build()).addActionRow(buyButton).queue();
 
