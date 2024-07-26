@@ -1,14 +1,17 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
+import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
-import io.github.stonley890.dreamvisitor.data.AccountLink;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.*;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -16,126 +19,93 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
-public class CmdTribeUpdate implements CommandExecutor {
+public class CmdTribeUpdate implements DVCommand {
+
+    @NotNull
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
+    public CommandAPICommand getCommand() {
+        return new CommandAPICommand("tribeupdate")
+                .withHelp("Update a player's tribe.", "Update the roles of a player based on their tribe.")
+                .withPermission(CommandPermission.fromString("dreamvisitor.tribeupdate"))
+                .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
+                .executesNative((sender, args) -> {
+                    Collection<Player> players = (Collection<Player>) args.get("players");
+                    assert players != null;
 
-        List<Player> targets = new ArrayList<>();
+                    // This may take some time
+                    sender.sendMessage(Dreamvisitor.PREFIX + "Please wait...");
 
-        if (args.length == 0) {
-            // If no arguments, do self (if player)
-            if (sender instanceof Player player) {
-                targets.add(player);
-            } else {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Missing arguments! /tribeupdate <targets>");
-                return true;
-            }
-        } else if (args.length == 1) {
+                    Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
 
-            // Use vanilla target selector args
-            List<Entity> entities;
-            try {
-                entities = Bukkit.selectEntities(sender, args[0]);
-            } catch (IllegalArgumentException e) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Incorrect arguments! /tribeupdate <targets>");
-                return true;
-            }
+                    // Run async
+                    Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
 
-            // Check if empty
-            if (entities.isEmpty()) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "No players were selected.");
-                return true;
-            }
+                        List<String> tribeRoles = Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles");
 
-            // Check for non-players
-            for (Entity entity : entities) {
-                if (entity instanceof Player player) {
-                    targets.add(player);
-                } else {
-                    sender.sendMessage(Main.PREFIX + ChatColor.RED + "This command is only applicable to players.");
-                    return true;
-                }
-            }
+                        for (Player player : players) {
 
-        } else {
-            sender.sendMessage(Main.PREFIX + ChatColor.RED + "Too many arguments! /tribeupdate <targets>");
-            return true;
-        }
+                            UUID uuid = player.getUniqueId();
 
-        // Target selection is good
-
-        // This may take some time
-        sender.sendMessage(Main.PREFIX + "Please wait...");
-
-        Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
-
-        // Run async
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getPlugin(), () -> {
-
-            List<String> tribeRoles = Main.getPlugin().getConfig().getStringList("tribeRoles");
-
-            for (Player player : targets) {
-
-                UUID uuid = player.getUniqueId();
-
-                // Get stored Discord ID
-                long discordId;
-                try {
-                    discordId = AccountLink.getDiscordId(uuid);
-                } catch (NullPointerException e) {
-                    sender.sendMessage(Main.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
-                    continue;
-                }
-
-                Main.debug(player.getUniqueId().toString());
-                Main.debug(String.valueOf(discordId));
-
-                // Retrieve user from JDA
-                User user = Bot.getJda().retrieveUserById(discordId).complete();
-
-                // Get team
-                Team playerTeam = scoreboard.getEntryTeam(player.getName());
-
-                if (playerTeam != null) {
-
-                    // Iterate through team names to get index
-                    for (int i = 0; i < Bot.TRIBE_NAMES.length; i++) {
-                        if (playerTeam.getName().equalsIgnoreCase(Bot.TRIBE_NAMES[i])) {
-
-                            // Remove roles
-                            for (String roleId : tribeRoles) {
-                                Bot.gameLogChannel.getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
+                            // Get stored Discord ID
+                            long discordId;
+                            try {
+                                discordId = AccountLink.getDiscordId(uuid);
+                            } catch (NullPointerException e) {
+                                sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
+                                continue;
                             }
 
-                            Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(i));
+                            Dreamvisitor.debug(player.getUniqueId().toString());
+                            Dreamvisitor.debug(String.valueOf(discordId));
 
-                            if (targetRole == null) {
-                                sender.sendMessage(Main.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
-                                break;
+                            // Retrieve user from JDA
+                            User user;
+                            try {
+                                user = Bot.getJda().retrieveUserById(discordId).complete();
+                            } catch (Exception e) {
+                                sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + "'s associated Discord ID is invalid. Skipping...");
+                                continue;
                             }
 
-                            // Add role
-                            Bot.gameLogChannel.getGuild().addRoleToMember(user, targetRole).queue();
+                            PlayerTribe.updateTribeOfPlayer(uuid);
 
-                            break;
+                            // Get team
+                            Team playerTeam = scoreboard.getEntryTeam(player.getName());
+
+                            if (playerTeam != null) {
+
+                                Tribe tribe = TribeUtil.parse(playerTeam.getName());
+                                if (tribe != null) {
+
+                                    try {
+                                        // Remove roles
+                                        for (String roleId : tribeRoles) {
+                                            Bot.getGameLogChannel().getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
+                                        }
+
+                                        Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(TribeUtil.indexOf(tribe)));
+
+                                        if (targetRole == null) {
+                                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
+                                            break;
+                                        }
+
+                                        // Add role
+                                        Bot.getGameLogChannel().getGuild().addRoleToMember(user, targetRole).queue();
+                                    } catch (InsufficientPermissionException e) {
+                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Dreamvisitor Bot is missing permission MANAGE_ROLES. Skipping...");
+                                    } catch (NullPointerException e) {
+                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "One or more tribe roles  Skipping...");
+                                    }
+                                }
+                            }
                         }
-                    }
 
-                }
+                        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + players.size() + " players."));
 
-            }
-
-            Bukkit.getScheduler().runTask(Main.getPlugin(), () -> sender.sendMessage(Main.PREFIX + "Updated " + targets.size() + " players."));
-
-        });
-
-        return true;
-
+                    });
+                });
     }
-
 }

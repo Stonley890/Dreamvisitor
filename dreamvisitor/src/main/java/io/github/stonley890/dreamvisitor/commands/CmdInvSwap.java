@@ -1,26 +1,29 @@
 package io.github.stonley890.dreamvisitor.commands;
 
-import io.github.stonley890.dreamvisitor.Main;
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.InvSwap;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class CmdInvSwap implements CommandExecutor {
+public class CmdInvSwap implements DVCommand {
+
+    @NotNull
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public CommandAPICommand getCommand() {
+        return new CommandAPICommand("invswap")
+                .withHelp("Swap your inventory.", "Swap between two different inventories.")
+                .withPermission(CommandPermission.fromString("dreamvisitor.invswap"))
+                .executesNative(((sender, args) -> {
+                    CommandSender callee = sender.getCallee();
+                    if (callee instanceof Player player) {
+                        InvSwap.swapInventories(player);
+                        callee.sendMessage(Dreamvisitor.PREFIX + "Your inventory has been swapped!");
+                    } else throw CommandAPI.failWithString("This command can only be executed as a player!");
 
-        if (sender instanceof Player player) {
-
-            InvSwap.swapInventories(player);
-
-        } else {
-            sender.sendMessage(Main.PREFIX + ChatColor.RED + "This command must be run by a player!");
-        }
-
-        return true;
+               }));
     }
 }

@@ -1,5 +1,6 @@
-package io.github.stonley890.dreamvisitor;
+package io.github.stonley890.dreamvisitor.functions;
 
+import io.github.stonley890.dreamvisitor.Bot;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;
@@ -28,10 +29,7 @@ public class ConsoleLogger extends AbstractAppender {
 
         if (log.getThrown() != null) {
             builder.append("\n").append(log.getThrown().getMessage());
-            for (StackTraceElement stackTraceElement : log.getThrown().getStackTrace()) {
-                builder.append("\n").append(stackTraceElement.toString());
-            }
-
+            for (StackTraceElement stackTraceElement : log.getThrown().getStackTrace()) builder.append("\n").append(stackTraceElement.toString());
         }
 
         String message = builder.toString();
@@ -43,11 +41,11 @@ public class ConsoleLogger extends AbstractAppender {
         // Truncate messages over 2000 characters
         if (message.length() >= 2000) {
             String tooLongMessage = "**This message was too long! Here is the shorter version:**\n";
-            message = message.substring(0, 1999 - tooLongMessage.length());
+            message = tooLongMessage.concat(message.substring(0, (1998 - tooLongMessage.length())));
         }
 
-        // Pause adding strings if the new message will be > 2000
-        if (messageBuilder.length() + message.length() + "\n".length() <= 2000) {
+        // Pause adding strings if the new message will be >= 2000
+        if (messageBuilder.toString().length() + message.length() + "\n".length() < 2000) {
 
             if (!messageBuilder.isEmpty()) {
                 messageBuilder.append("\n");

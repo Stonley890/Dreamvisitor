@@ -1,50 +1,52 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
+import dev.jorel.commandapi.ExecutableCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
-public class CmdPausechat implements CommandExecutor {
+public class CmdPausechat implements DVCommand {
 
-    final Main plugin = Main.getPlugin();
+    final Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
+    @NotNull
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public CommandAPICommand getCommand() {
+        return new CommandAPICommand("pausechat")
+                .withPermission(CommandPermission.fromString("dreamvisitor.pausechat"))
+                .withHelp("Pause the chat.", "Suppresses messages from players and the Discord chat bridge.")
+                .executesNative((sender, args) -> {
+                    if (Dreamvisitor.chatPaused) {
 
-        // If chat is paused, unpause. If not, pause
-        if (Main.chatPaused) {
+                        // Change settings
+                        Dreamvisitor.chatPaused = false;
+                        plugin.getConfig().set("chatPaused", Dreamvisitor.chatPaused);
 
-            // Change settings
-            Main.chatPaused = false;
-            plugin.getConfig().set("chatPaused", Main.chatPaused);
+                        // Broadcast to server
+                        Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been unpaused.");
 
-            // Broadcast to server
-            Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been unpaused.");
-            
-            // Broadcast to chat channel
-            Bot.sendMessage(Bot.gameChatChannel, "**Chat has been unpaused. Messages will now be sent to Minecraft**");
+                        // Broadcast to chat channel
+                        Bot.getGameChatChannel().sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft**").queue();
 
-        } else {
+                    } else {
 
-            // Change settings
-            Main.chatPaused = true;
-            plugin.getConfig().set("chatPaused", Main.chatPaused);
+                        // Change settings
+                        Dreamvisitor.chatPaused = true;
+                        plugin.getConfig().set("chatPaused", Dreamvisitor.chatPaused);
 
-            // Broadcast to server
-            Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been paused.");
+                        // Broadcast to server
+                        Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been paused.");
 
-            // Broadcast to chat channel
-            Bot.sendMessage(Bot.gameChatChannel, "**Chat has been paused. Messages will not be sent to Minecraft**");
+                        // Broadcast to chat channel
+                        Bot.getGameChatChannel().sendMessage("**Chat has been paused. Messages will not be sent to Minecraft**").queue();
 
-        }
-        plugin.saveConfig();
-        return true;
+                    }
+                    plugin.saveConfig();
+                });
     }
-
 }

@@ -48,11 +48,6 @@ triberoles:
   - 964773212321882132
   - 660599708145942581
 
-# The guild ID of the tribe server.
-# This will allow Dreamvistor to sync roles across servers.
-# Default: 1103730296068788358
-tribeGuildID: 1103730296068788358
-
 # Whether chat is paused or not.
 # This can be toggled in Minecraft with /pausechat
 # Default: false
@@ -88,3 +83,72 @@ log-console: false
 #   them as console commands.
 # Default: false
 enable-log-console-commands: false
+
+# The amount of time in days (as an integer) that infractions take to expire.
+# Expired infractions are not deleted, but they do not count toward a total infraction count.
+# Default: 90
+infraction-expire-time-days: 90
+
+# The ID of the category to create infractions channels.
+# They will accumulate here.
+# Default: 1226180189604544593
+infractions-category-id: 1226180189604544593
+
+# The name of the Discord shop.
+# This will appear at the top of the embed.
+# Default: "Shop"
+shopName: "Shop"
+
+# The icon used for currency in the Discord economy system.
+# This can be any string, including symbols, letters, emojis, and Discord custom emoji.
+# Default: "$"
+currencyIcon: "$"
+
+# The base amount given by the /daily Discord command.
+# This is the default amount before adding the streak bonus. The total amount is decided by dailyBaseAmount + (user's streak * this).
+# Default: 10.00
+dailyBaseAmount: 10.00
+
+# The multiplier of the streak bonus given by the /daily command.
+# This is multiplied by the streak and added to the base amount. The total amount is decided by dailyBaseAmount + (user's streak * this).
+# Default: 5.00
+dailyStreakMultiplier: 5.00
+
+# The amount gained from the /work command.
+# /work can only be run every hour.
+# Default: 20.00
+workReward: 20.00
+
+# The multiplier of the distance weight when choosing mail delivery locations.
+# Takes the ratio (between 0 and 1) of the distance to the maximum distance between locations,
+#   multiplies it by this value, and adds it to the mail location weight.
+# This weight is used to randomly choose a mail location to deliver to provide a realistic
+#   relationship between delivery locations.
+# At 0, distance has no effect on location selection.
+# At 1, the weight will have a slight effect on the location selection.
+# At 10, the weight will have a significant effect on the location selection.
+# The weight is applied inversely, making closer distances worth more than further distances.
+# Default: 1.00
+mailDeliveryLocationSelectionDistanceWeightMultiplier: 1.00
+
+# Mail delivery reward is calculated by multiplying the distance by this number.
+# The result is then rounded to the nearest ten.
+# At 0, the reward given is 0.
+# At 1, the reward given will be the distance in blocks.
+# Default: 0.05
+mailDistanceToRewardMultiplier: 0.05
+
+# The current in-universe year.
+# This will be incremented by Dreamvisitor automatically.
+# Default: 0
+currentYear: 0
+
+# The number of minutes in an in-universe year.
+# Default: 43200
+minutesPerYear: 43200
+
+# The last time the year was updated.
+# This is used to keep time accurately, even if the server goes offline.
+# Do not change this value.
+# Default: 0
+lastUpdateMilli: 0

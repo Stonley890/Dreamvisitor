@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.Contract;
@@ -28,7 +28,7 @@ public class PlayerUtility {
      * @return The {@link PlayerMemory} of the given player.
      */
     private static @NotNull PlayerMemory fetchPlayerMemory(@NotNull UUID uuid) {
-        File file = new File(Main.getPlayerPath(uuid));
+        File file = new File(Dreamvisitor.getPlayerPath(uuid));
         FileConfiguration fileConfig = YamlConfiguration.loadConfiguration(file);
         return PlayerMemory.getFromFileConfig(fileConfig);
     }
@@ -40,7 +40,7 @@ public class PlayerUtility {
     public static void savePlayerMemory(@NotNull UUID uuid) throws IOException {
         if(MEMORY_MAP.containsKey(uuid.toString())) {
             PlayerMemory memory = getPlayerMemory(uuid);
-            memory.toFileConfig().save(Main.getPlayerPath(uuid));
+            memory.toFileConfig().save(Dreamvisitor.getPlayerPath(uuid));
         }
     }
 
@@ -89,12 +89,12 @@ public class PlayerUtility {
                 "$1-$2-$3-$4-$5");
     }
 
-    public static String getUsernameOfUuid(@NotNull UUID uuid) {
+    public static @Nullable String getUsernameOfUuid(@NotNull UUID uuid) {
         Mojang mojang = new Mojang();
         return mojang.getPlayerProfile(uuid.toString()).getUsername();
     }
 
-    public static String getUsernameOfUuid(@NotNull String uuid) {
+    public static @Nullable String getUsernameOfUuid(@NotNull String uuid) {
         Mojang mojang = new Mojang();
         return mojang.getPlayerProfile(uuid).getUsername();
     }

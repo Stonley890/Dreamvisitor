@@ -1,22 +1,23 @@
 package io.github.stonley890.dreamvisitor.discord;
 
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
-import io.github.stonley890.dreamvisitor.data.AccountLink;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import io.github.stonley890.dreamvisitor.data.Whitelist;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.*;
+import io.github.stonley890.dreamvisitor.functions.Whitelist;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Channel;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,10 +29,10 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.io.IOException;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -41,102 +42,115 @@ public class DiscEventListener extends ListenerAdapter {
     @SuppressWarnings({"null"})
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 
-        if (event.getAuthor().isBot()) {
-            return;
-        }
-
-        Main.debug("MessageReceivedEvent (not bot)");
+        if (event.getAuthor().isBot()) return;
 
         User user = event.getAuthor();
-        Channel channel = event.getChannel();
+        MessageChannel channel = event.getChannel();
         String username = event.getMessage().getContentRaw();
 
-        Main plugin = Main.getPlugin();
+        Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
         Pattern p = Pattern.compile("[^a-zA-Z0-9_-_]");
 
         // If in the whitelist channel and username is "legal"
-        if (channel.equals(Bot.whitelistChannel) && !user.isBot() && !p.matcher(username).find()) {
+        try {
+            Dreamvisitor.debug("Channel ID: " + channel.getId());
+            Dreamvisitor.debug("Whitelist ID: " + Bot.getWhitelistChannel().getId());
+            Dreamvisitor.debug("Game chat ID: " + Bot.getGameChatChannel().getId());
+            Dreamvisitor.debug("Log chat ID: " + Bot.getGameLogChannel().getId());
+            if (channel.getId().equals(Bot.getWhitelistChannel().getId()) && !user.isBot() && !p.matcher(username).find()) {
 
-            EmbedBuilder builder = new EmbedBuilder();
+                EmbedBuilder builder = new EmbedBuilder();
 
-            // Check for valid UUID
-            Main.debug("Checking for valid UUID");
-            UUID uuid = PlayerUtility.getUUIDOfUsername(username);
-            if (uuid == null) {
-                // username does not exist alert
-                Main.debug("Username does not exist.");
+                // banned users cannot add accounts to whitelist
+                if (Infraction.hasBan(user.getIdLong())) {
+                    builder.setColor(Color.RED).setTitle("You aren't allowed.")
+                            .setDescription("You aren't allowed to add accounts to the whitelist. Ask a staff member for help.");
+                    event.getMessage().replyEmbeds(builder.build()).queue();
+                    event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+                    return;
+                }
 
-                builder.setTitle("❌ `" + username + "` could not be found!")
-                        .setDescription("Make sure you type your username exactly as shown in the bottom-left corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
-                        .setColor(Color.RED);
+                // Check for valid UUID
+                Dreamvisitor.debug("Checking for valid UUID");
+                UUID uuid = PlayerUtility.getUUIDOfUsername(username);
+                if (uuid == null) {
+                    // username does not exist alert
+                    Dreamvisitor.debug("Username does not exist.");
+
+                    builder.setTitle("❌ `" + username + "` could not be found!")
+                            .setDescription("Make sure you type your username exactly as shown in the bottom-right corner of the Minecraft Launcher. You need a paid Minecraft: Java Edition account.")
+                            .setColor(Color.RED);
+                    event.getMessage().replyEmbeds(builder.build()).queue();
+
+                    event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
+                    Dreamvisitor.debug("Failed whitelist.");
+                } else {
+
+                    Dreamvisitor.debug("Got UUID");
+
+                    // Link accounts if not already linked
+                    Dreamvisitor.debug("Do accounts need to be linked?");
+                    if (AccountLink.getUuid(user.getIdLong()) == null) {
+                        Dreamvisitor.debug("Yes, linking account.");
+                        AccountLink.linkAccounts(uuid, user.getIdLong());
+                        Dreamvisitor.debug("Linked.");
+                    }
+
+                    try {
+                        if (Whitelist.isUserWhitelisted(uuid)) {
+                            Dreamvisitor.debug("Already whitelisted.");
+
+                            builder.setTitle("☑️ `" + username + "` is already whitelisted!")
+                                    .setDescription("Check <#914620824332435456> for the server address and version.")
+                                    .setColor(Color.BLUE);
+                            event.getMessage().replyEmbeds(builder.build()).queue();
+
+                            event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
+                            Dreamvisitor.debug("Resolved.");
+                        } else {
+                            Dreamvisitor.debug("Player is not whitelisted.");
+
+                            Whitelist.add(username, uuid);
+
+                            // success message
+                            Dreamvisitor.debug("Success.");
+
+                            builder.setTitle("✅ `" + username + "` has been whitelisted!")
+                                    .setDescription("Check <#914620824332435456> for the server address and version.")
+                                    .setColor(Color.GREEN);
+                            event.getMessage().replyEmbeds(builder.build()).queue();
+
+                            event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
+
+                            // Report this to system log channel
+                            Whitelist.report(username, uuid, event.getAuthor());
+                        }
+                    } catch (IOException e) {
+                        channel.sendMessage("There was a problem accessing the whitelist file. Please try again later.").queue();
+                        if (Dreamvisitor.debugMode) throw new RuntimeException();
+                    }
+                }
+
+            } else if (channel.getId().equals(Bot.getWhitelistChannel().getId()) && !user.isBot()) {
+
+                EmbedBuilder builder = new EmbedBuilder();
+
+                // illegal username
+                builder.setTitle("⚠️ `" + username + "` contains illegal characters!")
+                        .setDescription("Please send only your username in this channel. Usernames are alphanumeric and cannot contain spaces. Move conversation or questions elsewhere.")
+                        .setColor(Color.YELLOW);
                 event.getMessage().replyEmbeds(builder.build()).queue();
 
-                event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
-                Main.debug("Failed whitelist.");
-            } else {
-
-                Main.debug("Got UUID");
-
-                // Link accounts if not already linked
-                Main.debug("Do accounts need to be linked?");
-                if (AccountLink.getUuid(user.getIdLong()) == null) {
-                    Main.debug("Yes, linking account.");
-                    AccountLink.linkAccounts(uuid, user.getIdLong());
-                    Main.debug("Linked.");
-                }
-
-                try {
-                    if (Whitelist.isUserWhitelisted(uuid)) {
-                        Main.debug("Already whitelisted.");
-
-                        builder.setTitle("☑️ `" + username + "` is already whitelisted!")
-                                .setDescription("Check <#914620824332435456> for the server address and version.")
-                                .setColor(Color.BLUE);
-                        event.getMessage().replyEmbeds(builder.build()).queue();
-
-                        event.getMessage().addReaction(Emoji.fromFormatted("☑️")).queue();
-                        Main.debug("Resolved.");
-                    } else {
-                        Main.debug("Player is not whitelisted.");
-
-                        Whitelist.add(username, uuid);
-
-                        // success message
-                        Main.debug("Success.");
-
-                        builder.setTitle("✅ `" + username + "` has been whitelisted!")
-                                .setDescription("Check <#914620824332435456> for the server address and version.")
-                                .setColor(Color.GREEN);
-                        event.getMessage().replyEmbeds(builder.build()).queue();
-
-                        event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
-
-                        // Report this to system log channel
-                        Whitelist.report(username, uuid, event.getAuthor());
-                    }
-                } catch (IOException e) {
-                    Bot.sendMessage((TextChannel) channel, "There was a problem accessing the whitelist file. Please try again later.");
-                    if (Main.debugMode) throw new RuntimeException();
-                }
+                event.getMessage().addReaction(Emoji.fromFormatted("⚠")).queue();
             }
-
-        } else if (channel.equals(Bot.whitelistChannel) && !user.isBot()) {
-
-            EmbedBuilder builder = new EmbedBuilder();
-
-            // illegal username
-            builder.setTitle("⚠️ `" + username + "` contains illegal characters!")
-                    .setDescription("Please send only your username in this channel. Usernames are alphanumeric and cannot contain spaces. Move conversation or questions elsewhere.")
-                    .setColor(Color.YELLOW);
-            event.getMessage().replyEmbeds(builder.build()).queue();
-
-            event.getMessage().addReaction(Emoji.fromFormatted("⚠")).queue();
+        } catch (InsufficientPermissionException e) {
+            Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions in the whitelist channel! " + e.getMessage());
         }
 
         // If in the chat channel and the chat is not paused, send to Minecraft
-        else if (channel.equals(Bot.gameChatChannel) && !user.isBot()
-                && !Main.getPlugin().getConfig().getBoolean("chatPaused")) {
+        if (channel.getId().equals(Bot.getGameChatChannel().getId()) && !user.isBot()
+                && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
             // Build message
             String discName = user.getName();
@@ -157,26 +171,79 @@ public class DiscEventListener extends ListenerAdapter {
             }
         }
 
-        if (event.getChannel().equals(Bot.gameLogChannel)) {
+        if (event.getChannel().getId().equals(Bot.getGameLogChannel().getId())) {
 
             if (plugin.getConfig().getBoolean("enable-log-console-commands") && plugin.getConfig().getBoolean("log-console") && Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
 
-                Main.debug("Sending console command from log channel...");
+                Dreamvisitor.debug("Sending console command from log channel...");
 
                 String message = event.getMessage().getContentRaw();
 
                 // Running commands from log channel
                 Runnable runCommand = new BukkitRunnable() {
                     @Override
-                    public void run() {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message);
-                    }
+                    public void run() {Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message);}
                 };
                 Bukkit.getScheduler().runTask(plugin, runCommand);
 
             }
         } else if (event.getMessage().getContentRaw().contains(Bot.getJda().getSelfUser().getAsMention())) {
-            String[] responses = {"...", "Don't bother me.", "I know who you are.", "This isn't the right time.",
+
+            String[] responses = getResponses(event);
+
+            String response = responses[new Random().nextInt(responses.length)];
+
+            try {
+                event.getChannel().sendMessage(response).queue();
+            } catch (InsufficientPermissionException e) {
+                Bukkit.getLogger().warning("Dreamvisitor was mentioned, but doesn't have permission to respond! " + e.getMessage());
+            }
+
+            if (channel.getId().equals(Bot.getGameChatChannel().getId()) && !user.isBot()
+                    && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
+
+                // Build message
+
+                Bukkit.getLogger().log(Level.INFO, "[Discord] <{0}> {1}", response);
+
+                // Check for each player
+                if (Bukkit.getServer().getOnlinePlayers().isEmpty()) return;
+                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                    // If the player has discord on, build and send the message
+                    if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordToggled) {
+                        player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<" + event.getJDA().getSelfUser().getName() + "> " + response);
+                    }
+                }
+            }
+        }
+    }
+
+    @NotNull
+    private static String[] getResponses(@NotNull MessageReceivedEvent event) {
+        String[] responses;
+        String message = "".concat(event.getMessage().getContentRaw().toLowerCase().strip()).concat(" ");
+
+        if (message.contains("owo") || message.contains("uwu")) {
+            responses = new String[]{"No."};
+        } else if (message.length() >= 200) {
+            responses = new String[]{"You talk too much.", "I'm not reading all of that.",
+                    "If you turned that into poetry, *someone* might read it.", "You must have a lot of time on your talons.",
+                    "No matter how many words you use, your conversation remains empty.", "I'd rather listen to Orbiter's lectures.",
+                    "Dragons tend to remember those who speak few words rather than many."};
+        } else if (message.contains("chat") || message.contains("talk")) {
+            responses = new String[]{"I'm not interested.", "I'm not here for idle chatter.",
+                    "Find someone else to talk to.", "I'm not your chat buddy.", "I have more important matters to attend to.",
+                    "I have a job to do.", "I'm not here for socializing.", "Engaging in conversation is not a priority right now.",
+                    "I'm not here for socializing.", "I'm not in the mood for a chat.", "I'm on a mission, not a conversation.",
+                    "My agenda doesn't include idle chit-chat.", "Your desire to converse is one-sided.",
+                    "I've got other dragons to chat with.", "There is nothing I wish to talk about."};
+        } else if (message.contains("you love me")) {
+            responses = new String[]{"I'm not seeking a new relationship.", "I'm not interested.",
+                    "Find someone else to talk to.", "You're not my type. Literally.", "There is another dragon who is my priority.",
+                    "Put simply, no.", "I have other priorities."};
+        } else {
+
+            responses = new String[]{"...", "Don't bother me.", "I know who you are.", "This isn't the right time.",
                     "What are you doing? This isn't productive.", "Surely, you have something better to do than talk to me.",
                     "I'm very busy right now.", "I'm not going to tell you anything.", "I have calculations to make.", "You again?",
                     "Is this really necessary?", "Can't you see I'm in the middle of something?", "What now?",
@@ -188,7 +255,7 @@ public class DiscEventListener extends ListenerAdapter {
                     "What can I do for you this time?", "Why have you summoned me, mortal?", "Not now.", "What will it take to get you to stop?",
                     "I've seen a lot of things, but your persistence is something I have not encountered before.",
                     "Have you heard of the dark triad?", "I'm not a NightWing, but I can see that you will regret talking to me.",
-                    "If I were a SandWing, you'd have poison in your blood by now.",
+                    "If I were a SandWing, you'd have venom in your blood by now.",
                     "If I were an IceWing, I'd freeze your tongue.", "If I were a SilkWing, I'd tie you up far, far away.",
                     "You have nothing to gain talking to me.", "Are you sure this can't wait?", "I'm not your therapist.",
                     "Why don't you talk to Kinkajou instead?", "If it's the Dreamvisitor you want, I'm not giving it up. " +
@@ -212,6 +279,7 @@ public class DiscEventListener extends ListenerAdapter {
                     "In case you were wondering, I'm only repeating my words to you because I cannot be bothered to give you new ones.",
                     "I don't think you quite realize who I am. And unless you plan on making a long journey away from Pretarsi anytime soon, you won't be finding out.",
                     "When I was young, I never once bothered those who were busy. Hasn't anyone taught you anything?",
+                    "No.",
 
                     """
 If you *must* know something, interpret this. Let's see if you remember your history classes.
@@ -280,32 +348,28 @@ Let's see if you remember this one.
 > *The earth is rumbling...*
 You could say I have a special nostalgia with that one."""
             };
-
-
-            event.getChannel().sendMessage(responses[new Random().nextInt(responses.length)]).queue();
         }
+        return responses;
     }
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
 
+        Dreamvisitor.debug("Button interaction with ID " + event.getButton().getId());
+
         Button button = event.getButton();
         ButtonInteraction interaction = event.getInteraction();
 
         if (Objects.equals(button.getId(), "panic")) {
-            Bukkit.getScheduler().runTask(Main.getPlugin(), () -> {
-                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                    if (!player.isOp()) {
-                        player.kickPlayer("Panic!");
-                    }
-                }
+            Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
+                for (Player player : Bukkit.getServer().getOnlinePlayers()) if (!player.isOp()) player.kickPlayer("Panic!");
             });
-            Main.playerLimit = 0;
-            Main.getPlugin().getConfig().set("playerlimit", 0);
-            Main.getPlugin().saveConfig();
+            Dreamvisitor.playerLimit = 0;
+            Dreamvisitor.getPlugin().getConfig().set("playerlimit", 0);
+            Dreamvisitor.getPlugin().saveConfig();
             Bukkit.getServer().broadcastMessage(
                     ChatColor.RED + "Panicked by " + interaction.getUser().getName() + ".\nPlayer limit override set to 0.");
-            Bot.sendMessage(Bot.gameLogChannel, "**Panicked by " + interaction.getUser().getName());
+            Bot.sendLog("**Panicked by " + interaction.getUser().getName());
             event.reply("Panicked!").queue();
 
             // Disable button after use
@@ -317,13 +381,14 @@ You could say I have a special nostalgia with that one."""
 
             try {
                 if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
+                    assert username != null;
                     Whitelist.remove(username, UUID.fromString(uuid));
                     event.reply("Removed `" + username + "` from the whitelist.").queue();
                 } else {
                     event.reply("`" + username + "` is not whitelisted.").queue();
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                event.reply("Unable to read or write the whitelist file: " + e.getMessage()).queue();
             }
 
             // Disable button after use
@@ -337,32 +402,271 @@ You could say I have a special nostalgia with that one."""
             try {
 
                 if (Whitelist.isUserWhitelisted(UUID.fromString(uuid))) {
+                    assert username != null;
                     Whitelist.remove(username, UUID.fromString(uuid));
                 }
                 BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
+                assert username != null;
                 banList.addBan(Bukkit.getServer().createPlayerProfile(username), "Banned by Dreamvistitor.", (Date) null, null);
                 event.reply("Banned `" + username + "`.").queue();
 
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                event.reply("Unable to read or write the whitelist file: " + e.getMessage()).queue();
             }
 
             // Disable button after use
             interaction.editButton(button.asDisabled()).queue();
-        } else if (button.getId().equals("schedulerestart")) {
+        } else if (button.getId().startsWith("setban-")) {
 
-            ActionRow undoButton = ActionRow.of(Button.primary("schedulerestart", "Undo"));
+            String[] split = button.getId().split("-");
 
-            if (Main.restartScheduled) {
-                Main.restartScheduled = false;
-                event.reply("✅ Canceled server restart.").addActionRows(undoButton).queue();
-            } else {
-                Main.restartScheduled = true;
-                event.reply("✅ The server will restart when there are no players online").addActionRows(undoButton).queue();
+            long userId = Long.parseLong(split[1]);
+            String action = split[2];
+            switch (action) {
+                case "none" -> {
+                    Infraction.setBan(userId, false);
+                    Infraction.setTempban(userId, false);
+                    event.reply("Marked this user as not banned.").setEphemeral(true).queue();
+                }
+                case "temp" -> {
+                    Infraction.setBan(userId, false);
+                    Infraction.setTempban(userId, true);
+                    event.reply("Marked this user as temp-banned.").setEphemeral(true).queue();
+                }
+                case "full" -> {
+                    Infraction.setBan(userId, true);
+                    Infraction.setTempban(userId, true);
+                    event.reply("Marked this user as banned.").setEphemeral(true).queue();
+                }
+                default -> event.reply("Unexpected request: " + button.getId()).setEphemeral(true).queue();
             }
 
-        }
+        } else if (button.getId().equals("schedulerestart")) {
 
+            Button undoButton = Button.primary("schedulerestart", "Undo");
+
+            if (Dreamvisitor.restartScheduled) {
+                Dreamvisitor.restartScheduled = false;
+                event.reply("✅ Canceled server restart.").addActionRow(undoButton).queue();
+            } else {
+                Dreamvisitor.restartScheduled = true;
+                event.reply("✅ The server will restart when there are no players online").addActionRow(undoButton).queue();
+            }
+
+        } else if (button.getId().startsWith("infraction-")) {
+            if (button.getId().startsWith("infraction-expire-")) {
+
+                long id = Long.parseLong(button.getId().substring("infraction-expire-".length()));
+                Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+
+                    @NotNull List<Infraction> infractions;
+
+                    infractions = Infraction.getInfractions(member.getIdLong());
+
+                    if (infractions.isEmpty()) {
+                        event.reply("That user has no infractions.").queue();
+                        return;
+                    }
+
+                    StringSelectMenu.Builder selectMenu = StringSelectMenu.create("infraction-expire-" + member.getId());
+                    selectMenu.setPlaceholder("Select an infraction to remove");
+
+                    for (Infraction infraction : infractions) {
+                        if (infraction.isExpired()) continue;
+
+                        String shortenedReason;
+                        if (infraction.getReason().length() >= 35) shortenedReason = infraction.getReason().substring(0, 35) + "... [Value " + infraction.getValue() + "]";
+                        else shortenedReason = infraction.getReason() + " [Value " + infraction.getValue() + "]";
+
+                        selectMenu.addOption(
+                                infraction.getTime().format(DateTimeFormatter.ofPattern("M/d/u H:m")),
+                                infraction.getTime().toString(),
+                                shortenedReason
+                        );
+                    }
+
+                    if (selectMenu.getOptions().isEmpty()) {
+                        event.reply("That user has no unexpired infractions.").queue();
+                        return;
+                    }
+
+                    StringSelectMenu dropdown = selectMenu.build();
+
+                    event.reply("Select the infraction to expire.").addActionRow(dropdown).queue();
+
+                });
+
+            } else if (button.getId().startsWith("infraction-remove-")) {
+
+                long id = Long.parseLong(button.getId().substring("infraction-remove-".length()));
+                Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+
+                    @NotNull List<Infraction> infractions;
+
+                    infractions = Infraction.getInfractions(member.getIdLong());
+
+                    if (infractions.isEmpty()) {
+                        event.reply("That user has no infractions.").queue();
+                        return;
+                    }
+
+                    StringSelectMenu.Builder selectMenu = StringSelectMenu.create("infraction-remove-" + member.getId());
+
+                    for (Infraction infraction : infractions) {
+
+                        String shortenedReason;
+                        if (infraction.getReason().length() >= 35) shortenedReason = infraction.getReason().substring(0, 35) + "... [Value " + infraction.getValue() + "]";
+                        else shortenedReason = infraction.getReason() + " [Value " + infraction.getValue() + "]";
+
+                        selectMenu.addOption(
+                                infraction.getTime().format(DateTimeFormatter.ofPattern("M/d/u H:m")),
+                                infraction.getTime().toString(),
+                                shortenedReason
+                        );
+                    }
+
+                    StringSelectMenu dropdown = selectMenu.build();
+
+                    event.reply("Select the infraction to remove.").addActionRow(dropdown).queue();
+
+                });
+            } else if (button.getId().startsWith("purchase-")) {
+
+                String itemIdString = button.getId().substring("purchase-".length());
+                int itemId;
+                try {
+                    itemId = Integer.parseInt(itemIdString);
+                } catch (NumberFormatException e) {
+                    event.reply("The item you selected could not be parsed.").queue();
+                    return;
+                }
+                Economy.ShopItem item = Economy.getItem(itemId);
+                if (item == null) {
+                    event.reply("That item does not exist.").queue();
+                    return;
+                }
+                Economy.Consumer consumer = Economy.getConsumer(event.getUser().getIdLong());
+                try {
+                    consumer.purchaseItem(itemId);
+                } catch (Economy.Consumer.ItemNotEnabledException | Economy.Consumer.ItemOutOfStockException |
+                         NullPointerException e) {
+                    event.reply(e.getMessage()).queue();
+                    return;
+                } catch (Economy.Consumer.InsufficientFundsException e) {
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setDescription("You do not have sufficient funds to purchase " + item.getName() + ".\nYour balance: " + consumer.getBalance() + "\nItem cost: " + item.getTruePrice());
+                    embed.setColor(Color.RED);
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    return;
+                } catch (Economy.Consumer.MaxItemQualityException e) {
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setDescription("You already have " + item.getMaxAllowed() + " of this item, which is as many as you can have at one time.");
+                    embed.setColor(Color.RED);
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    return;
+                }
+
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Purchase successful!");
+                embed.setDescription("Purchased " + item.getName() + " for " + item.getTruePrice() + ".");
+                embed.setFooter("You now have " + consumer.getQuantityOfItem(itemId) + " of this item.\nYour new balance is " + consumer.getBalance());
+                embed.setColor(Color.GREEN);
+
+                event.editMessageEmbeds(embed.build()).queue();
+                event.getMessage().editMessageComponents().queue();
+
+            }
+        }
+    }
+
+    @Override
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
+        if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-expire-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("infraction-expire-".length()));
+            Objects.requireNonNull(event.getGuild()).retrieveMemberById(id).queue(member -> {
+
+                @NotNull List<Infraction> infractions;
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+
+                LocalDateTime selectedTime = LocalDateTime.parse(selectOption.getValue());
+
+                infractions = Infraction.getInfractions(member.getIdLong());
+
+                if (infractions.isEmpty()) {
+                    event.reply("That user has no infractions.").queue();
+                    return;
+                }
+
+                for (Infraction infraction : infractions) {
+                    if (infraction.isExpired()) continue;
+                    if (infraction.getTime().equals(selectedTime)) {
+                        infractions.remove(infraction);
+                        infraction.expire();
+                        infractions.add(infraction);
+                        break;
+                    }
+                }
+                Infraction.setInfractions(infractions, member.getIdLong());
+
+                event.reply("Infraction expired.").queue();
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+            });
+        } else if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-remove-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("infraction-remove-".length()));
+            event.getJDA().retrieveUserById(id).queue(member -> {
+
+                @NotNull List<Infraction> infractions;
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+
+                LocalDateTime selectedTime = LocalDateTime.parse(selectOption.getValue());
+
+                infractions = Infraction.getInfractions(member.getIdLong());
+
+                if (infractions.isEmpty()) {
+                    event.reply("That user has no infractions.").queue();
+                    return;
+                }
+
+                for (Infraction infraction : infractions) {
+                    if (infraction.getTime().equals(selectedTime)) {
+                        infractions.remove(infraction);
+                        break;
+                    }
+                }
+                Infraction.setInfractions(infractions, member.getIdLong());
+
+                event.reply("Infraction removed.").queue();
+                event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+            });
+        } else if (Objects.requireNonNull(event.getComponent().getId()).startsWith("alts-remove-")) {
+            long id = Long.parseLong(event.getComponent().getId().substring("alts-remove-".length()));
+            event.getJDA().retrieveUserById(id).queue(member -> {
+
+                AltFamily altFamily;
+                List<Long> childrenIds;
+
+                altFamily = AltFamily.getFamily(member.getIdLong());
+                childrenIds = altFamily.getChildren();
+
+                SelectOption selectOption = event.getInteraction().getSelectedOptions().get(0);
+                if (selectOption == null) return;
+                Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(childrenIds).onSuccess(children -> {
+                    for (Member child : children) {
+                        if (!child.getEffectiveName().equals(selectOption.getValue())) continue;
+                        childrenIds.remove(child.getIdLong());
+                        altFamily.setChildren(childrenIds);
+                        AltFamily.updateFamily(altFamily);
+                        event.reply("Removed " + child.getEffectiveName() + " from the family.").queue();
+                        event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                        return;
+                    }
+                    event.reply("That child account could not be found.").queue();
+                    event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
+                });
+            });
+        }
     }
 
 }

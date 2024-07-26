@@ -15,12 +15,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerLogin implements Listener {
 
-    final Main plugin = Main.getPlugin();
+    final Dreamvisitor plugin = Dreamvisitor.getPlugin();
 
     @EventHandler
     public void onPlayerLoginEvent(@NotNull PlayerLoginEvent event) {
@@ -32,8 +32,8 @@ public class ListenPlayerLogin implements Listener {
             // Always allow ops
 
             // Remind bot login failure to ops
-            if (Main.botFailed && player.isOp()) {
-                player.sendMessage(Main.PREFIX + ChatColor.RED +
+            if (Dreamvisitor.botFailed && player.isOp()) {
+                player.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED +
                         "Bot login failed on server start! You may need a new login token.");
             }
             event.allow();
@@ -48,14 +48,14 @@ public class ListenPlayerLogin implements Listener {
             // Always deny non-whitelisted
             event.disallow(Result.KICK_WHITELIST, "You are not whitelisted.");
 
-        } else if (Main.playerLimit != -1) {
+        } else if (Dreamvisitor.playerLimit != -1) {
             // If player limit has been overridden
 
             // If server is full
-            if (Bukkit.getOnlinePlayers().size() >= Main.playerLimit) {
+            if (Bukkit.getOnlinePlayers().size() >= Dreamvisitor.playerLimit) {
 
                 // Kick for server full
-                event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + Main.playerLimit);
+                event.disallow(Result.KICK_FULL, "The server is full. The current player limit is " + Dreamvisitor.playerLimit);
 
             } else if (plugin.getConfig().getBoolean("softwhitelist")) {
                 
@@ -91,8 +91,9 @@ public class ListenPlayerLogin implements Listener {
         // Load file
         try {
             fileConfig.load(file);
-        } catch (IOException | InvalidConfigurationException e1) {
-            throw new RuntimeException();
+        } catch (IOException | InvalidConfigurationException ignored) {
+            event.disallow(Result.KICK_OTHER, "You are not allowed at this time.");
+            return;
         }
 
         // Fetch soft-whitelisted players

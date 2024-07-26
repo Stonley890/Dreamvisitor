@@ -1,66 +1,51 @@
 package io.github.stonley890.dreamvisitor.commands;
 
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandPermission;
+import dev.jorel.commandapi.arguments.OfflinePlayerArgument;
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.AccountLink;
-import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
+public class CmdUser implements DVCommand {
 
-public class CmdUser implements CommandExecutor {
-
+    @NotNull
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
+    public CommandAPICommand getCommand() {
+        return new CommandAPICommand("user")
+                .withPermission(CommandPermission.fromString("dreamvisitor.user"))
+                .withHelp("Get details of a player.", "Get details of a player, online or offline.")
+                .withArguments(new OfflinePlayerArgument("player"))
+                .executesNative((sender, args) -> {
 
-        // Must have at least 1 argument
-        if (args.length > 0) {
-            sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Searching for " + args[0]);
+                    OfflinePlayer player = (OfflinePlayer) args.get("player");
 
-            // Get UUID
-            UUID uuid = PlayerUtility.getUUIDOfUsername(args[0]);
+                    if (player == null) throw CommandAPI.failWithString("Player not found!");
 
-            if /* The UUID could not be found */ (uuid == null) {
-                sender.sendMessage(Main.PREFIX + ChatColor.RED + "That user could not be found!");
-            } else {
+                    String discordID;
+                    String discordUsername = "N/A";
+                    long discord;
 
-                // Get username (for proper CASE)
-                String username = PlayerUtility.getUsernameOfUuid(uuid);
+                    // Discord ID from AccountLink.yml
+                    try {
+                        discord = AccountLink.getDiscordId(player.getUniqueId());
+                        discordID = String.valueOf(discord);
+                        discordUsername = Bot.getJda().retrieveUserById(discord).complete().getName();
+                    } catch (NullPointerException e) {
+                        discordID = "N/A";
+                        // Discord username from JDA
 
-                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Player found. Looking for data.");
+                    }
 
-                String discordID;
-                String discordUsername = "N/A";
-                long discord;
-
-                // Discord ID from AccountLink.yml
-                try {
-                    discord = AccountLink.getDiscordId(uuid);
-                    discordID = String.valueOf(discord);
-                    discordUsername = Bot.getJda().retrieveUserById(discord).complete().getName();
-                } catch (NullPointerException e) {
-                    discordID = "N/A";
-                    // Discord username from JDA
-
-                }
-
-                sender.sendMessage(Main.PREFIX + ChatColor.WHITE + "Local data for player " + username + ":" +
-                        "\nUUID: " + uuid +
-                        "\nDiscord Username: " + discordUsername +
-                        "\nDiscord ID: " + discordID
-                );
-
-
-            }
-        } else {
-            sender.sendMessage(Main.PREFIX +
-                    ChatColor.RED + "Missing arguments! /user <username>");
-        }
-
-        return true;
+                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Local data for player " + player.getName() + ":" +
+                            "\nUUID: " + player.getUniqueId() +
+                            "\nDiscord Username: " + discordUsername +
+                            "\nDiscord ID: " + discordID
+                    );
+                });
     }
 }
