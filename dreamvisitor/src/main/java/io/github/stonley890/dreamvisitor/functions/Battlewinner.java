@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Main;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -55,7 +55,7 @@ public class Battlewinner {
         dragon.setPhase(EnderDragon.Phase.HOVER);
         arenaOrigin.getWorld().playSound(dragon.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.HOSTILE, 1, 1);
         Battlewinner.arenaOrigin = arenaOrigin;
-        battlewinnerTickingTask = Bukkit.getScheduler().runTaskTimer(Main.getPlugin(), new Runnable() {
+        battlewinnerTickingTask = Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), new Runnable() {
             @Override
             public void run() {
                 tick();
