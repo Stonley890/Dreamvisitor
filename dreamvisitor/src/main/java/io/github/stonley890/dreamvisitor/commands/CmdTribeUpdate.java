@@ -11,9 +11,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -30,14 +27,12 @@ public class CmdTribeUpdate implements DVCommand {
                 .withHelp("Update a player's tribe.", "Update the roles of a player based on their tribe.")
                 .withPermission(CommandPermission.fromString("dreamvisitor.tribeupdate"))
                 .withArguments(new EntitySelectorArgument.ManyPlayers("players"))
-                .executesNative((sender, args) -> {
+                .executes((sender, args) -> {
                     Collection<Player> players = (Collection<Player>) args.get("players");
                     assert players != null;
 
                     // This may take some time
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Please wait...");
-
-                    Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
+                    if (sender instanceof Player) sender.sendMessage(Dreamvisitor.PREFIX + "Please wait...");
 
                     // Run async
                     Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
@@ -53,7 +48,7 @@ public class CmdTribeUpdate implements DVCommand {
                             try {
                                 discordId = AccountLink.getDiscordId(uuid);
                             } catch (NullPointerException e) {
-                                sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
+                                if (sender instanceof Player) sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
                                 continue;
                             }
 
@@ -65,40 +60,39 @@ public class CmdTribeUpdate implements DVCommand {
                             try {
                                 user = Bot.getJda().retrieveUserById(discordId).complete();
                             } catch (Exception e) {
-                                sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + "'s associated Discord ID is invalid. Skipping...");
+                                if (sender instanceof Player) sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + "'s associated Discord ID is invalid. Skipping...");
                                 continue;
                             }
 
                             PlayerTribe.updateTribeOfPlayer(uuid);
 
-                            // Get team
-                            Team playerTeam = scoreboard.getEntryTeam(player.getName());
+                            // Get tribe
+                            Tribe playerTribe = PlayerTribe.getTribeOfPlayer(uuid);
 
-                            if (playerTeam != null) {
+                            if (playerTribe != null) {
 
-                                Tribe tribe = TribeUtil.parse(playerTeam.getName());
-                                if (tribe != null) {
-
-                                    try {
-                                        // Remove roles
-                                        for (String roleId : tribeRoles) {
-                                            Bot.getGameLogChannel().getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
-                                        }
-
-                                        Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(TribeUtil.indexOf(tribe)));
-
-                                        if (targetRole == null) {
-                                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTeam.getName());
-                                            break;
-                                        }
-
-                                        // Add role
-                                        Bot.getGameLogChannel().getGuild().addRoleToMember(user, targetRole).queue();
-                                    } catch (InsufficientPermissionException e) {
-                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Dreamvisitor Bot is missing permission MANAGE_ROLES. Skipping...");
-                                    } catch (NullPointerException e) {
-                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "One or more tribe roles  Skipping...");
+                                try {
+                                    // Remove roles
+                                    for (String roleId : tribeRoles) {
+                                        Bot.getGameLogChannel().getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
                                     }
+
+                                    Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(TribeUtil.indexOf(playerTribe)));
+
+                                    if (targetRole == null) {
+                                        if (sender instanceof Player)
+                                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTribe.getName());
+                                        break;
+                                    }
+
+                                    // Add role
+                                    Bot.getGameLogChannel().getGuild().addRoleToMember(user, targetRole).queue();
+                                } catch (InsufficientPermissionException e) {
+                                    if (sender instanceof Player)
+                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Dreamvisitor Bot is missing permission MANAGE_ROLES. Skipping...");
+                                } catch (NullPointerException e) {
+                                    if (sender instanceof Player)
+                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "One or more tribe roles  Skipping...");
                                 }
                             }
                         }

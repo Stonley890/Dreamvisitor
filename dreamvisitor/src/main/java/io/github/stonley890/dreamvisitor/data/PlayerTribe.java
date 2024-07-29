@@ -100,7 +100,7 @@ public class PlayerTribe {
         boolean online;
         Player player = Bukkit.getPlayer(uuid);
 
-        online = player != null;
+        online = player != null && player.isOnline();
 
         Scoreboard scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getMainScoreboard();
 
@@ -118,19 +118,22 @@ public class PlayerTribe {
         for (int i = 0; i < tribes.length; i++) {
             Tribe tribe = tribes[i];
             Team team = scoreboard.getTeam(tribe.getTeamName());
+            Dreamvisitor.debug("Checking team " + i);
             if (team != null && team.hasEntry(username)) {
-                Dreamvisitor.debug("Found tribe " + i);
+                Dreamvisitor.debug("Found team " + i);
                 playerTribe = i;
                 savePlayer(uuid, tribes[playerTribe]);
                 return;
             }
         }
+        Dreamvisitor.debug("Could not find by team.");
 
         if (online) {
             // If no matching team, check by tags
             Dreamvisitor.debug("Checking by tag...");
             for (int i = 0; i < tribes.length; i++) {
                 Tribe tribe = tribes[i];
+                Dreamvisitor.debug("Checking tag " + i);
                 if (player.getScoreboardTags().contains(tribe.getTeamName())) {
                     Dreamvisitor.debug("Found tag " + i);
                     playerTribe = i;
@@ -140,6 +143,6 @@ public class PlayerTribe {
             }
         }
 
-        throw new NullPointerException("Given player does nozt have a valid team or tag associated with a tribe!");
+        throw new NullPointerException("Given player does not have a valid team or tag associated with a tribe!");
     }
 }
