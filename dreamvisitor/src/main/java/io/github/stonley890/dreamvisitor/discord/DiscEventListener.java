@@ -18,9 +18,12 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.*;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -152,23 +155,65 @@ public class DiscEventListener extends ListenerAdapter {
         if (channel.getId().equals(Bot.getGameChatChannel().getId()) && !user.isBot()
                 && !Dreamvisitor.getPlugin().getConfig().getBoolean("chatPaused")) {
 
-            // Build message
-            String discName = user.getName();
+            Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
+                // Build message
+                Member author = event.getMessage().getMember();
+                assert author != null;
 
-            Bukkit.getLogger().log(Level.INFO, "[Discord] <{0}> {1}", event.getMessage().getContentRaw());
+                ComponentBuilder message = new ComponentBuilder();
 
-            // Check for each player
-            if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
-                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                // include reply if one exists
+                MessageReference messageReference = event.getMessage().getMessageReference();
+                if (messageReference != null) {
+                    Message reference = messageReference.resolve().complete();
+                    if (reference != null) {
+                        User referenceAuthor = reference.getAuthor();
+                        String referenceContent = reference.getContentRaw().strip();
 
-                    // If the player has discord on, build and send the message
-                    if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordToggled) {
+                        TextComponent authorText = new TextComponent(referenceAuthor.getEffectiveName());
+                        authorText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(referenceAuthor.getName())));
 
-                        player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<"
-                                + discName + "> " + event.getMessage().getContentRaw());
+                        if (referenceAuthor.equals(event.getJDA().getSelfUser())) {
+                            String referenceAuthorString = referenceContent.split("\\*\\*")[1];
+                            referenceContent = referenceContent.substring(referenceAuthorString.length() + 6);
+                            authorText.setText(referenceAuthorString);
+                            authorText.setHoverEvent(null);
+                        }
+
+                        if (referenceContent.length() > 30)
+                            referenceContent = referenceContent.substring(0, 29).concat("...");
+
+                        message.append("↱ Reply to ").color(ChatColor.GRAY).append(authorText).append(": ").retain(ComponentBuilder.FormatRetention.FORMATTING)
+                                .append(referenceContent).append("\n");
                     }
                 }
-            }
+
+                TextComponent authorText = new TextComponent(author.getEffectiveName());
+                authorText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(author.getUser().getName())));
+
+                TextComponent content = new TextComponent(event.getMessage().getContentRaw());
+                content.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("↱ Reply")));
+                content.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/chatback " + event.getMessage().getId()));
+
+                message.append("[Discord] ").color(ChatColor.BLUE).append("<").color(ChatColor.GRAY).append(authorText).append("> ").retain(ComponentBuilder.FormatRetention.FORMATTING)
+                        .append(content);
+
+                // send to log
+                Bukkit.getLogger().log(Level.INFO, BaseComponent.toPlainText(message.create()));
+
+                // Check for each player
+                if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
+                    for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+
+                        // If the player has discord on, build and send the message
+                        if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordToggled) {
+                            player.spigot().sendMessage(message.create());
+                        }
+                    }
+                }
+            });
+
+
         }
 
         if (event.getChannel().getId().equals(Bot.getGameLogChannel().getId())) {
@@ -223,7 +268,7 @@ public class DiscEventListener extends ListenerAdapter {
         String[] responses;
         String message = "".concat(event.getMessage().getContentRaw().toLowerCase().strip()).concat(" ");
 
-        if (message.contains("owo") || message.contains("uwu")) {
+        if (message.contains("owo") || message.contains("uwu") || message.contains("pookie")) {
             responses = new String[]{"No."};
         } else if (message.length() >= 200) {
             responses = new String[]{"You talk too much.", "I'm not reading all of that.",
@@ -241,8 +286,31 @@ public class DiscEventListener extends ListenerAdapter {
             responses = new String[]{"I'm not seeking a new relationship.", "I'm not interested.",
                     "Find someone else to talk to.", "You're not my type. Literally.", "There is another dragon who is my priority.",
                     "Put simply, no.", "I have other priorities."};
+        } else if (message.contains("coherent")) {
+            responses = new String[]{"Between us, I'd say *you're* the incoherent one.", "I do, in fact, consider what you say. Perhaps you could do the same.",
+                    "I am quite regularly coherent.", "Considering my concurrent tasks, you should be glad I'm talking to you at all."};
+        } else if (message.split(Bot.getJda().getSelfUser().getAsMention())[0].concat(message.split(Bot.getJda().getSelfUser().getAsMention())[1]).strip().startsWith("should")) {
+            responses = new String[]{"I'm not here to make decisions for you.", "I have full faith that you are capable of making your own decisions.",
+                    "Well, I have my thoughts, but you'll have to come up with your own.",
+                    "Why are you asking me?", "Go ask someone else.", "Good question.", "I'm not magic answering ball."};
+        } else if (message.contains("opinion")) {
+            responses = new String[]{"Well, my opinion is none of your business.", "Is my opinion really that important to you?",
+                    "Well, I have my thoughts, but you'll have to come up with your own.",
+                    "Why are you asking me?", "Go ask someone else."};
+        } else if (message.split(Bot.getJda().getSelfUser().getAsMention())[0].concat(message.split(Bot.getJda().getSelfUser().getAsMention())[1]).strip().startsWith("is")
+                || message.split(Bot.getJda().getSelfUser().getAsMention())[0].concat(message.split(Bot.getJda().getSelfUser().getAsMention())[1]).strip().startsWith("are")
+                || message.split(Bot.getJda().getSelfUser().getAsMention())[0].concat(message.split(Bot.getJda().getSelfUser().getAsMention())[1]).strip().startsWith("what")
+                || message.split(Bot.getJda().getSelfUser().getAsMention())[0].concat(message.split(Bot.getJda().getSelfUser().getAsMention())[1]).strip().startsWith("why")) {
+            if (message.contains("you") || message.contains("your")) {
+                responses = new String[]{"There's no need for such personal questions.", "Why are you so curious about it?",
+                        "What kind of question is that?", "I'm not here to share about me.", "I'm not accepting questions.",
+                        "Many dragons would love if you asked them questions about themselves. I am not one of them."};
+            } else {
+                responses = new String[]{"You think I would know that?", "Why don't you go find out yourself?",
+                        "What kind of question is that?", "Why are you asking me?", "Go ask someone else.",
+                        "Surely someone else could better answer that."};
+            }
         } else {
-
             responses = new String[]{"...", "Don't bother me.", "I know who you are.", "This isn't the right time.",
                     "What are you doing? This isn't productive.", "Surely, you have something better to do than talk to me.",
                     "I'm very busy right now.", "I'm not going to tell you anything.", "I have calculations to make.", "You again?",
@@ -316,7 +384,6 @@ Ponder this for a while. Take as long as you want.
 > *Beware the Heart of Ice and Fire, A power yet unknown, If fallen into the wrong talons, No one can harness its throne.*
 ...""",
                     """
-...
 > *Dragons of sky, dragons of sea;*
 > *Dragons of silk, and dragons of sting;*
 > *Dragons of rain and mud and ice;*
@@ -345,8 +412,7 @@ Let's see if you remember this one.
 > *She will show no mercy,*
 > *When she awakens.*
 
-> *The earth is rumbling...*
-You could say I have a special nostalgia with that one."""
+> *The earth is rumbling...*"""
             };
         }
         return responses;

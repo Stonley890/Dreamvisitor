@@ -60,7 +60,7 @@ public class DCmdBaltop implements DiscordCommand {
         if (sortedConsumers.size() < numberShown) numberShown = sortedConsumers.size();
         Dreamvisitor.debug("Consumer list size: " + sortedConsumers.size());
 
-        final List<Long> retrieveIds = new ArrayList<>(sortedConsumers.subList(0, numberShown).stream().map(Economy.Consumer::getId).toList());
+        final List<Long> retrieveIds = new ArrayList<>(sortedConsumers.subList(0, numberShown - 1).stream().map(Economy.Consumer::getId).toList());
         if (aboveSender != null) retrieveIds.add(aboveSender.getId());
         if (belowSender != null) retrieveIds.add(belowSender.getId());
 
@@ -70,7 +70,7 @@ public class DCmdBaltop implements DiscordCommand {
         Objects.requireNonNull(event.getGuild()).retrieveMembersByIds(retrieveIds).onSuccess(members -> {
 
             Map<Long, Member> memberMap = new HashMap<>();
-            List<Member> topMembers = members.subList(0, finalNumberShown);
+            List<Member> topMembers = members.subList(0, finalNumberShown - 1);
             for (Member member : topMembers) {
                 memberMap.put(member.getIdLong(), member);
             }
@@ -81,16 +81,15 @@ public class DCmdBaltop implements DiscordCommand {
             // Add members to the sorted list in the order of consumer IDs
             for (Economy.Consumer consumer : sortedConsumers) {
                 Member member = memberMap.get(consumer.getId());
-                if (member != null) {
-                    sortedMembers.add(member);
-                }
+                sortedMembers.add(member);
             }
 
             final StringBuilder balanceList = new StringBuilder();
             for (int i = 0; i < finalNumberShown; i++) {
                 balanceList.append(i + 1).append(". ")
-                        .append(currencySymbol).append(Economy.formatDouble(sortedConsumers.get(i).getBalance())).append(": ")
-                        .append(sortedMembers.get(i).getAsMention()).append("\n");
+                        .append(currencySymbol).append(Economy.formatDouble(sortedConsumers.get(i).getBalance())).append(": ");
+                if (sortedMembers.get(i) == null) balanceList.append("<@").append(sortedConsumers.get(i).getId()).append(">");
+                else balanceList.append(sortedMembers.get(i).getAsMention()).append("\n");
             }
 
             if (finalNumberShown == 0) balanceList.append("No one has any ").append(Economy.getCurrencySymbol()).append(" yet!\n");

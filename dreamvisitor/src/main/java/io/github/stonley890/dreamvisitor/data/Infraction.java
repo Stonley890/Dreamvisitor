@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.data;
 
+import dev.jorel.commandapi.wrappers.Time;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.commands.DCmdWarn;
@@ -24,9 +25,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -217,10 +216,12 @@ public class Infraction implements ConfigurationSerializable {
                 String username = PlayerUtility.getUsernameOfUuid(uuid);
                 if (username != null) {
                     ProfileBanList banList = Bukkit.getBanList(BanList.Type.PROFILE);
-                    if (!hasTempban)
-                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Instant.from(LocalDateTime.now().plusDays(7)), "Dreamvisitor");
-                    else
+                    if (!hasTempban) {
+                        LocalDateTime localDateTime = LocalDateTime.now().plusDays(7);
+                        banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), "Dreamvisitor");
+                    } else {
                         banList.addBan(Bukkit.createPlayerProfile(uuid, username), infraction.reason, (Date) null, "Dreamvisitor");
+                    }
                 }
             });
         }

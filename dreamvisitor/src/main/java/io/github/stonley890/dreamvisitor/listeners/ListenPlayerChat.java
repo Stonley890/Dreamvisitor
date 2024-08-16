@@ -6,9 +6,15 @@ import java.util.List;
 
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.Chatback;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -50,7 +56,25 @@ public class ListenPlayerChat implements Listener {
             if (event.isCancelled()) return;
 
             try {
-                Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                if (Chatback.nextChatback.containsKey(event.getPlayer())) {
+                    Chatback.ReplyMessage replyMessage = Chatback.nextChatback.get(event.getPlayer());
+
+                    ComponentBuilder replyNotice = new ComponentBuilder();
+                    replyNotice.append("↱ Reply to ").color(ChatColor.GRAY);
+                    TextComponent replyUser = new TextComponent();
+                    replyUser.setText(replyMessage.authorEffectiveName);
+                    replyUser.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(replyMessage.authorUsername)));
+                    replyNotice.append(replyUser);
+
+                    Bot.getGameChatChannel().sendMessage(chatMessage).setMessageReference(replyMessage.messageId).failOnInvalidReply(false).queue();
+
+                    Bukkit.spigot().broadcast(replyNotice.create());
+
+                    Chatback.nextChatback.remove(event.getPlayer());
+                } else {
+                    Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                }
+
             } catch (InsufficientPermissionException e) {
                 Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
             }
@@ -77,7 +101,22 @@ public class ListenPlayerChat implements Listener {
                     || event.getPlayer().hasPermission("dreamvisitor.nopause")) {
 
                 try {
-                    Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                    if (Chatback.nextChatback.containsKey(event.getPlayer())) {
+                        Chatback.ReplyMessage replyMessage = Chatback.nextChatback.get(event.getPlayer());
+
+                        ComponentBuilder replyNotice = new ComponentBuilder();
+                        replyNotice.append("↱ Reply to ").color(ChatColor.GRAY);
+                        TextComponent replyUser = new TextComponent(replyMessage.authorEffectiveName);
+                        replyUser.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(replyMessage.authorUsername)));
+                        replyNotice.append(replyUser);
+
+                        Bukkit.spigot().broadcast(replyNotice.create());
+                        Bot.getGameChatChannel().sendMessage(chatMessage).setMessageReference(replyMessage.messageId).failOnInvalidReply(false).queue();
+
+                        Chatback.nextChatback.remove(event.getPlayer());
+                    } else {
+                        Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+                    }
                 } catch (InsufficientPermissionException e) {
                     Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
                 }

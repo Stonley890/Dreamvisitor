@@ -7,6 +7,7 @@ import dev.jorel.commandapi.CommandTree;
 import io.github.stonley890.dreamvisitor.commands.*;
 import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
+import io.github.stonley890.dreamvisitor.discord.commands.DCmdChatback;
 import io.github.stonley890.dreamvisitor.functions.*;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
@@ -118,6 +119,7 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdSetback());
             commands.add(new CmdParcel());
             commands.add(new CmdDreamvisitor());
+            commands.add(new DCmdChatback());
 
             debug("Initializing commands...");
             CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));

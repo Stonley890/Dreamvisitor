@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.discord;
 import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.discord.commands.*;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -10,7 +11,9 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class DiscCommandsManager extends ListenerAdapter {
 
@@ -72,8 +75,12 @@ public class DiscCommandsManager extends ListenerAdapter {
                 return;
             }
         }
-        event.reply("No commands match your request. This is a fatal error and should not be possible.\n" +
-                "*Great, everything is broken. I'm going to have to bother one of my superiors to fix this.*").queue();
+        EmbedBuilder noMatchEmbed = new EmbedBuilder();
+        noMatchEmbed.setColor(Color.RED).setTitle("No commands match your request.").setDescription("This is a fatal error and should not be possible. The command has been scheduled for deletion to prevent further exceptions.");
+        event.reply("Great, everything is broken. I'm going to have to bother one of my superiors to fix this.").addEmbeds(noMatchEmbed.build()).queue();
+
+        String commandId = event.getCommandId();
+        event.getJDA().deleteCommandById(commandId).queue();
     }
 
     public static void addCommands(@NotNull List<DiscordCommand> commands) {

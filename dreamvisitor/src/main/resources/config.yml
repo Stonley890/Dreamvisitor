@@ -11,8 +11,9 @@ bot-token: BOT_TOKEN
 
 # Website URL
 # The URL for the whitelisting website.
-# Default: "https://woftnw.duckdns.org"
-website-url: "https://woftnw.duckdns.org"
+# Used to restrict requests not from the specified website to prevent abuse.
+# Default: "https://www.woftnw.org"
+website-url: "https://www.woftnw.org"
 
 # Whether web whitelisting is enabled or not
 # This can be set with the /toggleweb Discord command.
@@ -69,7 +70,7 @@ playerlimit: -1
 disablepvp: false
 
 # The location of the recorded hub.
-# This can be set in Minecraft with /sethub
+# This should be set in Minecraft with /sethub
 # Default: none
 hubLocation: none
 

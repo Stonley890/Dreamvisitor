@@ -133,10 +133,11 @@ public class Whitelist extends ListenerAdapter {
     public static void startWeb() {
 
         // Web whitelist server
+        String websiteUrl = Dreamvisitor.getPlugin().getConfig().getString("website-url");
 
         Spark.port(4567); // Choose a port for your API
         Spark.before((request, response) -> {
-            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Origin", websiteUrl);
             response.header("Access-Control-Request-Method", "*");
             response.header("Access-Control-Allow-Headers", "*");
         });

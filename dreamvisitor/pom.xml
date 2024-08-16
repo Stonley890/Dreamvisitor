@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.stonley890</groupId>
   <artifactId>dreamvisitor</artifactId>
-  <version>2.13.9</version>
+  <version>2.13.11</version>
   <packaging>jar</packaging>
 
   <name>Dreamvisitor</name>
@@ -43,7 +43,7 @@
       <!--Bukkit/Spigot API-->
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.20.1-R0.1-SNAPSHOT</version>
+      <version>1.20.4-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -111,6 +111,7 @@
     <resources>
       <resource>
         <directory>${project.basedir}/src/main/resources</directory>
+        <filtering>true</filtering>
         <includes>
           <include>plugin.yml</include>
           <include>config.yml</include>
@@ -138,27 +139,6 @@
             <goals>
               <goal>shade</goal>
             </goals>
-<!--            <configuration>-->
-<!--              <artifactSet>-->
-<!--                <includes>-->
-<!--                  <include>dev.jorel:commandapi-bukkit-shade</include>-->
-<!--                </includes>-->
-<!--              </artifactSet>-->
-<!--              <relocations>-->
-<!--                <relocation>-->
-<!--                  <pattern>dev.jorel.commandapi</pattern>-->
-<!--                  <shadedPattern>io.github.stonley890.dreamvisitor.shaded.dev.jorel.commandapi</shadedPattern>-->
-<!--                  <includes>-->
-<!--                    <include>dev.jorel.commandapi.arguments.*</include>-->
-<!--                    <include>dev.jorel.commandapi.*</include>-->
-<!--                    <include>dev.jorel.commandapi.commandsenders.*</include>-->
-<!--                    <include>dev.jorel.commandapi.exceptions.*</include>-->
-<!--                    <include>dev.jorel.commandapi.nms.*</include>-->
-<!--                    <include>dev.jorel.commandapi.wrappers.*</include>-->
-<!--                  </includes>-->
-<!--                </relocation>-->
-<!--              </relocations>-->
-<!--            </configuration>-->
           </execution>
         </executions>
         <configuration>
