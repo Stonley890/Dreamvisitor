@@ -153,3 +153,8 @@ minutesPerYear: 43200
 # Do not change this value.
 # Default: 0
 lastUpdateMilli: 0
+
+# The repository path of the server resource pack.
+# Dreamvisitor will pull the first artifact from the latest release on pack update.
+# Default: "WOFTNW/Dragonspeak"
+resourcePackRepo: "WOFTNW/Dragonspeak"
