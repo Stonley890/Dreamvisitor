@@ -1,19 +1,15 @@
-package io.github.stonley890.dreamvisitor.discord.commands;
+package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.LongArgument;
 import io.github.stonley890.dreamvisitor.Bot;
-import io.github.stonley890.dreamvisitor.commands.DVCommand;
 import io.github.stonley890.dreamvisitor.functions.Chatback;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.md_5.bungee.api.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
-public class DCmdChatback implements DVCommand {
+public class CmdChatback implements DVCommand {
     @NotNull
     @Override
     public ExecutableCommand<?, ?> getCommand() {
