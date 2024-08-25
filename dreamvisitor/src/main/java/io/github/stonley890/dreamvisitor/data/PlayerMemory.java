@@ -33,6 +33,7 @@ public class PlayerMemory {
     public ItemStack[] survivalInv;
     public ItemStack[] creativeInv;
     public boolean sandbox;
+    public List<Long> roles;
 
     @SuppressWarnings("unchecked")
     public static @NotNull PlayerMemory getFromFileConfig(@NotNull FileConfiguration fileConfig) {
@@ -44,9 +45,11 @@ public class PlayerMemory {
         memory.autoRadio = fileConfig.getBoolean("autoradio");
         List<ItemStack> survivalInvList = (List<ItemStack>) fileConfig.getList("survivalInv");
         List<ItemStack> creativeInvList = (List<ItemStack>) fileConfig.getList("creativeInv");
+        memory.roles = (List<Long>) fileConfig.getList("roles");
 
         if (survivalInvList == null) survivalInvList = new ArrayList<>();
         if (creativeInvList == null) creativeInvList = new ArrayList<>();
+        if (memory.roles == null) memory.roles = new ArrayList<>();
 
         memory.survivalInv = survivalInvList.toArray(ItemStack[]::new);
         memory.creativeInv = creativeInvList.toArray(ItemStack[]::new);
@@ -66,6 +69,7 @@ public class PlayerMemory {
         fileConfig.set("autoinvswap", autoinvswap);
         fileConfig.set("autoRadio", autoRadio);
         fileConfig.set("sandbox", sandbox);
+        fileConfig.set("roles", roles);
 
         return fileConfig;
     }
