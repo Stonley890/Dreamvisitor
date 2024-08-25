@@ -19,7 +19,7 @@ public class ListenTimeSkip implements Listener {
             List<World> worlds = Bukkit.getWorlds();
             Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> {
                 for (World world : worlds) {
-                    world.setFullTime(event.getWorld().getFullTime() + event.getSkipAmount());
+                    world.setTime(event.getWorld().getTime());
                 }
             });
         }
