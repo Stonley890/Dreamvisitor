@@ -321,7 +321,17 @@ public class CmdDreamvisitor implements DVCommand {
                                         .executes((sender, args) -> {
                                             @Nullable String key = "lastUpdateMilli";
                                             configLong(sender, args, key);
-                                        })
+                                        }),
+                                new CommandAPICommand("resourcePackRepo")
+                                        .withHelp("Set resourcePackRepo", """
+                                                The repository path of the server resource pack.
+                                                Dreamvisitor will pull the first artifact from the latest release on pack update.
+                                                Default: "WOFTNW/Dragonspeak""")
+                                        .withOptionalArguments(new TextArgument("resourcePackRepo"))
+                                        .executes(((sender, args) -> {
+                                            @Nullable String key = "resourcePackRepo";
+                                            configString(sender, args, key);
+                                        }))
                         )
                 );
     }
