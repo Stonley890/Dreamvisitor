@@ -1,15 +1,14 @@
 package io.github.stonley890.dreamvisitor.data;
 
+import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import net.dv8tion.jda.api.entities.Role;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class AccountLink {
 
@@ -103,6 +102,23 @@ public class AccountLink {
         uuidToDiscordIdMap.put(minecraftUUID, discordId);
         discordIdToUuidMap.put(discordId, minecraftUUID);
         Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), AccountLink::saveFile);
+
+        // store roles in PlayerMemory
+        storeRolesToPlayerMemory(minecraftUUID, discordId);
+    }
+
+    /**
+     * Stores the current roles of a {@link net.dv8tion.jda.api.entities.Member} to PlayerMemory.
+     * @param minecraftUUID the {@link UUID} of the player to store in.
+     * @param discordId the snowflake ID of the {@link net.dv8tion.jda.api.entities.Member}.
+     */
+    public static void storeRolesToPlayerMemory(@NotNull UUID minecraftUUID, @NotNull Long discordId) {
+        Bot.getGameLogChannel().getGuild().retrieveMemberById(discordId).queue(member -> {
+            PlayerMemory memory = PlayerUtility.getPlayerMemory(minecraftUUID);
+            List<Role> roles = member.getRoles();
+            memory.roles = roles.stream().map(Role::getIdLong).toList();
+            PlayerUtility.setPlayerMemory(minecraftUUID, memory);
+        });
     }
 
     /**

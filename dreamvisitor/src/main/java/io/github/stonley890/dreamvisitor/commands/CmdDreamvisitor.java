@@ -2,14 +2,17 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
-import dev.jorel.commandapi.arguments.BooleanArgument;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.LongArgument;
-import dev.jorel.commandapi.arguments.TextArgument;
+import dev.jorel.commandapi.IStringTooltip;
+import dev.jorel.commandapi.Tooltip;
+import dev.jorel.commandapi.arguments.*;
 import dev.jorel.commandapi.executors.CommandArguments;
+import io.github.stonley890.dreamvisitor.Bot;
+import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Tribe;
 import io.github.stonley890.dreamvisitor.data.TribeUtil;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.Role;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -328,9 +331,26 @@ public class CmdDreamvisitor implements DVCommand {
                                                 Dreamvisitor will pull the first artifact from the latest release on pack update.
                                                 Default: "WOFTNW/Dragonspeak""")
                                         .withOptionalArguments(new TextArgument("resourcePackRepo"))
-                                        .executes(((sender, args) -> {
+                                        .executes((sender, args) -> {
                                             @Nullable String key = "resourcePackRepo";
                                             configString(sender, args, key);
+                                        }),
+                                new CommandAPICommand("rolesToRemember")
+                                        .withHelp("Set rolesToRemember", """
+                                                The roles that Dreamvisitor should re-apply to members after the leave and join the Guild.
+                                                Dreamvisitor will save all roles to a user's linked UUID PlayerMemory, but only the ones listed will be added back upon rejoin.
+                                                Default:""")
+                                        .withOptionalArguments(new ListArgumentBuilder<Long>("rolesToRemember")
+                                                .allowDuplicates(false)
+                                                .withList(List.of((Long[]) Bot.getGameLogChannel().getGuild().getRoles().stream().map(Role::getIdLong).toArray()))
+                                                .withStringTooltipMapper(id -> (IStringTooltip) Tooltip.ofString(
+                                                        id.toString(),
+                                                        Objects.requireNonNull(Bot.getGameLogChannel().getGuild().getRoleById(id)).getName()))
+                                                .buildGreedy()
+                                        )
+                                        .executes(((sender, args) -> {
+                                            @Nullable String key = "rolesToRemember";
+                                            configLongList(sender, args, key);
                                         }))
                         )
                 );
@@ -373,6 +393,17 @@ public class CmdDreamvisitor implements DVCommand {
             plugin.getConfig().set(key, value);
             plugin.saveConfig();
             sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getString(key));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void configLongList(CommandSender sender, @NotNull CommandArguments args, String key) {
+        List<Long> value = (List<Long>) args.get(key);
+        if (value == null) sender.sendMessage(Dreamvisitor.PREFIX + key + " is currently set to\n" + plugin.getConfig().getLongList(key));
+        else {
+            plugin.getConfig().set(key, value);
+            plugin.saveConfig();
+            sender.sendMessage(Dreamvisitor.PREFIX + "Set " + key + " to\n" + plugin.getConfig().getLongList(key));
         }
     }
 }

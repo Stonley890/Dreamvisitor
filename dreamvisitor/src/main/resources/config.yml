@@ -158,3 +158,8 @@ lastUpdateMilli: 0
 # Dreamvisitor will pull the first artifact from the latest release on pack update.
 # Default: "WOFTNW/Dragonspeak"
 resourcePackRepo: "WOFTNW/Dragonspeak"
+
+# The roles that Dreamvisitor should re-apply to members after the leave and join the Guild.
+# Dreamvisitor will save all roles to a user's linked UUID PlayerMemory, but only the ones listed will be added back upon rejoin.
+# Default:
+rolesToRemember:
