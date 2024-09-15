@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.listeners;
 
 import io.github.stonley890.dreamvisitor.functions.Mail;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,7 +23,7 @@ public class ListenPlayerDeath implements Listener {
         if (event.getDeathMessage() == null) return;
 
         // Send death messages
-        String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getDeathMessage()) + "**";
+        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(event.getDeathMessage())) + "**";
         try {
             Bot.getGameChatChannel().sendMessage(chatMessage).queue();
         } catch (InsufficientPermissionException e) {
