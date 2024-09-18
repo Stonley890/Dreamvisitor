@@ -334,24 +334,7 @@ public class CmdDreamvisitor implements DVCommand {
                                         .executes((sender, args) -> {
                                             @Nullable String key = "resourcePackRepo";
                                             configString(sender, args, key);
-                                        }),
-                                new CommandAPICommand("rolesToRemember")
-                                        .withHelp("Set rolesToRemember", """
-                                                The roles that Dreamvisitor should re-apply to members after the leave and join the Guild.
-                                                Dreamvisitor will save all roles to a user's linked UUID PlayerMemory, but only the ones listed will be added back upon rejoin.
-                                                Default:""")
-                                        .withOptionalArguments(new ListArgumentBuilder<Long>("rolesToRemember")
-                                                .allowDuplicates(false)
-                                                .withList(List.of((Long[]) Bot.getGameLogChannel().getGuild().getRoles().stream().map(Role::getIdLong).toArray()))
-                                                .withStringTooltipMapper(id -> (IStringTooltip) Tooltip.ofString(
-                                                        id.toString(),
-                                                        Objects.requireNonNull(Bot.getGameLogChannel().getGuild().getRoleById(id)).getName()))
-                                                .buildGreedy()
-                                        )
-                                        .executes(((sender, args) -> {
-                                            @Nullable String key = "rolesToRemember";
-                                            configLongList(sender, args, key);
-                                        }))
+                                        })
                         )
                 );
     }

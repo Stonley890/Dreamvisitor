@@ -738,34 +738,4 @@ Let's see if you remember this one.
         }
     }
 
-    @Override
-    public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
-        long id = event.getMember().getIdLong();
-        UUID uuid = AccountLink.getUuid(id);
-        if (uuid == null) return;
-        PlayerMemory memory = PlayerUtility.getPlayerMemory(uuid);
-        if (memory.roles.isEmpty()) return;
-        List<Long> rolesToRemember = Dreamvisitor.getPlugin().getConfig().getLongList("rolesToRemember");
-        for (Long role : memory.roles) {
-            if (!rolesToRemember.contains(role)) continue;
-            Role roleToAdd = event.getGuild().getRoleById(role);
-            if (roleToAdd == null) continue;
-            event.getGuild().addRoleToMember(event.getMember(), roleToAdd).queue();
-        }
-    }
-
-    @Override
-    public void onGuildMemberRoleAdd(@NotNull GuildMemberRoleAddEvent event) {
-        long id = event.getMember().getIdLong();
-        UUID uuid = AccountLink.getUuid(id);
-        if (uuid != null) AccountLink.storeRolesToPlayerMemory(uuid, id);
-    }
-
-    @Override
-    public void onGuildMemberRoleRemove(@NotNull GuildMemberRoleRemoveEvent event) {
-        long id = event.getMember().getIdLong();
-        UUID uuid = AccountLink.getUuid(id);
-        if (uuid != null) AccountLink.storeRolesToPlayerMemory(uuid, id);
-    }
-
 }

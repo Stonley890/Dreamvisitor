@@ -102,23 +102,6 @@ public class AccountLink {
         uuidToDiscordIdMap.put(minecraftUUID, discordId);
         discordIdToUuidMap.put(discordId, minecraftUUID);
         Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), AccountLink::saveFile);
-
-        // store roles in PlayerMemory
-        storeRolesToPlayerMemory(minecraftUUID, discordId);
-    }
-
-    /**
-     * Stores the current roles of a {@link net.dv8tion.jda.api.entities.Member} to PlayerMemory.
-     * @param minecraftUUID the {@link UUID} of the player to store in.
-     * @param discordId the snowflake ID of the {@link net.dv8tion.jda.api.entities.Member}.
-     */
-    public static void storeRolesToPlayerMemory(@NotNull UUID minecraftUUID, @NotNull Long discordId) {
-        Bot.getGameLogChannel().getGuild().retrieveMemberById(discordId).queue(member -> {
-            PlayerMemory memory = PlayerUtility.getPlayerMemory(minecraftUUID);
-            List<Role> roles = member.getRoles();
-            memory.roles = roles.stream().map(Role::getIdLong).toList();
-            PlayerUtility.setPlayerMemory(minecraftUUID, memory);
-        });
     }
 
     /**
