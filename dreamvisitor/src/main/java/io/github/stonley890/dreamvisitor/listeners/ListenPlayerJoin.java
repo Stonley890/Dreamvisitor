@@ -6,6 +6,7 @@ import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,7 +20,7 @@ public class ListenPlayerJoin implements Listener {
     public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
 
         // Send join messages
-        String chatMessage = "**" + Bot.escapeMarkdownFormatting(event.getPlayer().getName()) + " joined the game**";
+        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(event.getPlayer().getName())) + " joined the game**";
         try {
             Bot.getGameChatChannel().sendMessage(chatMessage).queue();
         } catch (InsufficientPermissionException e) {

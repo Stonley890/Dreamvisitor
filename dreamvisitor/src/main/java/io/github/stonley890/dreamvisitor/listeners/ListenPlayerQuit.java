@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.listeners;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,7 +25,7 @@ public class ListenPlayerQuit implements Listener {
         Player player = event.getPlayer();
 
         // Send player quits to Discord
-        String chatMessage = "**" + Bot.escapeMarkdownFormatting(player.getName()) + " left the game**";
+        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(player.getName())) + " left the game**";
         Bot.getGameChatChannel().sendMessage(chatMessage).queue();
         Bot.sendLog(chatMessage);
 
