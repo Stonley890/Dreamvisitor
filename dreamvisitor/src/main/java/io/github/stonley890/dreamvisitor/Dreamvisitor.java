@@ -28,6 +28,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.*;
@@ -250,12 +251,12 @@ public class Dreamvisitor extends JavaPlugin {
                     // Get the TPS statistic
                     DoubleStatistic<StatisticWindow.TicksPerSecond> tps = spark.tps();
                     assert tps != null;
-                    DataSender.sendDataToWebApp(DataSender.STATS, "tps=" + tps.poll(StatisticWindow.TicksPerSecond.SECONDS_5));
+                    DataSender.sendPost(DataSender.STATS, new JSONObject().put("tps", tps.poll(StatisticWindow.TicksPerSecond.SECONDS_5)));
 
                     // Get the MSPT statistic
                     GenericStatistic<DoubleAverageInfo, StatisticWindow.MillisPerTick> mspt = spark.mspt();
                     assert mspt != null;
-                    DataSender.sendDataToWebApp(DataSender.STATS, "mspt=" + mspt.poll(StatisticWindow.MillisPerTick.MINUTES_1).median());
+                    DataSender.sendPost(DataSender.STATS, new JSONObject().put("mspt", mspt.poll(StatisticWindow.MillisPerTick.MINUTES_1).median()));
                 }
             };
 
