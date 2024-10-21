@@ -1,6 +1,6 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Bot;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ public class ConsoleLogger extends AbstractAppender {
 
         // Remove Minecraft formatting codes
         message = message.replaceAll("\u001B?(\\W1B)?\\[([0-9,;]+)m", "");
-        message = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " " + event.getLevel().toString() + "] " + Bot.escapeMarkdownFormatting(message);
+        message = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " " + event.getLevel().toString() + "] " + Dreamvisitor.escapeMarkdownFormatting(message);
 
         // Truncate messages over 2000 characters
         if (message.length() >= 2000) {
