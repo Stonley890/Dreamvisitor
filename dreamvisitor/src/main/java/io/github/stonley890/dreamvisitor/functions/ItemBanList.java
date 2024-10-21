@@ -1,6 +1,5 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -10,8 +9,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 public class ItemBanList implements Listener {
     public static final Inventory inv = Bukkit.createInventory(null, 27, "Blacklisted Items");
@@ -35,7 +32,6 @@ public class ItemBanList implements Listener {
                 for (ItemStack content : player.getInventory().getContents()) {
                     if (content == null || !content.isSimilar(item)) continue;
                     player.getInventory().remove(item);
-                    Bot.sendLog("Removed " + item.getType().name() + " (" + Objects.requireNonNull(item.getItemMeta()).getDisplayName() + ") from " + player.getName());
                 }
             }
         }

@@ -3,6 +3,7 @@ package io.github.stonley890.dreamvisitor.commands;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.IntegerArgument;
+import io.github.stonley890.dreamvisitor.comms.DataSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -41,6 +42,7 @@ public class CmdPlayerlimit implements DVCommand {
                             Dreamvisitor.playerLimit = result;
                             plugin.getConfig().set("playerlimit", result);
                             plugin.saveConfig();
+                            DataSender.sendMaxPlayerCount();
 
                         } catch (NumberFormatException e) {
                             sender.sendMessage(Dreamvisitor.PREFIX +

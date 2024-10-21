@@ -2,10 +2,10 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
+import io.github.stonley890.dreamvisitor.comms.DataSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +30,7 @@ public class CmdPausechat implements DVCommand {
                         Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been unpaused.");
 
                         // Broadcast to chat channel
-                        Bot.getGameChatChannel().sendMessage("**Chat has been unpaused. Messages will now be sent to Minecraft**").queue();
+                        DataSender.sendChatPause();
 
                     } else {
 
@@ -42,7 +42,7 @@ public class CmdPausechat implements DVCommand {
                         Bukkit.getServer().broadcastMessage(ChatColor.BLUE + "Chat has been paused.");
 
                         // Broadcast to chat channel
-                        Bot.getGameChatChannel().sendMessage("**Chat has been paused. Messages will not be sent to Minecraft**").queue();
+                        DataSender.sendChatPause();
 
                     }
                     plugin.saveConfig();

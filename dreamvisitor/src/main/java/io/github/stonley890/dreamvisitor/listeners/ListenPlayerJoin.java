@@ -1,7 +1,7 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.comms.DataSender;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
@@ -20,13 +20,16 @@ public class ListenPlayerJoin implements Listener {
     public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
 
         // Send join messages
-        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(event.getPlayer().getName())) + " joined the game**";
+        String chatMessage = "**" + Dreamvisitor.escapeMarkdownFormatting(ChatColor.stripColor(event.getPlayer().getName())) + " joined the game**";
         try {
-            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+            // TODO: Send join message
+            // Bot.getGameChatChannel().sendMessage(chatMessage).queue();
         } catch (InsufficientPermissionException e) {
             Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
         }
-        Bot.sendLog(chatMessage);
+
+        // report stats
+        Bukkit.getScheduler().runTaskLaterAsynchronously(Dreamvisitor.getPlugin(), DataSender::sendPlayerCount, 1);
 
         PlayerMemory memory = PlayerUtility.getPlayerMemory(event.getPlayer().getUniqueId());
 

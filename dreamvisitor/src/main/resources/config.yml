@@ -1,53 +1,12 @@
+# The base URL for the Dreamvisitor Hub
+# Required for the web interface and Discord bot to work properly
+# Default: "https://dreamvisitor.woftnw.org"
+hubUrl: "https://dreamvisitor.woftnw.org"
+
 # Whether to enable debug messages.
 # This will send additional messages to help debug Dreamvisitor.
 # Default: false
 debug: false
-
-# The Dreamvisitor bot token. DO NOT SHARE THIS.
-# Dreamvisitor will not work properly unless this is a valid bot token.
-# Ask Bog for a bot token if Dreamvisitor reports a login error on startup.
-# Default: BOT_TOKEN
-bot-token: BOT_TOKEN
-
-# Website URL
-# The URL for the whitelisting website.
-# Used to restrict requests not from the specified website to prevent abuse.
-# Default: "https://www.woftnw.org"
-website-url: "https://www.woftnw.org"
-
-# Whether web whitelisting is enabled or not
-# This can be set with the /toggleweb Discord command.
-# Default: true
-web-whitelist: true
-
-# The channel ID of the game chat.
-# This can be set on Discord with /setgamechat
-# Default: 880269118975119410
-chatChannelID: 880269118975119410
-
-# The channel ID of the log chat.
-# This can be set on Discord /setlogchat
-# Default: 1114730320068104262
-logChannelID: 1114730320068104262
-
-# The channel ID of the whitelist chat.
-# This can be set on Discord /setwhitelist
-# Default: 858461513991323688
-whitelistChannelID: 858461513991323688
-
-# The role IDs of tribes on the main server.
-# This can be set on Discord with /setrole
-triberoles:
-  - 964773117803249694
-  - 660599218439716906
-  - 964773289203490837
-  - 660599477622669312
-  - 660599843093348392
-  - 660599418344439842
-  - 660600003315761172
-  - 660599559654735893
-  - 964773212321882132
-  - 660599708145942581
 
 # Whether chat is paused or not.
 # This can be toggled in Minecraft with /pausechat
@@ -57,68 +16,22 @@ chatPaused: false
 # Whether the soft whitelist is enabled or not
 # This can be set in Minecraft with /softwhitelist [on|off]
 # Default: false
-softwhitelist: false
+softWhitelist: false
 
 # Player limit override. This will override the player limit, both over and under.
 # This can be set in Minecraft with /playerlimit <int>
 # Default: -1
-playerlimit: -1
+playerLimit: -1
 
 # Whether to globally disable pvp or not.
 # This can be toggled in Minecraft with /togglepvp
 # Default: false
-disablepvp: false
+disablePvp: false
 
 # The location of the recorded hub.
 # This should be set in Minecraft with /sethub
 # Default: none
 hubLocation: none
-
-# Whether to copy the output of the console to the Discord log channel.
-# This will disable the default Dreamvisitor logging in place of the Minecraft server console.
-# Default: false
-log-console: false
-
-# Whether to pass messages in the log channel as console commands.
-# If log-console is enabled, this will take messages sent by users with the Discord administrator permission and pass
-#   them as console commands.
-# Default: false
-enable-log-console-commands: false
-
-# The amount of time in days (as an integer) that infractions take to expire.
-# Expired infractions are not deleted, but they do not count toward a total infraction count.
-# Default: 90
-infraction-expire-time-days: 90
-
-# The ID of the category to create infractions channels.
-# They will accumulate here.
-# Default: 1226180189604544593
-infractions-category-id: 1226180189604544593
-
-# The name of the Discord shop.
-# This will appear at the top of the embed.
-# Default: "Shop"
-shopName: "Shop"
-
-# The icon used for currency in the Discord economy system.
-# This can be any string, including symbols, letters, emojis, and Discord custom emoji.
-# Default: "$"
-currencyIcon: "$"
-
-# The base amount given by the /daily Discord command.
-# This is the default amount before adding the streak bonus. The total amount is decided by dailyBaseAmount + (user's streak * this).
-# Default: 10.00
-dailyBaseAmount: 10.00
-
-# The multiplier of the streak bonus given by the /daily command.
-# This is multiplied by the streak and added to the base amount. The total amount is decided by dailyBaseAmount + (user's streak * this).
-# Default: 5.00
-dailyStreakMultiplier: 5.00
-
-# The amount gained from the /work command.
-# /work can only be run every hour.
-# Default: 20.00
-workReward: 20.00
 
 # The multiplier of the distance weight when choosing mail delivery locations.
 # Takes the ratio (between 0 and 1) of the distance to the maximum distance between locations,
@@ -138,21 +51,6 @@ mailDeliveryLocationSelectionDistanceWeightMultiplier: 1.00
 # At 1, the reward given will be the distance in blocks.
 # Default: 0.05
 mailDistanceToRewardMultiplier: 0.05
-
-# The current in-universe year.
-# This will be incremented by Dreamvisitor automatically.
-# Default: 0
-currentYear: 0
-
-# The number of minutes in an in-universe year.
-# Default: 43200
-minutesPerYear: 43200
-
-# The last time the year was updated.
-# This is used to keep time accurately, even if the server goes offline.
-# Do not change this value.
-# Default: 0
-lastUpdateMilli: 0
 
 # The repository path of the server resource pack.
 # Dreamvisitor will pull the first artifact from the latest release on pack update.

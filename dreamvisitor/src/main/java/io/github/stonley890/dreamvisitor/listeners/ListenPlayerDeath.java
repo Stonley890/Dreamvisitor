@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.Mail;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.md_5.bungee.api.ChatColor;
@@ -9,7 +10,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenPlayerDeath implements Listener {
@@ -23,13 +23,13 @@ public class ListenPlayerDeath implements Listener {
         if (event.getDeathMessage() == null) return;
 
         // Send death messages
-        String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(event.getDeathMessage())) + "**";
+        String chatMessage = "**" + Dreamvisitor.escapeMarkdownFormatting(ChatColor.stripColor(event.getDeathMessage())) + "**";
         try {
-            Bot.getGameChatChannel().sendMessage(chatMessage).queue();
+            // TODO: Send death message
+            // Bot.getGameChatChannel().sendMessage(chatMessage).queue();
         } catch (InsufficientPermissionException e) {
             Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
         }
-        Bot.sendLog(chatMessage);
     }
     
 }

@@ -2,22 +2,14 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
-import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.comms.DataSender;
 import io.github.stonley890.dreamvisitor.data.*;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.*;
 
 public class CmdTribeUpdate implements DVCommand {
@@ -39,22 +31,20 @@ public class CmdTribeUpdate implements DVCommand {
                     // Run async
                     Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
 
+                        List<String> tribeRoles = Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles");
+
                         for (Player player : players) {
 
                             UUID uuid = player.getUniqueId();
+
+                            Dreamvisitor.debug(player.getUniqueId().toString());
 
                             PlayerTribe.updateTribeOfPlayer(uuid);
 
                             // Get tribe
                             Tribe playerTribe = PlayerTribe.getTribeOfPlayer(uuid);
 
-                            if (playerTribe != null) {
-
-                                // Update LP groups
-                                Dreamvisitor.debug("Updating permissions");
-                                PlayerTribe.updatePermissions(uuid);
-
-                            }
+                            DataSender.sendPlayerTribe(uuid, playerTribe);
                         }
 
                         Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + players.size() + " players."));

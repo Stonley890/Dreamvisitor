@@ -1,14 +1,11 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.profile.PlayerProfile;
@@ -212,14 +209,15 @@ public class Whitelist extends ListenerAdapter {
         String sourceName = "web whitelist";
         if (source != null) sourceName = source.getName();
 
-        TextChannel systemChannel = Bot.getGameLogChannel().getGuild().getSystemChannel();
-        if (systemChannel != null) {
-            EmbedBuilder logEmbed = getEmbedBuilder(username, source, sourceName);
-
-            Button ban = Button.danger("ban-" + uuid, "Ban");
-            Button unwhitelist = Button.secondary("unwhitelist-" + uuid, "Unwhitelist");
-            systemChannel.sendMessageEmbeds(logEmbed.build()).setActionRow(ban, unwhitelist).queue();
-        }
+        // TODO: Send whitelist embed
+//        TextChannel systemChannel = Bot.getGameLogChannel().getGuild().getSystemChannel();
+//        if (systemChannel != null) {
+//            EmbedBuilder logEmbed = getEmbedBuilder(username, source, sourceName);
+//
+//            Button ban = Button.danger("ban-" + uuid, "Ban");
+//            Button unwhitelist = Button.secondary("unwhitelist-" + uuid, "Unwhitelist");
+//            systemChannel.sendMessageEmbeds(logEmbed.build()).setActionRow(ban, unwhitelist).queue();
+//        }
     }
 
     @NotNull
