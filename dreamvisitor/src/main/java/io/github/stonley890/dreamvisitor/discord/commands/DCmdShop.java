@@ -144,8 +144,8 @@ public class DCmdShop extends ListenerAdapter implements DiscordCommand {
                 description.append("\n\nThis item regularly costs ").append(Economy.getCurrencySymbol()).append(Economy.formatDouble(item.getPrice())).append(".")
                         .append("\nIt is currently **").append(item.getSalePercent()).append("% off**, bringing the total to **").append(Economy.getCurrencySymbol()).append(Economy.formatDouble(item.getTruePrice())).append("**.");
             }
-            if (item.getMaxAllowed() != -1) description.append("\nYou can carry up to **").append(Economy.formatDouble(item.getMaxAllowed())).append("** of this item at a time.");
-            if (item.getQuantity() != -1) description.append("\n**").append(Economy.formatDouble(item.getQuantity())).append("** of this item remain.");
+            if (item.getMaxAllowed() != -1) description.append("\nYou can carry up to **").append(item.getMaxAllowed()).append("** of this item at a time.");
+            if (item.getQuantity() != -1) description.append("\n**").append(item.getQuantity()).append("** of this item remain.");
             embed.setDescription(description);
             embed.setFooter("Your current balance is " + Economy.formatDouble(consumer.getBalance()) + ". After purchasing this item, it would be " + Economy.formatDouble(consumer.getBalance() - item.getTruePrice()) + ".");
 

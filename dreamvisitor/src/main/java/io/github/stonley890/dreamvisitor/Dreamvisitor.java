@@ -398,6 +398,8 @@ public class Dreamvisitor extends JavaPlugin {
     @Override
     public void onDisable() {
 
+        CommandAPI.onDisable();
+
         if (!botFailed) {
             // Shutdown messages
             getLogger().info("Closing bot instance.");
@@ -419,8 +421,6 @@ public class Dreamvisitor extends JavaPlugin {
                 if (Dreamvisitor.debugMode) throw new RuntimeException();
             }
         }
-
-        CommandAPI.onDisable();
 
         logger.removeAppender(appender);
     }

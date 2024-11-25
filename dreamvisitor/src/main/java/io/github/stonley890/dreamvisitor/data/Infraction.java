@@ -360,6 +360,7 @@ public class Infraction implements ConfigurationSerializable {
         if (warnChannel == null) return;
 
         Dreamvisitor.debug("Attempting to retrieve last message.");
+        if (!Bot.getGameLogChannel().getGuild().getChannels().contains(warnChannel)) return;
         warnChannel.retrieveMessageById(warnChannel.getLatestMessageId()).queue(message -> {
             Dreamvisitor.debug("Retrieved last message.");
             Dreamvisitor.debug("Message author is bot? " + message.getAuthor().equals(Bot.getJda().getSelfUser()));

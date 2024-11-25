@@ -823,7 +823,7 @@ public class Economy {
         }
 
         public void updateStreak() {
-            if (lastDaily == null || !LocalDate.from(lastDaily).plusDays(1).equals(LocalDate.now())) setDailyStreak(0);
+            if (lastDaily == null || LocalDate.from(lastDaily).plusDays(1).isBefore(LocalDate.now())) setDailyStreak(0);
         }
 
         @Nullable

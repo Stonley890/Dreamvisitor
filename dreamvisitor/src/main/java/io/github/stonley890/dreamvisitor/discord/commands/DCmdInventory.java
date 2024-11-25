@@ -72,7 +72,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             int quantityOfItem = consumer.getQuantityOfItem(shopItem.getId());
             if (quantityOfItem == 0) continue;
             String useNotice = "This item can be used.";
-            String giftNotice = "This item cannot be gifted.";
+            String giftNotice = "This item can be gifted.";
             if (shopItem.isUseDisabled()) useNotice = "This item cannot be used.";
             if (shopItem.isGiftingEnabled()) giftNotice = "This item cannot be gifted.";
             embed.addField("**" + quantityOfItem + "** " + shopItem.getName(), useNotice + "\n" + giftNotice, true);

@@ -24,57 +24,52 @@ public class DCmdList implements DiscordCommand {
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
         // Compile players to list unless no players online
-        if (event.getChannel() == Bot.getGameChatChannel()) {
 
-            // Create a string builder
-            StringBuilder list = new StringBuilder();
+        // Create a string builder
+        StringBuilder list = new StringBuilder();
 
-            // If there are players online
-            if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
+        // If there are players online
+        if (!Bukkit.getServer().getOnlinePlayers().isEmpty()) {
 
-                Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
+            Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
 
-                List<Player> countedPlayers = new ArrayList<>();
+            List<Player> countedPlayers = new ArrayList<>();
 
-                // Iterate through each player
-                for (Player player : players) {
-                    PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+            // Iterate through each player
+            for (Player player : players) {
+                PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
 
-                    // If player is not vanished, add to list
-                    if (!memory.vanished) {
-                        countedPlayers.add(player);
-                    }
+                // If player is not vanished, add to list
+                if (!memory.vanished) {
+                    countedPlayers.add(player);
                 }
+            }
 
-                // If there are no listed players (may occur with vanished players), report none
-                if (countedPlayers.isEmpty()) {
-                    event.reply("**There are no players online.**").queue();
-                } else {
-                    // Create string of list
-                    for (Player player : countedPlayers) {
-                        if (!list.isEmpty()) {
-                            list.append("`, `");
-                        }
-                        list.append(player.getName());
-                    }
-                    String playerForm = "players";
-                    String isAreForm = "are";
-                    if (players.size() == 1) {
-                        playerForm = "player";
-                        isAreForm = "is";
-                    }
-                    // Send list
-                    event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Dreamvisitor.playerLimit + " " + playerForm + " online:** `" + list + "`")
-                            .setEphemeral(true).queue();
-                }
-
-            } else {
+            // If there are no listed players (may occur with vanished players), report none
+            if (countedPlayers.isEmpty()) {
                 event.reply("**There are no players online.**").setEphemeral(true).queue();
+            } else {
+                // Create string of list
+                for (Player player : countedPlayers) {
+                    if (!list.isEmpty()) {
+                        list.append("`, `");
+                    }
+                    list.append(player.getName());
+                }
+                String playerForm = "players";
+                String isAreForm = "are";
+                if (players.size() == 1) {
+                    playerForm = "player";
+                    isAreForm = "is";
+                }
+                // Send list
+                event.reply("**There " + isAreForm + " " + players.size() + " out of maximum " + Dreamvisitor.playerLimit + " " + playerForm + " online:** `" + list + "`")
+                        .setEphemeral(true).queue();
             }
 
         } else {
-            event.reply("This command must be executed in " + Bot.getGameChatChannel().getAsMention()).setEphemeral(true)
-                    .queue();
+            event.reply("**There are no players online.**").setEphemeral(true).queue();
         }
+
     }
 }
