@@ -28,7 +28,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
     final String[] tpAliases = {
             "/call","/ecall","/tpa","/etpa","/tpask","/etpask",
             "/tpaccept","/etpaccept","/tpyes","/etpyes",
-            "/home", "/ehome", "/homes", "/ehomes"
+            "/home", "/ehome", "/homes", "/ehomes", "/claimspawn"
     };
 
     @EventHandler
