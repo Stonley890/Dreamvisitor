@@ -158,3 +158,7 @@ lastUpdateMilli: 0
 # Dreamvisitor will pull the first artifact from the latest release on pack update.
 # Default: "WOFTNW/Dragonspeak"
 resourcePackRepo: "WOFTNW/Dragonspeak"
+
+# The port to use to accept web whitelist requests.
+# Default: 10826
+whitelistPort: 10826

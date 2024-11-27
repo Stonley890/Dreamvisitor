@@ -209,7 +209,7 @@ public class Dreamvisitor extends JavaPlugin {
 
             // Set up web whitelist if enabled
             webWhitelistEnabled = getConfig().getBoolean("web-whitelist");
-            if (webWhitelistEnabled) Whitelist.startWeb();
+            if (webWhitelistEnabled) Whitelist.startWeb(getConfig().getInt("whitelistPort"));
 
             Runnable pushConsole = new BukkitRunnable() {
                 // Push console log to Discord every 2 seconds

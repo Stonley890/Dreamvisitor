@@ -18,7 +18,7 @@ public class DCmdToggleweb implements DiscordCommand {
     @Override
     public void onCommand(@NotNull SlashCommandInteractionEvent event) {
         if (!Dreamvisitor.webWhitelistEnabled) {
-            Whitelist.startWeb();
+            Whitelist.startWeb(Dreamvisitor.getPlugin().getConfig().getInt("whitelistPort"));
             Dreamvisitor.webWhitelistEnabled = true;
             event.reply("Web whitelist enabled.").queue();
         } else {
