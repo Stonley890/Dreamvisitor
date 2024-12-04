@@ -75,7 +75,7 @@ public class ListenPlayerLogin implements Listener {
             if (plugin.getConfig().getBoolean("softwhitelist")) {
 
                 // Soft whitelist is enabled
-                Bukkit.getLogger().info("Soft whitelist is enabled");
+                Dreamvisitor.getPlugin().getLogger().info("Soft whitelist is enabled");
                 allowIfSoftWhitelist(player, event);
             }
         }

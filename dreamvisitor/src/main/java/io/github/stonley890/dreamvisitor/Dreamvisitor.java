@@ -64,7 +64,7 @@ public class Dreamvisitor extends JavaPlugin {
 
     public static void debug(String message) {
         if (getPlugin().getConfig().getBoolean("debug")){
-            Bukkit.getLogger().info("DEBUG: " + message);
+            Dreamvisitor.getPlugin().getLogger().info("DEBUG: " + message);
         }
     }
 
@@ -159,14 +159,14 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Restoring chat pause...");
             if (getConfig().getBoolean("chatPaused")) {
                 chatPaused = true;
-                Bukkit.getServer().getLogger().info(PREFIX +
+                getLogger().info(PREFIX +
                         "Chat is currently paused from last session! Use /pausechat to allow users to chat.");
             }
 
             // Restore player limit override
             debug("Restoring player limit override...");
             playerLimit = getConfig().getInt("playerlimit");
-            getServer().getLogger().info(PREFIX +
+            getLogger().info(PREFIX +
                     "Player limit override is currently set to " + playerLimit);
             DataSender.sendMaxPlayerCount();
 
@@ -195,7 +195,7 @@ public class Dreamvisitor extends JavaPlugin {
             try {
                 DataSender.sendResourcePack();
             } catch (IOException e) {
-                Bukkit.getLogger().warning("Could not check for resource pack update.");
+                getLogger().warning("Could not check for resource pack update.");
             }
 
             Runnable scheduledRestarts = new BukkitRunnable() {
@@ -203,7 +203,7 @@ public class Dreamvisitor extends JavaPlugin {
                 public void run() {
                     // Restart if requested and no players are online
                     if (ScheduleRestart.isRestartScheduled() && Bukkit.getOnlinePlayers().isEmpty()) {
-                        Bukkit.getLogger().info(PREFIX + "Restarting the server as scheduled.");
+                        getLogger().info(PREFIX + "Restarting the server as scheduled.");
                         getServer().spigot().restart();
                     }
 
@@ -213,7 +213,7 @@ public class Dreamvisitor extends JavaPlugin {
                     double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
                     if (freeMemoryPercent <= 10) {
                         ScheduleRestart.setRestartScheduled(true);
-                        Bukkit.getLogger().info("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
+                        getLogger().info("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
                     }
                 }
             };
@@ -273,7 +273,7 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Enable finished.");
         } catch (Exception e) {
 
-            Bukkit.getLogger().severe("Dreamvisitor was unable to start :(\nPlease notify Bog with the following stack trace:");
+            getLogger().severe("Dreamvisitor was unable to start :(\nPlease notify Bog with the following stack trace:");
             e.printStackTrace();
 
             Bukkit.getPluginManager().disablePlugin(this);
@@ -324,7 +324,7 @@ public class Dreamvisitor extends JavaPlugin {
                 PlayerUtility.savePlayerMemory(player.getUniqueId());
                 PlayerUtility.clearPlayerMemory(player.getUniqueId());
             } catch (IOException e) {
-                Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access?");
+                getLogger().severe("Unable to save player memory! Does the server have write access?");
                 if (Dreamvisitor.debugMode) throw new RuntimeException();
             }
         }

@@ -46,7 +46,7 @@ public class ListenPlayerQuit implements Listener {
             PlayerUtility.savePlayerMemory(player.getUniqueId());
             PlayerUtility.clearPlayerMemory(player.getUniqueId());
         } catch (IOException e) {
-            Bukkit.getLogger().severe("Unable to save player memory! Does the server have write access? Player memory will remain in memory. " + e.getMessage());
+            Dreamvisitor.getPlugin().getLogger().severe("Unable to save player memory! Does the server have write access? Player memory will remain in memory. " + e.getMessage());
         }
 
         Dreamvisitor.debug("Checking sandbox.");

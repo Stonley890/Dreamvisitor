@@ -51,7 +51,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                 try {
                     fileConfig.load(file);
                 } catch (IOException | InvalidConfigurationException e1) {
-                    Bukkit.getLogger().warning("Could not load 'pauseBypass.yml' file! " + e1.getMessage());
+                    Dreamvisitor.getPlugin().getLogger().warning("Could not load 'pauseBypass.yml' file! " + e1.getMessage());
                 }
 
                 // Remember bypassed players
@@ -70,7 +70,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                         // TODO: Send message
                         // Bot.getGameChatChannel().sendMessage(message).queue();
                     } catch (InsufficientPermissionException e) {
-                        Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+                        Dreamvisitor.getPlugin().getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
                     }
                 } // If list does not contain player, stop the command
                 else {
@@ -91,7 +91,7 @@ public class ListenPlayerCmdPreprocess implements Listener {
                     // TODO: Send message
                     // Bot.getGameChatChannel().sendMessage(message).queue();
                 } catch (InsufficientPermissionException e) {
-                    Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+                    Dreamvisitor.getPlugin().getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
                 }
             }
         } else {
