@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.functions;
 
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -13,7 +14,7 @@ public class Radio {
         String finalMessage = getString(message, name, command);
 
         // Send messageBuilder
-        Bukkit.getLogger().info(ChatColor.stripColor(finalMessage));
+        Dreamvisitor.getPlugin().getLogger().info(ChatColor.stripColor(finalMessage));
         for (Player operator : Bukkit.getServer().getOnlinePlayers())
         {
             switch (command) {

@@ -1,6 +1,7 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
 import com.earth2me.essentials.Essentials;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -39,7 +40,7 @@ public class ListenSignChangeEvent implements Listener {
             if (ess.getUser(player).isSocialSpyEnabled())
                 player.sendMessage(message);
         }
-        Bukkit.getLogger().info(ChatColor.stripColor(message));
+        Dreamvisitor.getPlugin().getLogger().info(ChatColor.stripColor(message));
     }
 
 }

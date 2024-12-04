@@ -81,7 +81,7 @@ public class DataSender {
             in.close();
 
             // Print or process the response from the web app
-            Bukkit.getLogger().info("Response from web app: " + content);
+            Dreamvisitor.getPlugin().getLogger().info("Response from web app: " + content);
 
         } catch (Exception e) {
             Dreamvisitor.debug("Could not send data to web app.");
@@ -107,7 +107,7 @@ public class DataSender {
             in.close();
 
             // Print or process the response from the web app
-            Bukkit.getLogger().info("Response from web app: " + content);
+            Dreamvisitor.getPlugin().getLogger().info("Response from web app: " + content);
 
         } catch (Exception e) {
             Dreamvisitor.debug("Could not send data to web app.");

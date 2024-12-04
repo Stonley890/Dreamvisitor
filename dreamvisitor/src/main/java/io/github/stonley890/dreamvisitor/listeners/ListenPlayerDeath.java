@@ -28,7 +28,7 @@ public class ListenPlayerDeath implements Listener {
             // TODO: Send death message
             // Bot.getGameChatChannel().sendMessage(chatMessage).queue();
         } catch (InsufficientPermissionException e) {
-            Bukkit.getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+            Dreamvisitor.getPlugin().getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
         }
     }
     

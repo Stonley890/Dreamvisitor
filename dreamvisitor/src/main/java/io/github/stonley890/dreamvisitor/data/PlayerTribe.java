@@ -31,7 +31,7 @@ public class PlayerTribe {
     public static void setup() throws IOException {
 
         if (!file.exists()) {
-            Bukkit.getLogger().info("player-tribes.yml does not exist. Creating one...");
+            Dreamvisitor.getPlugin().getLogger().info("player-tribes.yml does not exist. Creating one...");
             file.createNewFile();
         }
     }
@@ -43,7 +43,7 @@ public class PlayerTribe {
             configuration.load(file);
             return Tribe.valueOf(configuration.getString(uuid.toString()));
         } catch (IOException | InvalidConfigurationException e) {
-            Bukkit.getLogger().severe("Unable to load " + file.getName() + "!");
+            Dreamvisitor.getPlugin().getLogger().severe("Unable to load " + file.getName() + "!");
             Bukkit.getPluginManager().disablePlugin(plugin);
             throw new RuntimeException();
         } catch (IllegalArgumentException | NullPointerException e) {
@@ -61,7 +61,7 @@ public class PlayerTribe {
             configuration.set(uuid.toString(), tribe.toString());
             configuration.save(file);
         } catch (IOException | InvalidConfigurationException e) {
-            Bukkit.getLogger().severe("Unable to load " + file.getName() + "!");
+            Dreamvisitor.getPlugin().getLogger().severe("Unable to load " + file.getName() + "!");
             Bukkit.getPluginManager().disablePlugin(plugin);
             throw new RuntimeException();
         }
