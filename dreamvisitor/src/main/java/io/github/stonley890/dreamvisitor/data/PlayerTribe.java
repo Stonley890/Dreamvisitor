@@ -1,6 +1,8 @@
 package io.github.stonley890.dreamvisitor.data;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import net.luckperms.api.model.user.UserManager;
+import net.luckperms.api.node.Node;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -145,4 +148,64 @@ public class PlayerTribe {
 
         throw new NullPointerException("Given player does not have a valid team or tag associated with a tribe!");
     }
+
+    /**
+     * This will use the saved royalty board to fill information.
+     * @param uuid the UUID of player
+     */
+    public static void updatePermissions(@NotNull UUID uuid) {
+        if (Dreamvisitor.luckperms != null) {
+
+            Dreamvisitor.debug("[updatePermissions] Updating permissions for user " + uuid + " using info finding");
+
+            Tribe tribe;
+
+            tribe = PlayerTribe.getTribeOfPlayer(uuid);
+
+            // Run async
+            if (Dreamvisitor.luckperms != null) {
+
+                Dreamvisitor.debug("[updatePermissions] Updating permissions for user " + uuid);
+
+                // Get user manager
+                UserManager userManager = Dreamvisitor.luckperms.getUserManager();
+                // Get user at tribe t and position p
+
+                Dreamvisitor.debug("[updatePermissions] Updating permissions of UUID " + uuid + " of tribe " + tribe);
+
+                // Run async
+                userManager.modifyUser(uuid, user -> {
+
+                    // For each tribe and position...
+                    for (String tribeName : Arrays.stream(TribeUtil.tribes).map(tribeCheck -> tribeCheck.getTeamName().toLowerCase()).toList()) {
+
+                        // remove it from player
+
+                        if (tribeName != null) {
+                            Dreamvisitor.debug("[updatePermissions] Removing group " + tribeName + " from " + uuid);
+                            // Get the group from lp and remove it from the user.
+                            user.data().remove(Node.builder("group." + tribeName).build());
+
+                        }
+
+                    }
+
+                    // Now that all have been removed, add the correct one
+                    if (tribe != null) {
+
+                        String groupName = tribe.getTeamName().toLowerCase();
+
+                        Dreamvisitor.debug("[updatePermissions] Adding group " + groupName + " to " + uuid);
+                        // Get the group from lp and add it to the user.
+                        user.data().add(Node.builder("group." + groupName).build());
+                    }
+
+                });
+            } else
+                Bukkit.getLogger().warning("Dreamvisitor could not hook into LuckPerms on startup. Permission update failed.");
+        } else
+            Bukkit.getLogger().warning("Dreamvisitor could not hook into LuckPerms on startup. Permission update failed.");
+    }
+
+
 }

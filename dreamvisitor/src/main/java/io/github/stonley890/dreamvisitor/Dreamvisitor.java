@@ -40,6 +40,7 @@ public class Dreamvisitor extends JavaPlugin {
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
     // public
     public static Dreamvisitor PLUGIN;
+    public static LuckPerms luckperms;
     public static String MOTD = null;
     public static boolean chatPaused;
     public static int playerLimit;
@@ -155,6 +156,10 @@ public class Dreamvisitor extends JavaPlugin {
             // Init tribes
             debug("Initializing player-tribes.yml");
             PlayerTribe.setup();
+
+            // LuckPerms API
+            RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+            if (provider != null) luckperms = provider.getProvider();
 
             // Start message
             getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
