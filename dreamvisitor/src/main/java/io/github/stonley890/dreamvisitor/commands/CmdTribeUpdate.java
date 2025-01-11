@@ -39,32 +39,9 @@ public class CmdTribeUpdate implements DVCommand {
                     // Run async
                     Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
 
-                        List<String> tribeRoles = Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles");
-
                         for (Player player : players) {
 
                             UUID uuid = player.getUniqueId();
-
-                            // Get stored Discord ID
-                            long discordId;
-                            try {
-                                discordId = AccountLink.getDiscordId(uuid);
-                            } catch (NullPointerException e) {
-                                if (sender instanceof Player) sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + " does not have an associated Discord ID. Skipping...");
-                                continue;
-                            }
-
-                            Dreamvisitor.debug(player.getUniqueId().toString());
-                            Dreamvisitor.debug(String.valueOf(discordId));
-
-                            // Retrieve user from JDA
-                            User user;
-                            try {
-                                user = Bot.getJda().retrieveUserById(discordId).complete();
-                            } catch (Exception e) {
-                                if (sender instanceof Player) sender.sendMessage(Dreamvisitor.PREFIX + player.getName() + "'s associated Discord ID is invalid. Skipping...");
-                                continue;
-                            }
 
                             PlayerTribe.updateTribeOfPlayer(uuid);
 
@@ -77,29 +54,6 @@ public class CmdTribeUpdate implements DVCommand {
                                 Dreamvisitor.debug("Updating permissions");
                                 PlayerTribe.updatePermissions(uuid);
 
-                                try {
-                                    // Remove roles
-                                    for (String roleId : tribeRoles) {
-                                        Bot.getGameLogChannel().getGuild().removeRoleFromMember(user, Objects.requireNonNull(Bot.getJda().getRoleById(roleId))).queue();
-                                    }
-
-                                    Role targetRole = Bot.getJda().getRoleById(tribeRoles.get(TribeUtil.indexOf(playerTribe)));
-
-                                    if (targetRole == null) {
-                                        if (sender instanceof Player)
-                                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Could not find role for " + playerTribe.getName());
-                                        break;
-                                    }
-
-                                    // Add role
-                                    Bot.getGameLogChannel().getGuild().addRoleToMember(user, targetRole).queue();
-                                } catch (InsufficientPermissionException e) {
-                                    if (sender instanceof Player)
-                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "Dreamvisitor Bot is missing permission MANAGE_ROLES. Skipping...");
-                                } catch (NullPointerException e) {
-                                    if (sender instanceof Player)
-                                        sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "One or more tribe roles  Skipping...");
-                                }
                             }
                         }
 
