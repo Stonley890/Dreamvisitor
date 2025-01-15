@@ -121,6 +121,7 @@ public class Dreamvisitor extends JavaPlugin {
             commands.add(new CmdParcel());
             commands.add(new CmdDreamvisitor());
             commands.add(new CmdChatback());
+            commands.add(new CmdFlight());
 
             debug("Initializing commands...");
             CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(!debugMode));
@@ -156,6 +157,10 @@ public class Dreamvisitor extends JavaPlugin {
             // Init tribes
             debug("Initializing player-tribes.yml");
             PlayerTribe.setup();
+
+            // Init energy
+            debug("Initializing energy");
+            Energy.init();
 
             // LuckPerms API
             RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
@@ -388,6 +393,8 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new Sandbox(), this);
         getServer().getPluginManager().registerEvents(new ListenTimeSkip(), this);
         getServer().getPluginManager().registerEvents(new ListenSignChangeEvent(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerToggleFlightEvent(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerMoveEvent(), this);
     }
 
     private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {
