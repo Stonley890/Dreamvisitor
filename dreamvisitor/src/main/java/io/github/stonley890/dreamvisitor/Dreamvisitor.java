@@ -395,6 +395,7 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenSignChangeEvent(), this);
         getServer().getPluginManager().registerEvents(new ListenPlayerToggleFlightEvent(), this);
         getServer().getPluginManager().registerEvents(new ListenPlayerMoveEvent(), this);
+        getServer().getPluginManager().registerEvents(new ListenEntityToggleGlideEvent(), this);
     }
 
     private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {
