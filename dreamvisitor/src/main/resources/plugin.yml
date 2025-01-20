@@ -8,6 +8,7 @@ softdepend:
   - EyeOfOnyx
   - Essentials
   - OpenRP
+  - WorldGuard
 
 #commands:
 #  dvset:
@@ -199,3 +200,6 @@ permissions:
   dreamvisitor.mail.manage:
     description: Manage the mail minigame.
     default: op
+  dreamvisitor.fly:
+    description: Allows dragon flight
+    default: true

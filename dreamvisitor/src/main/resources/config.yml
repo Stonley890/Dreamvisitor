@@ -162,3 +162,23 @@ resourcePackRepo: "WOFTNW/Dragonspeak"
 # The port to use to accept web whitelist requests.
 # Default: 10826
 whitelistPort: 10826
+
+# The maximum amount of flight energy
+# Default: 400
+flightEnergyCapacity: 400
+
+# The point after energy depletion that flight is possible again
+# Default: 200.00
+flightRegenerationPoint: 200.00
+
+# The rate at which energy is regenerated per tick.
+# Default: 1.00
+flightEnergyRegeneration: 1.00
+
+# The rate at which movement on the X and Y axes depletes energy while flying.
+# Default: 4.00
+flightEnergyDepletionXYMultiplier: 4.00
+
+# The rate at which movement on the Y axes depletes energy while flying.
+# Default: 10.00
+flightEnergyDepletionYMultiplier: 10.00
