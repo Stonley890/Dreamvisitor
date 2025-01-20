@@ -473,7 +473,7 @@ public class DCmdEconomy extends ListenerAdapter implements DiscordCommand {
                             event.reply("Quantity must be a positive number!").setEphemeral(true).queue();
                             return;
                         }
-                        if (quantity > item.getMaxAllowed()) {
+                        if (quantity > item.getMaxAllowed() && item.getMaxAllowed() != -1) {
                             event.reply("You cannot set the quantity to above the max allowed!").setEphemeral(true).queue();
                             return;
                         }

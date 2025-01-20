@@ -74,7 +74,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             String useNotice = "This item can be used.";
             String giftNotice = "This item can be gifted.";
             if (shopItem.isUseDisabled()) useNotice = "This item cannot be used.";
-            if (shopItem.isGiftingEnabled()) giftNotice = "This item cannot be gifted.";
+            if (!shopItem.isGiftingEnabled()) giftNotice = "This item cannot be gifted.";
             embed.addField("**" + quantityOfItem + "** " + shopItem.getName(), useNotice + "\n" + giftNotice, true);
         }
 
@@ -125,7 +125,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
                 event.reply("You do not have any items you can gift.").setEphemeral(true).queue();
                 return;
             }
-            event.replyComponents(ActionRow.of(selectMenu.build())).queue();
+            event.replyComponents(ActionRow.of(selectMenu.build())).setEphemeral(true).queue();
         }
     }
 
@@ -160,7 +160,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
                 }
                 int itemQuantity = consumer.getItemQuantity(itemId);
                 if (itemQuantity < 1) {
-                    event.replyEmbeds(embed.setDescription("You do not have any of that item to use!").build()).queue();
+                    event.replyEmbeds(embed.setDescription("You do not have any of that item to use!").build()).setEphemeral(true).queue();
                     return;
                 }
                 if (item.isUseDisabled()) {
@@ -258,7 +258,7 @@ public class DCmdInventory extends ListenerAdapter implements DiscordCommand {
             }
             int itemQuantity = consumer.getItemQuantity(itemId);
             if (itemQuantity < 1) {
-                event.replyEmbeds(embed.setDescription("You do not have any of that item to gift!").build()).queue();
+                event.replyEmbeds(embed.setDescription("You do not have any of that item to gift!").build()).setEphemeral(true).queue();
                 return;
             }
             if (!item.isGiftingEnabled()) {

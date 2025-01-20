@@ -4,6 +4,7 @@ import io.github.stonley890.dreamvisitor.Bot;
 import io.github.stonley890.dreamvisitor.data.AltFamily;
 import io.github.stonley890.dreamvisitor.data.Infraction;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -119,6 +120,13 @@ public class DCmdInfractions extends ListenerAdapter implements DiscordCommand {
                 event.getMessage().editMessageComponents(event.getMessage().getActionRows().get(0).asDisabled()).queue();
             });
         } else if (Objects.requireNonNull(event.getComponent().getId()).startsWith("infraction-remove-")) {
+
+            // ensure user has permission to use /infractions command
+            if (!event.getMember().hasPermission(Permission.MODERATE_MEMBERS)) {
+                event.reply("You do not have permission to use this command.").queue();
+                return;
+            }
+
             long id = Long.parseLong(event.getComponent().getId().substring("infraction-remove-".length()));
             event.getJDA().retrieveUserById(id).queue(member -> {
 
