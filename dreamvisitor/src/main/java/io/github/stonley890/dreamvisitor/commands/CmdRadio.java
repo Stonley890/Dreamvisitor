@@ -2,7 +2,6 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.GreedyStringArgument;
 import io.github.stonley890.dreamvisitor.functions.Radio;
 import org.bukkit.command.CommandSender;

@@ -3,12 +3,11 @@ package io.github.stonley890.dreamvisitor.commands;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
-import dev.jorel.commandapi.ExecutableCommand;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.RotationArgument;
 import dev.jorel.commandapi.arguments.WorldArgument;
 import dev.jorel.commandapi.wrappers.Rotation;
-import org.bukkit.ChatColor;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
@@ -64,7 +63,7 @@ public class CmdSethub implements DVCommand {
                     Dreamvisitor.hubLocation = location;
                     plugin.getConfig().set("hubLocation", Dreamvisitor.hubLocation);
                     plugin.saveConfig();
-                    sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Hub location set.");
+                    sender.sendMessage(SystemMessage.formatPrivate("Hub location set."));
                 });
     }
 }

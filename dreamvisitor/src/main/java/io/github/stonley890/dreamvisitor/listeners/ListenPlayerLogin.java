@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -30,12 +31,6 @@ public class ListenPlayerLogin implements Listener {
         if (player.hasPermission("dreamvisitor.nowhitelist")) {
 
             // Always allow ops
-
-            // Remind bot login failure to ops
-            if (Dreamvisitor.botFailed && player.isOp()) {
-                player.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED +
-                        "Bot login failed on server start! You may need a new login token.");
-            }
             event.allow();
 
         } else if (event.getResult() == PlayerLoginEvent.Result.KICK_BANNED) {

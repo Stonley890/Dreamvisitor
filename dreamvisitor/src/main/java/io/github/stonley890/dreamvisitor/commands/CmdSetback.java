@@ -7,7 +7,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.*;
 import dev.jorel.commandapi.wrappers.Rotation;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -75,9 +75,9 @@ public class CmdSetback implements DVCommand {
                         user.setLastLocation(location);
                     }
 
-                    sender.sendMessage(Dreamvisitor.PREFIX + "Set back location to " + location.getBlockX() + ", " + location.getBlockY() +
+                    sender.sendMessage(SystemMessage.formatPrivate("Set back location to " + location.getBlockX() + ", " + location.getBlockY() +
                             ", " + location.getBlockZ() + " of " + Objects.requireNonNull(location.getWorld()).getName() + " for " +
-                            players.size() + " player(s).");
+                            players.size() + " player(s)."));
 
                 });
     }

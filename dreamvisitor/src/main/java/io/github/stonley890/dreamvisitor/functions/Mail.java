@@ -246,7 +246,7 @@ public class Mail {
 
     public static void cancel(@NotNull Player player) {
         activeDeliverers.removeIf(deliverer -> deliverer.player.equals(player));
-        player.sendMessage(Dreamvisitor.PREFIX + "You canceled your delivery.");
+        player.sendMessage(SystemMessage.formatPrivate("You canceled your delivery."));
     }
 
     public static boolean isPLayerDeliverer(@NotNull Player player) {

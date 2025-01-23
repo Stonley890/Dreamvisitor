@@ -20,7 +20,6 @@ import me.lucko.spark.api.statistic.types.GenericStatistic;
 import net.luckperms.api.LuckPerms;
 import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -41,7 +40,6 @@ import java.util.logging.Level;
 @SuppressWarnings({ "null" })
 public class Dreamvisitor extends JavaPlugin {
 
-    public static final String PREFIX = ChatColor.DARK_BLUE + "[" + ChatColor.WHITE + "DV" + ChatColor.DARK_BLUE + "] " + ChatColor.RESET;
     // private
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
     // public
@@ -53,7 +51,6 @@ public class Dreamvisitor extends JavaPlugin {
     public static Location hubLocation;
     public static boolean debugMode;
     private static ConsoleLogger appender;
-    public final String VERSION = getDescription().getVersion();
 
     public static Dreamvisitor getPlugin() {
         return PLUGIN;
@@ -160,15 +157,14 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Restoring chat pause...");
             if (getConfig().getBoolean("chatPaused")) {
                 chatPaused = true;
-                getLogger().info(PREFIX +
+                getLogger().info(
                         "Chat is currently paused from last session! Use /pausechat to allow users to chat.");
             }
 
             // Restore player limit override
             debug("Restoring player limit override...");
             playerLimit = getConfig().getInt("playerlimit");
-            getLogger().info(PREFIX +
-                    "Player limit override is currently set to " + playerLimit);
+            getLogger().info("Player limit override is currently set to " + playerLimit);
             DataSender.sendMaxPlayerCount();
 
             // Create item banlist if empty
@@ -204,7 +200,7 @@ public class Dreamvisitor extends JavaPlugin {
                 public void run() {
                     // Restart if requested and no players are online
                     if (ScheduleRestart.isRestartScheduled() && Bukkit.getOnlinePlayers().isEmpty()) {
-                        getLogger().info(PREFIX + "Restarting the server as scheduled.");
+                        getLogger().info("Restarting the server as scheduled.");
                         getServer().spigot().restart();
                     }
 

@@ -8,8 +8,8 @@ import dev.jorel.commandapi.arguments.FloatArgument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import dev.jorel.commandapi.wrappers.NativeProxyCommandSender;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.Moonglobe;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -36,7 +36,7 @@ public class CmdMoonglobe implements DVCommand {
             if (!alreadyHasGlobe) new Moonglobe(player.getUniqueId(), location, maxDistance);
         }
 
-        return (Dreamvisitor.PREFIX + "Created moon globes for " + players.size() + " players.");
+        return (SystemMessage.formatPrivate("Created moon globes for " + players.size() + " players."));
 
     }
 
@@ -62,7 +62,7 @@ public class CmdMoonglobe implements DVCommand {
                                 }
                             }
 
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Removed moon globes of " + targets.size() + " players.");
+                            sender.sendMessage(SystemMessage.formatPrivate("Removed moon globes of " + targets.size() + " players."));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("create")
