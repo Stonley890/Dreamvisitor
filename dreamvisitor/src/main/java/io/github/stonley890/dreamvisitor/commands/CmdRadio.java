@@ -17,7 +17,7 @@ public class CmdRadio implements DVCommand {
     @Override
     public CommandAPICommand getCommand() {
         return new CommandAPICommand("radio")
-                .withPermission(CommandPermission.fromString("dreamvisitor.radio"))
+                .withPermission("dreamvisitor.radio")
                 .withHelp("Send a message using the radio.", "Send a message to all other players who can access the radio.")
                 .withArguments(new GreedyStringArgument("message"))
                 .executesNative((sender, args) -> {
@@ -26,9 +26,9 @@ public class CmdRadio implements DVCommand {
 
                     CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
-                        Radio.buildMessage(message, player.getName(), getCommand().getName(), null);
+                        Radio.buildMessage(message, player.getName(), Radio.Type.STANDARD, null);
                     } else if (callee instanceof ConsoleCommandSender) {
-                        Radio.buildMessage(message, "Console", getCommand().getName(), null);
+                        Radio.buildMessage(message, "Console", Radio.Type.STANDARD, null);
                     } else {
                         throw CommandAPI.failWithString("This command can only be executed by a player or the console!");
                     }

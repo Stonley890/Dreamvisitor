@@ -28,9 +28,9 @@ public class CmdAdminRadio implements DVCommand {
 
                     CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
-                        Radio.buildMessage(message, player.getName(), getCommand().getName(), null);
+                        Radio.buildMessage(message, player.getName(), Radio.Type.ADMIN, null);
                     } else if (callee instanceof ConsoleCommandSender) {
-                        Radio.buildMessage(message, "Console",  getCommand().getName(), null);
+                        Radio.buildMessage(message, "Console",  Radio.Type.ADMIN, null);
                     } else {
                         throw CommandAPI.failWithString("This command can only be executed by a player or the console!");
                     }

@@ -8,24 +8,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Radio {
-    public static void buildMessage(String message, @NotNull String name, @NotNull String command, @Nullable String tag) {
+    public static void buildMessage(String message, @NotNull String name, @NotNull Type type, @Nullable String tag) {
 
         // Set color of name to red if from console
-        String finalMessage = getString(message, name, command);
+        String finalMessage = getString(message, name, type);
 
         // Send messageBuilder
         Dreamvisitor.getPlugin().getLogger().info(ChatColor.stripColor(finalMessage));
         for (Player operator : Bukkit.getServer().getOnlinePlayers())
         {
-            switch (command) {
-                case "radio" -> {
+            switch (type) {
+                case STANDARD -> {
                     if (operator.isOp() || operator.hasPermission("dreamvisitor.radio"))
                         operator.sendMessage(finalMessage);
                 }
-                case "aradio" -> {
+                case ADMIN -> {
                     if (operator.isOp()) operator.sendMessage(finalMessage);
                 }
-                case "tagradio" -> {
+                case TAG -> {
                     if (operator.getScoreboardTags().contains(tag) || operator.isOp()) operator.sendMessage(finalMessage);
                 }
             }
@@ -33,7 +33,7 @@ public class Radio {
         }
     }
 
-    private static @NotNull String getString(String message, @NotNull String name, @NotNull String command) {
+    private static @NotNull String getString(String message, @NotNull String name, @NotNull Type type) {
         ChatColor nameColor = ChatColor.YELLOW;
         if (name.equals("Console")) {
             nameColor = ChatColor.RED;
@@ -41,9 +41,15 @@ public class Radio {
 
         // Build messageBuilder
         String radioType = "[Staff Radio]";
-        if (command.equals("aradio")) radioType = "[Admin Radio]";
-        else if (command.equals("tagradio")) radioType = "[Tag Radio]";
+        if (type == Type.ADMIN) radioType = "[Admin Radio]";
+        else if (type == Type.TAG) radioType = "[Tag Radio]";
 
-        return ChatColor.DARK_AQUA + radioType + nameColor + " <" + name + "> " + ChatColor.WHITE + message;
+        return ChatColor.DARK_AQUA + radioType + nameColor + name + ": " + ChatColor.WHITE + message;
+    }
+
+    public enum Type {
+        STANDARD,
+        ADMIN,
+        TAG
     }
 }
