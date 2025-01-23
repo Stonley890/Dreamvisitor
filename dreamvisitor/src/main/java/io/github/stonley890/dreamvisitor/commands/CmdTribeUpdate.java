@@ -32,8 +32,6 @@ public class CmdTribeUpdate implements DVCommand {
                     // Run async
                     Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
 
-                        List<String> tribeRoles = Dreamvisitor.getPlugin().getConfig().getStringList("tribeRoles");
-
                         for (Player player : players) {
 
                             UUID uuid = player.getUniqueId();
