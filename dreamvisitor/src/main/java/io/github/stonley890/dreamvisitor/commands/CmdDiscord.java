@@ -22,7 +22,11 @@ public class CmdDiscord implements DVCommand {
                         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
                         memory.discordToggled = !memory.discordToggled;
 
-                        callee.sendMessage(Dreamvisitor.PREFIX + "Discord visibility toggled to " + !memory.discordToggled + ".");
+                        if (memory.discordToggled) {
+                            callee.sendMessage(Dreamvisitor.PREFIX + "You can now see incoming messages from Discord chat.");
+                        } else {
+                            callee.sendMessage(Dreamvisitor.PREFIX + "Incoming messages from Discord chat will now be hidden.");
+                        }
 
                         PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
                     } else throw CommandAPI.failWithString("This command must be executed as a player!");
