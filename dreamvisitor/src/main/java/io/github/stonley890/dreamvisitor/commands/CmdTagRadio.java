@@ -28,9 +28,9 @@ public class CmdTagRadio implements DVCommand {
 
                     CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
-                        Radio.buildMessage(message, player.getName(), getCommand().getName(), tag);
+                        Radio.buildMessage(message, player.getName(), Radio.Type.TAG, tag);
                     } else if (callee instanceof ConsoleCommandSender) {
-                        Radio.buildMessage(message, "Console", getCommand().getName(), tag);
+                        Radio.buildMessage(message, "Console", Radio.Type.TAG, tag);
                     } else {
                         throw CommandAPI.failWithString("This can only be run by players or the console!");
                     }
