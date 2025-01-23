@@ -22,7 +22,7 @@ public class CmdDreamvisitor implements DVCommand {
     public CommandAPICommand getCommand() {
         return new CommandAPICommand("dreamvisitor")
                 .executes((sender, args) -> {
-                    sender.sendMessage(ChatColor.BLUE + "Dreamvisitor " + Dreamvisitor.getPlugin().getDescription().getVersion() + "\nDeveloped by Stonley890\nOpen source at https://github.com/Stonley890/Dreamvisitor");
+                    sender.sendMessage(ChatColor.BLUE + "Dreamvisitor " + Dreamvisitor.getPlugin().getDescription().getVersion() + "\nDeveloped by WOFTNW\nOpen source at https://github.com/WOFTNW/Dreamvisitor");
                 })
                 .withSubcommand(new CommandAPICommand("reload")
                         .withPermission(CommandPermission.OP)
