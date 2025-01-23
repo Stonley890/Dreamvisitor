@@ -2,9 +2,9 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -23,9 +23,9 @@ public class CmdDiscord implements DVCommand {
                         memory.discordToggled = !memory.discordToggled;
 
                         if (memory.discordToggled) {
-                            callee.sendMessage(Dreamvisitor.PREFIX + "You can now see incoming messages from Discord chat.");
+                            callee.sendMessage(SystemMessage.formatPrivate("You can now see incoming messages from Discord chat."));
                         } else {
-                            callee.sendMessage(Dreamvisitor.PREFIX + "Incoming messages from Discord chat will now be hidden.");
+                            callee.sendMessage(SystemMessage.formatPrivate("Incoming messages from Discord chat will now be hidden."));
                         }
 
                         PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);

@@ -7,7 +7,7 @@ import dev.jorel.commandapi.arguments.OfflinePlayerArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.SoftWhitelist;
-import org.bukkit.ChatColor;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +33,7 @@ public class CmdSoftwhitelist implements DVCommand {
                             if (players.contains(player.getUniqueId())) throw CommandAPI.failWithString("That player is already on the soft whitelist!");
                             players.add(player.getUniqueId());
                             SoftWhitelist.setPlayers(players);
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Added " + player.getName() + ".");
+                            sender.sendMessage(SystemMessage.formatPrivate("Added " + player.getName() + "."));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("remove")
@@ -45,7 +45,7 @@ public class CmdSoftwhitelist implements DVCommand {
                             if (!players.contains(player.getUniqueId())) throw CommandAPI.failWithString("That player is not on soft whitelist!");
                             players.remove(player.getUniqueId());
                             SoftWhitelist.setPlayers(players);
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Removed " + player.getName() + ".");
+                            sender.sendMessage(SystemMessage.formatPrivate("Removed " + player.getName() + "."));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("list")
@@ -59,21 +59,21 @@ public class CmdSoftwhitelist implements DVCommand {
                                 }
                                 list.append(PlayerUtility.getUsernameOfUuid(player));
                             }
-                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Players soft-whitelisted: " + list);
+                            sender.sendMessage(SystemMessage.formatPrivate("Players soft-whitelisted: " + list));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("on")
                         .executesNative((sender, args) -> {
                             plugin.getConfig().set("softwhitelist", true);
                             plugin.saveConfig();
-                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Soft whitelist enabled.");
+                            sender.sendMessage(SystemMessage.formatPrivate("Soft whitelist enabled."));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("off")
                         .executesNative((sender, args) -> {
                             plugin.getConfig().set("softwhitelist", false);
                             plugin.saveConfig();
-                            sender.sendMessage(Dreamvisitor.PREFIX + ChatColor.WHITE + "Soft whitelist disabled.");
+                            sender.sendMessage(SystemMessage.formatPrivate("Soft whitelist disabled."));
                         })
                 );
     }

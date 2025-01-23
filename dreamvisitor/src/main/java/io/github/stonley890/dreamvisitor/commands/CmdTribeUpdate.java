@@ -6,6 +6,7 @@ import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.comms.DataSender;
 import io.github.stonley890.dreamvisitor.data.*;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ public class CmdTribeUpdate implements DVCommand {
                     assert players != null;
 
                     // This may take some time
-                    if (sender instanceof Player) sender.sendMessage(Dreamvisitor.PREFIX + "Please wait...");
+                    if (sender instanceof Player) sender.sendMessage(SystemMessage.formatPrivate("Please wait..."));
 
                     // Run async
                     Bukkit.getScheduler().runTaskAsynchronously(Dreamvisitor.getPlugin(), () -> {
@@ -45,7 +46,7 @@ public class CmdTribeUpdate implements DVCommand {
                             DataSender.sendPlayerTribe(uuid, playerTribe);
                         }
 
-                        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> sender.sendMessage(Dreamvisitor.PREFIX + "Updated " + players.size() + " players."));
+                        Bukkit.getScheduler().runTask(Dreamvisitor.getPlugin(), () -> sender.sendMessage(SystemMessage.formatPrivate("Updated " + players.size() + " player(s).")));
 
                     });
                 });

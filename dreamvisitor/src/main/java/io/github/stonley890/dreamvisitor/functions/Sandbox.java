@@ -1,9 +1,7 @@
 package io.github.stonley890.dreamvisitor.functions;
 
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -53,7 +51,7 @@ public class Sandbox implements Listener {
                 .append("- You cannot use spawn eggs.\n")
                 .append("- You cannot teleport.\n")
                 .append("Please notify a staff member if you require assistance with any of these rules.");
-        player.spigot().sendMessage(messageBuilder.create());
+        player.spigot().sendMessage(SystemMessage.formatPrivateComponents(messageBuilder.create()));
 
     }
 
@@ -72,7 +70,7 @@ public class Sandbox implements Listener {
         player.setGameMode(GameMode.SURVIVAL);
         player.setGlowing(false);
 
-        player.sendMessage(ChatColor.BOLD + "You are no longer in sandbox mode.");
+        player.sendMessage(SystemMessage.formatPrivate("You are no longer in sandbox mode."));
     }
 
     @EventHandler
@@ -105,7 +103,7 @@ public class Sandbox implements Listener {
         if (event.getRightClicked() instanceof ItemFrame) {
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer().getName() + " interacted with an item frame with held item " + Objects.requireNonNull(player.getInventory().getItem(event.getHand())).getType());
+                    onlinePlayer.sendMessage(SystemMessage.formatPrivate(event.getPlayer().getName() + " interacted with an item frame with held item " + Objects.requireNonNull(player.getInventory().getItem(event.getHand())).getType()));
                 }
             }
         }
@@ -125,7 +123,7 @@ public class Sandbox implements Listener {
                 if (event.getMessage().contains(disallowedCommand))
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers())
                         if (PlayerUtility.getPlayerMemory(onlinePlayer.getUniqueId()).sandbox && event.getMessage().contains(onlinePlayer.getName())) {
-                            event.getPlayer().sendMessage(ChatColor.RED + "That player is currently in Sandbox Mode.");
+                            event.getPlayer().sendMessage(SystemMessage.formatPrivate("That player is currently in Sandbox Mode.", SystemMessage.Type.ERROR));
                             event.setCancelled(true);
                         }
 

@@ -4,9 +4,9 @@ import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandPermission;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.PauseBypass;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +30,7 @@ public class CmdPauseBypass implements DVCommand {
                             assert players != null;
                             playersList.addAll(players.stream().map(Player::getUniqueId).toList());
                             PauseBypass.setPlayers(playersList);
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Added " + players.size() + " player(s) to the bypass list.");
+                            sender.sendMessage(SystemMessage.formatPrivate("Added " + players.size() + " player(s) to the bypass list."));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("remove")
@@ -41,7 +41,7 @@ public class CmdPauseBypass implements DVCommand {
                             assert players != null;
                             boolean removed = playersList.removeAll(players.stream().map(Player::getUniqueId).toList());
                             PauseBypass.setPlayers(playersList);
-                            if (removed) sender.sendMessage(Dreamvisitor.PREFIX + "Removed " + players.size() + " player(s) from the bypass list.");
+                            if (removed) sender.sendMessage(SystemMessage.formatPrivate("Removed " + players.size() + " player(s) from the bypass list."));
                             else throw CommandAPI.failWithString("No players were removed.");
                         })
                 )
@@ -54,7 +54,7 @@ public class CmdPauseBypass implements DVCommand {
                                 if (!list.isEmpty()) list.append(", ");
                                 list.append(PlayerUtility.getUsernameOfUuid(player));
                             }
-                            sender.sendMessage(Dreamvisitor.PREFIX + "Players bypassing: " + list);
+                            sender.sendMessage(SystemMessage.formatPrivate("Players bypassing: " + list));
                         })
                 );
     }

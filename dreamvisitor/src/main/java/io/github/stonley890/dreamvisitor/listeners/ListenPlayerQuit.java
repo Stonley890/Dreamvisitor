@@ -4,6 +4,7 @@ import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.comms.DataSender;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.functions.Sandbox;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -37,7 +38,7 @@ public class ListenPlayerQuit implements Listener {
         if (memory.sandbox) {
             for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("dreamvisitor.sandbox")) {
-                    onlinePlayer.sendMessage(Dreamvisitor.PREFIX + event.getPlayer().getName() + " left while in sandbox mode.");
+                    onlinePlayer.sendMessage(SystemMessage.formatPrivate(event.getPlayer().getName() + " left while in sandbox mode."));
                 }
             }
         }

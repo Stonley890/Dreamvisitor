@@ -7,6 +7,7 @@ import dev.jorel.commandapi.arguments.*;
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.Tribe;
 import io.github.stonley890.dreamvisitor.functions.Mail;
+import io.github.stonley890.dreamvisitor.functions.SystemMessage;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Location;
@@ -26,7 +27,8 @@ public class CmdParcel implements DVCommand {
                 .withSubcommand(new CommandAPICommand("cancel")
                         .withPermission("dreamvisitor.mail.play")
                         .executesPlayer((sender, args) -> {
-                            if (!Mail.isPLayerDeliverer(sender)) throw CommandAPI.failWithString("You are not currently delivering!");
+                            if (!Mail.isPLayerDeliverer(sender))
+                                throw CommandAPI.failWithString("You are not currently delivering!");
                             Mail.cancel(sender);
                         })
                 )
@@ -53,7 +55,7 @@ public class CmdParcel implements DVCommand {
                                     Mail.MailLocation mailLocation = new Mail.MailLocation(location, name, weight, tribe);
                                     Mail.saveLocation(mailLocation);
 
-                                    sender.sendMessage(Dreamvisitor.PREFIX + "Added location " + name + " at " + location.getX() + " " + location.getY() + " " + location.getZ() + " in world " + Objects.requireNonNull(location.getWorld()).getName() + ".");
+                                    sender.sendMessage(SystemMessage.formatPrivate("Added location " + name + " at " + location.getX() + " " + location.getY() + " " + location.getZ() + " in world " + Objects.requireNonNull(location.getWorld()).getName() + "."));
                                 }))
                         )
                         .withSubcommand(new CommandAPICommand("remove")
@@ -70,14 +72,14 @@ public class CmdParcel implements DVCommand {
                                     Mail.MailLocation location = Mail.getLocationByName(name);
                                     if (location == null) throw CommandAPI.failWithString("Mail location not found.");
                                     Mail.removeLocation(location);
-                                    sender.sendMessage(Dreamvisitor.PREFIX + "Removed location " + location.getName());
+                                    sender.sendMessage(SystemMessage.formatPrivate("Removed location " + location.getName()));
                                 })
                         )
                         .withSubcommand(new CommandAPICommand("list")
                                 .executesNative((sender, args) -> {
                                     List<Mail.MailLocation> locations = Mail.getLocations();
 
-                                    ComponentBuilder message = new ComponentBuilder(Dreamvisitor.PREFIX + "Mail Locations");
+                                    ComponentBuilder message = new ComponentBuilder(SystemMessage.formatPrivate("Mail Locations"));
 
                                     for (Mail.MailLocation mailLocation : locations) {
                                         message.append("\n").append(mailLocation.getName()).color(net.md_5.bungee.api.ChatColor.YELLOW)
@@ -114,7 +116,8 @@ public class CmdParcel implements DVCommand {
                                     }
 
                                     Mail.MailLocation startLoc = Mail.getNearestLocation(sender.getLocation());
-                                    if (startLoc == null) throw CommandAPI.failWithString("No start mail location found.");
+                                    if (startLoc == null)
+                                        throw CommandAPI.failWithString("No start mail location found.");
 
                                     for (Player player : addPlayers) {
 
@@ -136,19 +139,19 @@ public class CmdParcel implements DVCommand {
                                             String message = e.getMessage();
                                             switch (message) {
                                                 case "Player does not have parcel!" ->
-                                                        player.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "You do not have the parcel that is to be delivered!");
+                                                        player.sendMessage(SystemMessage.formatPrivate("You do not have the parcel that is to be delivered!", SystemMessage.Type.ERROR));
                                                 case "EssentialsX is not currently active!" ->
-                                                        player.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "EssentialsX is not enabled! Contact a staff member!");
+                                                        player.sendMessage(SystemMessage.formatPrivate("EssentialsX is not enabled! Contact a staff member!", SystemMessage.Type.ERROR));
                                                 case "Not at the destination location!" ->
-                                                        player.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "This is not your delivery location!");
+                                                        player.sendMessage(SystemMessage.formatPrivate("This is not your delivery location!", SystemMessage.Type.ERROR));
                                                 default ->
-                                                        player.sendMessage(Dreamvisitor.PREFIX + ChatColor.RED + "There was a problem: " + message + "\nPlease contact a staff member.");
+                                                        player.sendMessage(SystemMessage.formatPrivate("There was a problem: " + message + "\nPlease contact a staff member.", SystemMessage.Type.ERROR));
                                             }
                                             return;
                                         }
                                     }
 
-                                    sender.sendMessage(Dreamvisitor.PREFIX + "Toggled mail for " + players.size() + ".");
+                                    sender.sendMessage(SystemMessage.formatPrivate("Toggled mail for " + players.size() + "."));
                                 })
                         )
 
@@ -168,11 +171,13 @@ public class CmdParcel implements DVCommand {
 
                                     String startArg = (String) args.get("start");
                                     Mail.MailLocation start = Mail.getLocationByName(startArg);
-                                    if (start == null) throw CommandAPI.failWithString(startArg + " is not a valid MailLocation!");
+                                    if (start == null)
+                                        throw CommandAPI.failWithString(startArg + " is not a valid MailLocation!");
 
                                     String endArg = (String) args.get("end");
                                     Mail.MailLocation end = Mail.getLocationByName(endArg);
-                                    if (end == null) throw CommandAPI.failWithString(endArg + " is not a valid MailLocation!");
+                                    if (end == null)
+                                        throw CommandAPI.failWithString(endArg + " is not a valid MailLocation!");
 
                                     Collection<Player> players = (Collection<Player>) args.get("players");
                                     assert players != null;
@@ -180,7 +185,7 @@ public class CmdParcel implements DVCommand {
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected");
 
                                     add(players, start, end);
-                                    sender.sendMessage(Dreamvisitor.PREFIX + "Added " + players.size() + " player(s).");
+                                    sender.sendMessage(SystemMessage.formatPrivate("Added " + players.size() + " player(s)."));
                                 })
                         )
 
@@ -194,17 +199,17 @@ public class CmdParcel implements DVCommand {
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected");
 
                                     remove(players);
-                                    sender.sendMessage(Dreamvisitor.PREFIX + "Removed " + players.size() + " player(s).");
+                                    sender.sendMessage(SystemMessage.formatPublic("Removed " + players.size() + " player(s)."));
                                 })
                         )
 
                         .withSubcommand(new CommandAPICommand("list")
                                 .executesNative((sender, args) -> {
-                                    StringBuilder message = new StringBuilder(Dreamvisitor.PREFIX);
+                                    StringBuilder message = new StringBuilder();
                                     for (Mail.Deliverer deliverer : Mail.getDeliverers()) {
                                         message.append(deliverer.getPlayer().getName()).append(" ");
                                     }
-                                    sender.sendMessage(message.toString());
+                                    sender.sendMessage(SystemMessage.formatPrivate(message.toString()));
                                 })
                         )
 
@@ -221,7 +226,12 @@ public class CmdParcel implements DVCommand {
             Mail.Deliverer deliverer = new Mail.Deliverer(player, start, end);
             deliverer.start();
             deliverers.add(deliverer);
-            player.sendMessage(Dreamvisitor.PREFIX + "Deliver this parcel to " + ChatColor.YELLOW + end.getName().replace("_", " ") + ChatColor.WHITE + ".\nRun " + ChatColor.AQUA + "/" + getCommand().getName() + " cancel" + ChatColor.WHITE + " to cancel.");
+            player.sendMessage(SystemMessage.formatPrivate(
+                    "Deliver this parcel to " +
+                            ChatColor.YELLOW + end.getName().replace("_", " ") +
+                            SystemMessage.Type.INFO.color + ".\nRun " +
+                            ChatColor.AQUA + "/" + getCommand().getName() + " cancel" +
+                            SystemMessage.Type.INFO.color + " to cancel."));
         }
 
         Dreamvisitor.debug("Size of deliverers now: " + deliverers.size());
