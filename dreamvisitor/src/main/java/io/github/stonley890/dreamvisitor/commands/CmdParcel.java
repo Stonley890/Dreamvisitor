@@ -151,7 +151,7 @@ public class CmdParcel implements DVCommand {
                                         }
                                     }
 
-                                    sender.sendMessage(SystemMessage.formatPrivate("Toggled mail for " + players.size() + "."));
+                                    sender.sendMessage(SystemMessage.formatPrivate("Toggled mail for " + players.size() + " player" + SystemMessage.sIfPlural(players.size()) + "."));
                                 })
                         )
 
@@ -185,7 +185,7 @@ public class CmdParcel implements DVCommand {
                                     if (players.isEmpty()) throw CommandAPI.failWithString("No players selected");
 
                                     add(players, start, end);
-                                    sender.sendMessage(SystemMessage.formatPrivate("Added " + players.size() + " player(s)."));
+                                    sender.sendMessage(SystemMessage.formatPrivate("Added " + players.size() + " player" + SystemMessage.sIfPlural(players.size()) +"."));
                                 })
                         )
 

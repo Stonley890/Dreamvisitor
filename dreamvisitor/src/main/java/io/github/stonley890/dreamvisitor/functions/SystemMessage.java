@@ -6,6 +6,8 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class SystemMessage {
 
     private static final String PREFIX = ChatColor.DARK_BLUE + "✧ ";
@@ -88,6 +90,20 @@ public class SystemMessage {
     @Contract(pure = true)
     public static String formatPublic(String string) {
         return PREFIX + string;
+    }
+
+    @NotNull
+    @Contract(pure = true)
+    public static String sIfPlural(Number number) {
+        if (Objects.equals(number, 1)) return "";
+        else return "s";
+    }
+
+    @NotNull
+    @Contract(pure = true)
+    public static String iesIfPlural(Number number) {
+        if (Objects.equals(number, 1)) return "y";
+        else return "ies";
     }
 
     public enum Type {

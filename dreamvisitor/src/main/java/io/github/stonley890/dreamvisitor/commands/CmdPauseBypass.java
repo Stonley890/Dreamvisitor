@@ -30,7 +30,7 @@ public class CmdPauseBypass implements DVCommand {
                             assert players != null;
                             playersList.addAll(players.stream().map(Player::getUniqueId).toList());
                             PauseBypass.setPlayers(playersList);
-                            sender.sendMessage(SystemMessage.formatPrivate("Added " + players.size() + " player(s) to the bypass list."));
+                            sender.sendMessage(SystemMessage.formatPrivate("Added " + players.size() + " player" + SystemMessage.sIfPlural(players.size()) + " to the bypass list."));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("remove")
@@ -41,7 +41,7 @@ public class CmdPauseBypass implements DVCommand {
                             assert players != null;
                             boolean removed = playersList.removeAll(players.stream().map(Player::getUniqueId).toList());
                             PauseBypass.setPlayers(playersList);
-                            if (removed) sender.sendMessage(SystemMessage.formatPrivate("Removed " + players.size() + " player(s) from the bypass list."));
+                            if (removed) sender.sendMessage(SystemMessage.formatPrivate("Removed " + players.size() + " player" + SystemMessage.sIfPlural(players.size()) + " from the bypass list."));
                             else throw CommandAPI.failWithString("No players were removed.");
                         })
                 )

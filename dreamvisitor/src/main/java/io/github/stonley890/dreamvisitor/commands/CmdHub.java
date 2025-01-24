@@ -66,9 +66,7 @@ public class CmdHub implements DVCommand {
                                             user.setLastLocation(player.getLocation());
                                         }
 
-                                        player.teleport(Dreamvisitor.hubLocation);
-                                        player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
-                                        player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f, 1f);
+                                        teleport(player, Dreamvisitor.hubLocation);
                                     } else entity.teleport(Dreamvisitor.hubLocation, TeleportCause.COMMAND);
                                 }
                             }
@@ -76,7 +74,7 @@ public class CmdHub implements DVCommand {
                                 callee.sendMessage(SystemMessage.formatPrivate("Teleported " + entitySelect.stream().findFirst().get().getName() + " to the hub."));
                             }
                             else {
-                                callee.sendMessage(SystemMessage.formatPrivate("Teleported " + entitySelect.size() + " entities to the hub."));
+                                callee.sendMessage(SystemMessage.formatPrivate("Teleported " + entitySelect.size() + " entitie" + SystemMessage.iesIfPlural(entitySelect.size()) +" to the hub."));
                             }
                         }
 
@@ -106,18 +104,12 @@ public class CmdHub implements DVCommand {
                                 }
 
                                 if (leashed.isEmpty() || !player.hasPermission("dreamvisitor.hub.leash")) {
-                                    player.teleport(Dreamvisitor.hubLocation);
-                                    player.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
-                                    player.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
-                                            1f);
+                                    teleport(player, Dreamvisitor.hubLocation);
                                 } else {
 
                                     Location tpLocation = Dreamvisitor.hubLocation.clone().subtract(0, 14, 0);
 
-                                    player.teleport(tpLocation);
-                                    player.spawnParticle(Particle.FIREWORKS_SPARK, tpLocation, 100);
-                                    player.playSound(tpLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
-                                            1f);
+                                    teleport(player, tpLocation);
                                     for (LivingEntity entity : leashed) {
                                         entity.teleport(tpLocation);
                                     }
@@ -153,10 +145,7 @@ public class CmdHub implements DVCommand {
                                         user.setLastLocation(closest.getLocation());
                                     }
 
-                                    closest.teleport(Dreamvisitor.hubLocation);
-                                    closest.spawnParticle(Particle.FIREWORKS_SPARK, Dreamvisitor.hubLocation, 100);
-                                    closest.playSound(Dreamvisitor.hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f,
-                                            1f);
+                                    teleport(closest, Dreamvisitor.hubLocation);
                                 }
                             }
 
@@ -166,5 +155,11 @@ public class CmdHub implements DVCommand {
                     }
 
                 }));
+    }
+
+    private static void teleport(@NotNull Player player, Location hubLocation) {
+        player.teleport(hubLocation);
+        player.spawnParticle(Particle.FIREWORKS_SPARK, hubLocation, 100);
+        player.playSound(hubLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.5f, 1f);
     }
 }

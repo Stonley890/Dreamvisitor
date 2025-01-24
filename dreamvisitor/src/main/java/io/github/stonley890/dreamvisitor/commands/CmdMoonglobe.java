@@ -36,7 +36,7 @@ public class CmdMoonglobe implements DVCommand {
             if (!alreadyHasGlobe) new Moonglobe(player.getUniqueId(), location, maxDistance);
         }
 
-        return (SystemMessage.formatPrivate("Created moon globes for " + players.size() + " players."));
+        return (SystemMessage.formatPrivate("Created moon globes for " + players.size() + " player" + SystemMessage.sIfPlural(players.size())) + ".");
 
     }
 
@@ -62,7 +62,7 @@ public class CmdMoonglobe implements DVCommand {
                                 }
                             }
 
-                            sender.sendMessage(SystemMessage.formatPrivate("Removed moon globes of " + targets.size() + " players."));
+                            sender.sendMessage(SystemMessage.formatPrivate("Removed moon globes of " + targets.size() + " player" + SystemMessage.sIfPlural(targets.size())) +".");
                         })
                 )
                 .withSubcommand(new CommandAPICommand("create")

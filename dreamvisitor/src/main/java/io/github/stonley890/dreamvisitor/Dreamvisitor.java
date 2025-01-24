@@ -185,14 +185,14 @@ public class Dreamvisitor extends JavaPlugin {
             try {
                 new RequestHandler();  // Start the embedded HTTP server
             } catch (IOException e) {
-                e.printStackTrace();
+                Bukkit.getLogger().severe("There was a problem starting the embedded HTTP server. Communication with Dreamvisitor Hub will be limited.\n" + e.getMessage());
             }
 
             // Send resource pack info to web app
             try {
                 DataSender.sendResourcePack();
             } catch (IOException e) {
-                getLogger().warning("Could not check for resource pack update.");
+                getLogger().warning("Could not check for resource pack update.\n" + e.getMessage());
             }
 
             Runnable scheduledRestarts = new BukkitRunnable() {
@@ -210,7 +210,7 @@ public class Dreamvisitor extends JavaPlugin {
                     double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
                     if (freeMemoryPercent <= 10) {
                         ScheduleRestart.setRestartScheduled(true);
-                        getLogger().info("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
+                        getLogger().warning("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
                     }
                 }
             };
@@ -270,7 +270,7 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Enable finished.");
         } catch (Exception e) {
 
-            getLogger().severe("Dreamvisitor was unable to start :(\nPlease notify Bog with the following stack trace:");
+            getLogger().severe("Dreamvisitor was unable to start :(\nDreamvisitor will now be disabled to avoid critical issues:");
             e.printStackTrace();
 
             Bukkit.getPluginManager().disablePlugin(this);
