@@ -21,33 +21,34 @@ public class ListenPlayerToggleFlightEvent implements Listener {
     @EventHandler
     public void onToggleFlight(@NotNull PlayerToggleFlightEvent event) {
 
-        if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
+        Player player = event.getPlayer();
+        if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
             if (event.isFlying()) {
-                event.getPlayer().setGliding(false);
-                event.getPlayer().setFlySpeed(0.05f);
-                event.getPlayer().setFlying(true);
+                player.setGliding(false);
+                player.setFlySpeed(0.05f);
+                player.setFlying(true);
 
-                wingFlapSoundTask.put(event.getPlayer(), Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
-                    if (!event.getPlayer().isOnline() || !event.getPlayer().isFlying()) {
+                wingFlapSoundTask.put(player, Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
+                    if (!player.isOnline() || !player.isFlying()) {
                         // remove this task
-                        cancelWingFlapSoundTask(event.getPlayer());
+                        cancelWingFlapSoundTask(player);
 
                     } else {
-                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS, 0.5f, 1.2f);
+                        player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS, 0.5f, 1.2f);
                     }
                 }, 1, 15));
 
 
             } else {
-                event.getPlayer().setFlying(false);
-                event.getPlayer().setGliding(true);
+                player.setFlying(false);
+                player.setGliding(true);
             }
         } else {
             if (event.isFlying()) {
-                event.getPlayer().setFlySpeed(0.1f);
-                event.getPlayer().setFlying(true);
+                player.setFlySpeed(0.1f);
+                player.setFlying(true);
             } else {
-                event.getPlayer().setFlying(false);
+                player.setFlying(false);
             }
         }
 

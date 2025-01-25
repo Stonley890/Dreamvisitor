@@ -27,7 +27,7 @@ public class Flight {
             for (Player player : Bukkit.getOnlinePlayers()) {
 
                 // If player does not have the dreamvisitor.fly permission, disable flight if not in creative
-                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && player.getGameMode() != GameMode.CREATIVE)) {
+                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR)) {
                     player.setAllowFlight(false);
                 }
 
@@ -40,7 +40,7 @@ public class Flight {
 
                 if (energy.get(player) < energyCapacity) {
 
-                    if (!player.isFlying() || player.getGameMode() == GameMode.CREATIVE) {
+                    if (!player.isFlying() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
                         // Regenerate energy if not flying or in creative mode
                         try {
                             energy.compute(player, (k, i) -> i + 1);
@@ -104,7 +104,7 @@ public class Flight {
 
     public static void setFlightRestricted(@NotNull Player player, boolean restricted) {
         flightRestricted.put(player, restricted);
-        if (player.getGameMode() != GameMode.CREATIVE) {
+        if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
             player.setAllowFlight(!restricted && !isPlayerDepleted(player));
             if (restricted && player.isFlying()) {
                 player.setFlying(false);
