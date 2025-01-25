@@ -26,6 +26,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -426,22 +427,25 @@ public class Dreamvisitor extends JavaPlugin {
     }
 
     private void registerListeners() {
-        getServer().getPluginManager().registerEvents(new ListenEntityDamage(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerChat(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerCmdPreprocess(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerDeath(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerJoin(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerLogin(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerQuit(), this);
-        getServer().getPluginManager().registerEvents(new ItemBanList(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerGameModeChange(), this);
-        getServer().getPluginManager().registerEvents(new ListenServerPing(), this);
-        getServer().getPluginManager().registerEvents(new Sandbox(), this);
-        getServer().getPluginManager().registerEvents(new ListenTimeSkip(), this);
-        getServer().getPluginManager().registerEvents(new ListenSignChangeEvent(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerToggleFlightEvent(), this);
-        getServer().getPluginManager().registerEvents(new ListenPlayerMoveEvent(), this);
-        getServer().getPluginManager().registerEvents(new ListenEntityToggleGlideEvent(), this);
+        PluginManager pluginManager = getServer().getPluginManager();
+        pluginManager.registerEvents(new ListenEntityDamage(), this);
+        pluginManager.registerEvents(new ListenPlayerChat(), this);
+        pluginManager.registerEvents(new ListenPlayerCmdPreprocess(), this);
+        pluginManager.registerEvents(new ListenPlayerDeath(), this);
+        pluginManager.registerEvents(new ListenPlayerJoin(), this);
+        pluginManager.registerEvents(new ListenPlayerLogin(), this);
+        pluginManager.registerEvents(new ListenPlayerQuit(), this);
+        pluginManager.registerEvents(new ItemBanList(), this);
+        pluginManager.registerEvents(new ListenPlayerGameModeChange(), this);
+        pluginManager.registerEvents(new ListenServerPing(), this);
+        pluginManager.registerEvents(new Sandbox(), this);
+        pluginManager.registerEvents(new ListenTimeSkip(), this);
+        pluginManager.registerEvents(new ListenSignChangeEvent(), this);
+        pluginManager.registerEvents(new ListenPlayerToggleFlightEvent(), this);
+        pluginManager.registerEvents(new ListenPlayerMoveEvent(), this);
+        pluginManager.registerEvents(new ListenEntityToggleGlideEvent(), this);
+        pluginManager.registerEvents(new ListenPlayerChangedWorld(), this);
+        pluginManager.registerEvents(new ListenPlayerRespawn(), this);
     }
 
     private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {

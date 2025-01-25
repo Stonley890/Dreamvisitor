@@ -113,4 +113,11 @@ public class Flight {
         }
 
     }
+
+    public static void setupFlight(Player player) {
+        // Re-enable flight if it gets disabled by game mode change
+        if (!isFlightRestricted(player) && !isPlayerDepleted(player)) {
+            Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> player.setAllowFlight(true), 1);
+        }
+    }
 }
