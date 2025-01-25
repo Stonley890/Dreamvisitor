@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class Flight {
     public static double energyCapacity = Dreamvisitor.getPlugin().getConfig().getInt("flightEnergyCapacity");
-    public static double reactivationPoint = Dreamvisitor.getPlugin().getConfig().getInt("flightRegenerationPoint");;
+    public static double reactivationPoint = Dreamvisitor.getPlugin().getConfig().getInt("flightRegenerationPoint");
     public static final Map<Player, Double> energy = new HashMap<>();
     private static final Map<Player, Boolean> energyDepletion = new HashMap<>();
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
