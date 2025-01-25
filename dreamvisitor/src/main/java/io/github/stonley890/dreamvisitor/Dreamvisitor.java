@@ -1,5 +1,11 @@
 package io.github.stonley890.dreamvisitor;
 
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
+import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
+import com.sk89q.worldguard.session.SessionManager;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -9,6 +15,7 @@ import io.github.stonley890.dreamvisitor.data.*;
 import io.github.stonley890.dreamvisitor.discord.DiscCommandsManager;
 import io.github.stonley890.dreamvisitor.commands.CmdChatback;
 import io.github.stonley890.dreamvisitor.functions.*;
+import io.github.stonley890.dreamvisitor.functions.worldguard.DragonFlightFlag;
 import io.github.stonley890.dreamvisitor.listeners.*;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.luckperms.api.LuckPerms;
@@ -52,6 +59,8 @@ public class Dreamvisitor extends JavaPlugin {
     private static ConsoleLogger appender;
     public final String VERSION = getDescription().getVersion();
 
+    public static StateFlag DRAGON_FLIGHT;
+
     public static Dreamvisitor getPlugin() {
         return PLUGIN;
     }
@@ -75,6 +84,39 @@ public class Dreamvisitor extends JavaPlugin {
             throw new NullPointerException("LuckPerms cannot be found.");
         }
         return luckPerms;
+    }
+
+    @Override
+    public void onLoad() {
+        // Called after a plugin is loaded but before it has been enabled.
+        // When multiple plugins are loaded, the onLoad() for all plugins is called before any onEnable() is called.
+        // Init WorldGuard flags
+        try {
+            FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
+            try {
+                // create a flag with the name "dragon-flight", defaulting to true
+                StateFlag flag = new StateFlag("dragon-flight", true);
+                registry.register(flag);
+                DRAGON_FLIGHT = flag; // only set our field if there was no error
+
+            } catch (FlagConflictException e) {
+                // some other plugin registered a flag by the same name already.
+                // you can use the existing flag, but this may cause conflicts - be sure to check type
+                Flag<?> existing = registry.get("dragon-flight");
+                if (existing instanceof StateFlag) {
+                    DRAGON_FLIGHT = (StateFlag) existing;
+                } else {
+                    // types don't match - this is bad news! some other plugin conflicts with you
+                    // hopefully this never actually happens
+                    getLogger().severe("A flag with the name dragon-flight already exists! Some other plugin claimed it already :(");
+                }
+            }
+        } catch (NoClassDefFoundError e) {
+            getLogger().info("WorldGuard is not installed, so no flags will be created.");
+        } catch (IllegalStateException e) {
+            getLogger().severe("New WorldGuard flags cannot be registered at this time. This should be impossible.");
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -157,9 +199,18 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Initializing player-tribes.yml");
             PlayerTribe.setup();
 
+            // Init energy
+            debug("Initializing energy");
+            Flight.init();
+
             // LuckPerms API
             RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
             if (provider != null) luckperms = provider.getProvider();
+
+            // WorldGuard flags
+            SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
+            // second param allows for ordering of handlers - see the JavaDocs
+            sessionManager.registerHandler(DragonFlightFlag.FACTORY, null);
 
             // Start message
             getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WoF:TNW to add various features.");
@@ -388,6 +439,9 @@ public class Dreamvisitor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new Sandbox(), this);
         getServer().getPluginManager().registerEvents(new ListenTimeSkip(), this);
         getServer().getPluginManager().registerEvents(new ListenSignChangeEvent(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerToggleFlightEvent(), this);
+        getServer().getPluginManager().registerEvents(new ListenPlayerMoveEvent(), this);
+        getServer().getPluginManager().registerEvents(new ListenEntityToggleGlideEvent(), this);
     }
 
     private void registerCommands(@NotNull List<DVCommand> commands) throws NullPointerException {

@@ -19,6 +19,11 @@ public class ListenPlayerJoin implements Listener {
     @EventHandler
     public void onPlayerJoinEvent(@NotNull PlayerJoinEvent event) {
 
+        // Enable flight
+        if (event.getPlayer().hasPermission("dreamvisitor.fly")) {
+            event.getPlayer().setAllowFlight(true);
+        }
+
         // Send join messages
         String chatMessage = "**" + Bot.escapeMarkdownFormatting(ChatColor.stripColor(event.getPlayer().getName())) + " joined the game**";
         try {
