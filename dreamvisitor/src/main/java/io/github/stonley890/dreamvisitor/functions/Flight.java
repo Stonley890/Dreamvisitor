@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class Flight {
     public static double energyCapacity = Dreamvisitor.getPlugin().getConfig().getInt("flightEnergyCapacity");
-    public static double reactivationPoint = Dreamvisitor.getPlugin().getConfig().getInt("flightRegenerationPoint");;
+    public static double reactivationPoint = Dreamvisitor.getPlugin().getConfig().getInt("flightRegenerationPoint");
     public static final Map<Player, Double> energy = new HashMap<>();
     private static final Map<Player, Boolean> energyDepletion = new HashMap<>();
     private static final Map<Player, Boolean> flightRestricted = new HashMap<>();
@@ -27,7 +27,7 @@ public class Flight {
             for (Player player : Bukkit.getOnlinePlayers()) {
 
                 // If player does not have the dreamvisitor.fly permission, disable flight if not in creative
-                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && player.getGameMode() != GameMode.CREATIVE)) {
+                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR)) {
                     player.setAllowFlight(false);
                 }
 
@@ -40,7 +40,7 @@ public class Flight {
 
                 if (energy.get(player) < energyCapacity) {
 
-                    if (!player.isFlying() || player.getGameMode() == GameMode.CREATIVE) {
+                    if (!player.isFlying() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
                         // Regenerate energy if not flying or in creative mode
                         try {
                             energy.compute(player, (k, i) -> i + 1);
@@ -104,7 +104,7 @@ public class Flight {
 
     public static void setFlightRestricted(@NotNull Player player, boolean restricted) {
         flightRestricted.put(player, restricted);
-        if (player.getGameMode() != GameMode.CREATIVE) {
+        if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
             player.setAllowFlight(!restricted && !isPlayerDepleted(player));
             if (restricted && player.isFlying()) {
                 player.setFlying(false);
@@ -112,5 +112,12 @@ public class Flight {
             }
         }
 
+    }
+
+    public static void setupFlight(Player player) {
+        // Re-enable flight if it gets disabled by game mode change
+        if (!isFlightRestricted(player) && !isPlayerDepleted(player)) {
+            Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> player.setAllowFlight(true), 1);
+        }
     }
 }
