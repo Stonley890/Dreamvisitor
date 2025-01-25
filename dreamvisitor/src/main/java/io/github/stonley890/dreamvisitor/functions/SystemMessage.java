@@ -118,7 +118,7 @@ public class SystemMessage {
             INFO.color = ChatColor.of("#ccccff");
             WARNING.color = ChatColor.of("#fbd17a");
             DANGER.color = ChatColor.of("#ff5b2b");
-            ERROR.color = ChatColor.of("ff2d00");
+            ERROR.color = ChatColor.of("#ff2d00");
         }
     }
 

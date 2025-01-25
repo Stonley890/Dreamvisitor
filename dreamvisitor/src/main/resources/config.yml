@@ -3,11 +3,6 @@
 # Default: "https://dreamvisitor.woftnw.org"
 hubUrl: "https://dreamvisitor.woftnw.org"
 
-# Whether to enable debug messages.
-# This will send additional messages to help debug Dreamvisitor.
-# Default: false
-debug: false
-
 # Whether chat is paused or not.
 # This can be toggled in Minecraft with /pausechat
 # Default: false

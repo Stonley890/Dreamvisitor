@@ -74,7 +74,7 @@ public class CmdHub implements DVCommand {
                                 callee.sendMessage(SystemMessage.formatPrivate("Teleported " + entitySelect.stream().findFirst().get().getName() + " to the hub."));
                             }
                             else {
-                                callee.sendMessage(SystemMessage.formatPrivate("Teleported " + entitySelect.size() + " entitie" + SystemMessage.iesIfPlural(entitySelect.size()) +" to the hub."));
+                                callee.sendMessage(SystemMessage.formatPrivate("Teleported " + entitySelect.size() + " entit" + SystemMessage.iesIfPlural(entitySelect.size()) +" to the hub."));
                             }
                         }
 
