@@ -13,7 +13,11 @@ public class PlayerMemory {
     /**
      * Whether the user can see messages sent from the Discord game chat.
      */
-    public boolean discordToggled;
+    public boolean discordEnabled;
+    /**
+     * Whether the user can activate Flight Mode.
+     */
+    public boolean flightDisabled;
     /**
      * Whether the user is hidden from Discord.
      */
@@ -37,7 +41,8 @@ public class PlayerMemory {
     @SuppressWarnings("unchecked")
     public static @NotNull PlayerMemory getFromFileConfig(@NotNull FileConfiguration fileConfig) {
         PlayerMemory memory = new PlayerMemory();
-        memory.discordToggled = fileConfig.getBoolean("discordToggled");
+        memory.discordEnabled = fileConfig.getBoolean("discordToggled");
+        memory.flightDisabled = fileConfig.getBoolean("flightDisabled");
         memory.vanished = fileConfig.getBoolean("vanished");
         memory.creative = fileConfig.getBoolean("creative");
         memory.autoinvswap = fileConfig.getBoolean("autoinvswap");
@@ -58,7 +63,8 @@ public class PlayerMemory {
 
     public FileConfiguration toFileConfig() {
         FileConfiguration fileConfig = new YamlConfiguration();
-        fileConfig.set("discordToggled", discordToggled);
+        fileConfig.set("discordToggled", discordEnabled);
+        fileConfig.set("flightDisabled", flightDisabled);
         fileConfig.set("vanished", vanished);
         fileConfig.set("creative", creative);
         fileConfig.set("survivalInv", survivalInv);

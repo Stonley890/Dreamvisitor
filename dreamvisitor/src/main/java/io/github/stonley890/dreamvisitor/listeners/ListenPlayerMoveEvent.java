@@ -20,7 +20,7 @@ public class ListenPlayerMoveEvent implements Listener {
         Player player = event.getPlayer();
         if (event.getTo() == null) return;
 
-        if (player.isFlying() && player.getGameMode() != GameMode.CREATIVE) {
+        if (player.isFlying() && !Flight.inFlightGameMode(player)) {
             // Remove energy if flying
             try {
                 Double energy = Flight.energy.get(player);

@@ -28,7 +28,15 @@ public class CmdDvset implements DVCommand {
             builder.append("\n\nDiscord Visibility: ").color(ChatColor.WHITE)
                     .append("\nWhether to show messages from Discord's chat bridge.").color(ChatColor.GRAY)
                     .append("\n[").color(ChatColor.DARK_GRAY)
-                    .append(booleanToggle(memory.discordToggled, "discord"))
+                    .append(booleanToggle(memory.discordEnabled, "discord"))
+                    .append("").reset().append("]").color(ChatColor.DARK_GRAY);
+        }
+
+        if (player.hasPermission("dreamvisitor.set.flight")) {
+            builder.append("\n\nFlight Disabled: ").color(ChatColor.WHITE)
+                    .append("\nWhether Flight Mode cannot be activated.").color(ChatColor.GRAY)
+                    .append("\n[").color(ChatColor.DARK_GRAY)
+                    .append(booleanToggle(memory.flightDisabled, "flight"))
                     .append("").reset().append("]").color(ChatColor.DARK_GRAY);
         }
 
@@ -119,7 +127,12 @@ public class CmdDvset implements DVCommand {
                                 case "discord" -> {
                                     if (!player.hasPermission("dreamvisitor.set.discord"))
                                         throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                    callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility is currently set to " + ChatColor.WHITE + playerMemory.discordToggled);
+                                    callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility is currently set to " + ChatColor.WHITE + playerMemory.discordEnabled);
+                                }
+                                case "flight" -> {
+                                    if (!player.hasPermission("dreamvisitor.set.flight"))
+                                        throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                    callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Flight Enabled is currently set to " + ChatColor.WHITE + playerMemory.flightDisabled);
                                 }
                                 case "vanished" -> {
                                     if (!player.hasPermission("dreamvisitor.set.zoop"))
@@ -165,8 +178,14 @@ public class CmdDvset implements DVCommand {
                                         case "discord" -> {
                                             if (!player.hasPermission("dreamvisitor.set.discord"))
                                                 throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
-                                            playerMemory.discordToggled = Boolean.parseBoolean(modification);
-                                            callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility toggled to " + ChatColor.WHITE + playerMemory.discordToggled);
+                                            playerMemory.discordEnabled = Boolean.parseBoolean(modification);
+                                            callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Discord Visibility toggled to " + ChatColor.WHITE + playerMemory.discordEnabled);
+                                        }
+                                        case "flight" -> {
+                                            if (!player.hasPermission("dreamvisitor.set.flight"))
+                                                throw CommandAPI.failWithString("Invalid arguments or insufficient permissions!");
+                                            playerMemory.flightDisabled = Boolean.parseBoolean(modification);
+                                            callee.sendMessage(Dreamvisitor.PREFIX + ChatColor.GRAY + "Flight Enabled toggled to " + ChatColor.WHITE + playerMemory.flightDisabled);
                                         }
                                         case "vanished" -> {
                                             if (!player.hasPermission("dreamvisitor.set.zoop"))

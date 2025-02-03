@@ -20,9 +20,9 @@ public class CmdDiscord implements DVCommand {
                     CommandSender callee = sender.getCallee();
                     if (callee instanceof Player player) {
                         PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
-                        memory.discordToggled = !memory.discordToggled;
+                        memory.discordEnabled = !memory.discordEnabled;
 
-                        callee.sendMessage(Dreamvisitor.PREFIX + "Discord visibility toggled to " + !memory.discordToggled + ".");
+                        callee.sendMessage(Dreamvisitor.PREFIX + "Discord visibility toggled to " + !memory.discordEnabled + ".");
 
                         PlayerUtility.setPlayerMemory(player.getUniqueId(), memory);
                     } else throw CommandAPI.failWithString("This command must be executed as a player!");

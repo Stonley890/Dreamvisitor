@@ -19,6 +19,9 @@ permissions:
   dreamvisitor.set.discord:
     description: Set Discord visibility for self.
     default: true
+  dreamvisitor.set.flight:
+    description: Set Flight Mode availability for self.
+    default: true
   dreamvisitor.set.zoop:
     description: Set Discord vanish for self.
     default: op

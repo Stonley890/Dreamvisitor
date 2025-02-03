@@ -9,9 +9,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -209,7 +206,7 @@ public class DiscEventListener extends ListenerAdapter {
                     for (Player player : Bukkit.getServer().getOnlinePlayers()) {
 
                         // If the player has discord on, build and send the message
-                        if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordToggled) {
+                        if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordEnabled) {
                             player.spigot().sendMessage(message.create());
                         }
                     }
@@ -258,7 +255,7 @@ public class DiscEventListener extends ListenerAdapter {
                 if (Bukkit.getServer().getOnlinePlayers().isEmpty()) return;
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                     // If the player has discord on, build and send the message
-                    if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordToggled) {
+                    if (!PlayerUtility.getPlayerMemory(player.getUniqueId()).discordEnabled) {
                         player.sendMessage(ChatColor.BLUE + "[Discord] " + ChatColor.GRAY + "<" + event.getJDA().getSelfUser().getName() + "> " + response);
                     }
                 }

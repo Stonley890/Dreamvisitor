@@ -1,5 +1,6 @@
 package io.github.stonley890.dreamvisitor.listeners;
 
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.functions.Flight;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,6 +11,12 @@ public class ListenPlayerRespawn implements Listener {
 
     @EventHandler
     public void onPlayerRespawn(@NotNull PlayerRespawnEvent event) {
+        Dreamvisitor.debug("Respawn");
+        // Reset energy
+        Flight.energy.put(event.getPlayer(), Flight.energyCapacity);
+        Flight.setPlayerDepleted(event.getPlayer(), false);
+        // Flight is disabled after respawn, so it needs to be re-enabled.
         Flight.setupFlight(event.getPlayer());
+
     }
 }

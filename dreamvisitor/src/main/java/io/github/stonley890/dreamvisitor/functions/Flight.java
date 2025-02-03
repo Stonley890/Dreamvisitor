@@ -1,6 +1,8 @@
 package io.github.stonley890.dreamvisitor.functions;
 
 import io.github.stonley890.dreamvisitor.Dreamvisitor;
+import io.github.stonley890.dreamvisitor.data.PlayerMemory;
+import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
@@ -23,13 +25,14 @@ public class Flight {
     public static void init() {
         Bukkit.getScheduler().runTaskTimer(Dreamvisitor.getPlugin(), () -> {
 
-            // if Player is flying, remove one energy
             for (Player player : Bukkit.getOnlinePlayers()) {
 
+                PlayerMemory memory = PlayerUtility.getPlayerMemory(player.getUniqueId());
+
                 // If player does not have the dreamvisitor.fly permission, disable flight if not in creative
-                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR)) {
+                if ((!player.hasPermission("dreamvisitor.fly") || isFlightRestricted(player) && !inFlightGameMode(player)) || (memory.flightDisabled && !inFlightGameMode(player))) {
                     player.setAllowFlight(false);
-                }
+                } else setupFlight(player);
 
                 energy.putIfAbsent(player, energyCapacity);
 
@@ -40,8 +43,8 @@ public class Flight {
 
                 if (energy.get(player) < energyCapacity) {
 
-                    if (!player.isFlying() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
-                        // Regenerate energy if not flying or in creative mode
+                    if (!player.isFlying() || inFlightGameMode(player)) {
+                        // Regenerate energy if not flying or in creative/spectator mode
                         try {
                             energy.compute(player, (k, i) -> i + 1);
                         } catch (NullPointerException e) {
@@ -54,8 +57,10 @@ public class Flight {
                     if (bossBar == null) { // Create bossbar if it's null
                         bossBar = Bukkit.createBossBar(namespacedKey, "Energy", BarColor.GREEN, BarStyle.SEGMENTED_10);
                         bossBar.addPlayer(player);
-                        bossBar.setVisible(true);
                     }
+
+                    bossBar.setVisible(!inFlightGameMode(player));
+
                     // Set progress
                     bossBar.setProgress(energy.get(player) / energyCapacity);
 
@@ -75,9 +80,7 @@ public class Flight {
                     if (isPlayerDepleted(player) && energy.get(player) >= reactivationPoint) {
                         bossBar.setColor(BarColor.GREEN);
                         setPlayerDepleted(player, false);
-                        if (player.hasPermission("dreamvisitor.fly")) {
-                            player.setAllowFlight(true);
-                        }
+                        setupFlight(player);
                     }
 
                 } else if (bossBar != null) {
@@ -91,13 +94,18 @@ public class Flight {
     }
 
     public static boolean isPlayerDepleted(Player player) {
-        return energyDepletion.computeIfAbsent(player, k -> false);
+        return (energyDepletion.computeIfAbsent(player, k -> false));
     }
 
     public static void setPlayerDepleted(Player player, boolean depleted) {
         energyDepletion.put(player, depleted);
     }
 
+    /**
+     * Whether flight is restricted by a WorldGuard region.
+     * @param player the player to check for
+     * @return whether flying is permitted by the player's region
+     */
     public static boolean isFlightRestricted(Player player) {
         return flightRestricted.computeIfAbsent(player, k -> false);
     }
@@ -105,19 +113,35 @@ public class Flight {
     public static void setFlightRestricted(@NotNull Player player, boolean restricted) {
         flightRestricted.put(player, restricted);
         if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
-            player.setAllowFlight(!restricted && !isPlayerDepleted(player));
-            if (restricted && player.isFlying()) {
-                player.setFlying(false);
-                player.setGliding(true);
+
+            if (restricted) {
+                if (player.isFlying()) {
+                    player.setFlying(false);
+                    player.setGliding(true);
+                }
+                player.setAllowFlight(false);
             }
+            else setupFlight(player);
+
         }
 
     }
 
-    public static void setupFlight(Player player) {
+    public static void setupFlight(@NotNull Player player) {
         // Re-enable flight if it gets disabled by game mode change
-        if (!isFlightRestricted(player) && !isPlayerDepleted(player)) {
+        // Dreamvisitor.debug("FlightNotAllowed: " + !player.getAllowFlight() + " Permission: " + player.hasPermission("dreamvisitor.fly") + " NotRestricted: " + !isFlightRestricted(player) + " NotDepleted: " + !isPlayerDepleted(player) + " NotDisabled: " + !PlayerUtility.getPlayerMemory(player.getUniqueId()).flightDisabled);
+        if (!player.getAllowFlight() && player.hasPermission("dreamvisitor.fly") && !isFlightRestricted(player) && !isPlayerDepleted(player) && !PlayerUtility.getPlayerMemory(player.getUniqueId()).flightDisabled) {
+            Dreamvisitor.debug("All requirements met for flight.");
             Bukkit.getScheduler().runTaskLater(Dreamvisitor.getPlugin(), () -> player.setAllowFlight(true), 1);
         }
+    }
+
+    /**
+     * Whether a player is in a flight-enabled game mode like Creative or Spectator.
+     * @param player
+     * @return
+     */
+    public static boolean inFlightGameMode(@NotNull Player player) {
+        return (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR);
     }
 }
