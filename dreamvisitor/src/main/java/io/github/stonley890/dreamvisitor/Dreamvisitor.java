@@ -42,6 +42,7 @@ public class Dreamvisitor extends JavaPlugin {
 
     // private
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
+    public final static String TITLE = getPlugin().getName();
     // public
     public static Dreamvisitor PLUGIN;
     public static LuckPerms luckperms;
@@ -143,7 +144,7 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Creating data folder...");
             // Create config if needed
             boolean directoryCreated = getDataFolder().mkdir();
-            if (!directoryCreated) debug("Dreamvisitor did not create a data folder. It may already exist.");
+            if (!directoryCreated) debug(TITLE + " did not create a data folder. It may already exist.");
             saveDefaultConfig();
 
             // Init mail
@@ -151,7 +152,7 @@ public class Dreamvisitor extends JavaPlugin {
             Mail.init();
 
             // Start message
-            getLogger().log(Level.INFO, "Dreamvisitor: A plugin created by Bog for WOFTNW to add various features.");
+            getLogger().log(Level.INFO, TITLE + ": A plugin created by Bog for WOFTNW to add various features.");
 
             // If chat was previously paused, restore and notify in console\
             debug("Restoring chat pause...");
@@ -210,7 +211,7 @@ public class Dreamvisitor extends JavaPlugin {
                     double freeMemoryPercent = ((double) freeMemory / maxMemory) * 100;
                     if (freeMemoryPercent <= 10) {
                         ScheduleRestart.setRestartScheduled(true);
-                        getLogger().warning("Dreamvisitor scheduled a restart because free memory usage is at or less than 10%.");
+                        getLogger().warning(TITLE + " scheduled a restart because free memory usage is at or less than 10%.");
                     }
                 }
             };
@@ -270,7 +271,7 @@ public class Dreamvisitor extends JavaPlugin {
             debug("Enable finished.");
         } catch (Exception e) {
 
-            getLogger().severe("Dreamvisitor was unable to start :(\nDreamvisitor will now be disabled to avoid critical issues:");
+            getLogger().severe(TITLE + " was unable to start :(\n" + TITLE + " will now be disabled to avoid critical issues:");
             e.printStackTrace();
 
             Bukkit.getPluginManager().disablePlugin(this);

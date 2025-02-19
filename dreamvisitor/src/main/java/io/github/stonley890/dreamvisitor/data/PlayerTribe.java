@@ -202,9 +202,9 @@ public class PlayerTribe {
 
                 });
             } else
-                Bukkit.getLogger().warning("Dreamvisitor could not hook into LuckPerms on startup. Permission update failed.");
+                Bukkit.getLogger().warning(Dreamvisitor.TITLE + " could not hook into LuckPerms on startup. Permission update failed.");
         } else
-            Bukkit.getLogger().warning("Dreamvisitor could not hook into LuckPerms on startup. Permission update failed.");
+            Bukkit.getLogger().warning(Dreamvisitor.TITLE + " could not hook into LuckPerms on startup. Permission update failed.");
     }
 
 

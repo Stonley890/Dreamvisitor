@@ -76,7 +76,7 @@ public class ListenPlayerChat implements Listener {
                 }
 
             } catch (InsufficientPermissionException e) {
-                Dreamvisitor.getPlugin().getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+                Dreamvisitor.getPlugin().getLogger().warning(Dreamvisitor.TITLE + " does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
             }
 
         } else {
@@ -119,7 +119,7 @@ public class ListenPlayerChat implements Listener {
                         // Bot.getGameChatChannel().sendMessage(chatMessage).queue();
                     }
                 } catch (InsufficientPermissionException e) {
-                    Dreamvisitor.getPlugin().getLogger().warning("Dreamvisitor does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
+                    Dreamvisitor.getPlugin().getLogger().warning(Dreamvisitor.TITLE + " does not have sufficient permissions to send messages in game chat channel: " + e.getMessage());
                 }
 
             } else {

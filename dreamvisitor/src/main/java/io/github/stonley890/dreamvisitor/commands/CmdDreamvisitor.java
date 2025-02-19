@@ -23,11 +23,11 @@ public class CmdDreamvisitor implements DVCommand {
     public CommandAPICommand getCommand() {
         return new CommandAPICommand("dreamvisitor")
                 .executes((sender, args) -> {
-                    sender.sendMessage(ChatColor.BLUE + "Dreamvisitor " + Dreamvisitor.getPlugin().getDescription().getVersion() + "\nDeveloped by WOFTNW\nOpen source at https://github.com/WOFTNW/Dreamvisitor");
+                    sender.sendMessage(ChatColor.BLUE + Dreamvisitor.TITLE + Dreamvisitor.getPlugin().getDescription().getVersion() + "\nDeveloped by WOFTNW\nOpen source at https://github.com/WOFTNW/Dreamvisitor");
                 })
                 .withSubcommand(new CommandAPICommand("reload")
                         .withPermission(CommandPermission.OP)
-                        .withHelp("Reload Dreamvisitor.", "Reload Dreamvisitor's config file from disk.")
+                        .withHelp("Reload "+ Dreamvisitor.TITLE +".", "Reload " + Dreamvisitor.TITLE + "'s config file from disk.")
                         .executes(((sender, args) -> {
                             Dreamvisitor.getPlugin().reloadConfig();
                             sender.sendMessage(SystemMessage.formatPrivate("Configuration reloaded."));
@@ -35,13 +35,10 @@ public class CmdDreamvisitor implements DVCommand {
                 )
                 .withSubcommand(new CommandAPICommand("manage")
                         .withPermission(CommandPermission.OP)
-                        .withHelp("Manage Dreamvisitor config.", "Read from or write to the Dreamvisitor configuration.")
+                        .withHelp("Manage " + Dreamvisitor.TITLE + " config.", "Read from or write to the " + Dreamvisitor.TITLE + " configuration.")
                         .withSubcommands(
                                 new CommandAPICommand("debug")
-                                        .withHelp("Set debug.", """
-                                                Whether to enable debug messages.
-                                                This will send additional messages to help debug Dreamvisitor.
-                                                Default: false""")
+                                        .withHelp("Set debug.", "Whether to enable debug messages.\n This will send additional messages to help debug " + Dreamvisitor.TITLE + ".\n Default: false")
                                         .withOptionalArguments(new BooleanArgument("debug"))
                                         .executes((sender, args) -> {
                                             @Nullable String key = "debug";
@@ -129,10 +126,7 @@ public class CmdDreamvisitor implements DVCommand {
                                             configLong(sender, args, key);
                                         }),
                                 new CommandAPICommand("resourcePackRepo")
-                                        .withHelp("Set resourcePackRepo", """
-                                                The repository path of the server resource pack.
-                                                Dreamvisitor will pull the first artifact from the latest release on pack update.
-                                                Default: "WOFTNW/Dragonspeak""")
+                                        .withHelp("Set resourcePackRepo", "The repository path of the server resource pack.\n" + Dreamvisitor.TITLE + " will pull the first artifact from the latest release on pack update.\nDefault: \"WOFTNW/Dragonspeak\"")
                                         .withOptionalArguments(new TextArgument("resourcePackRepo"))
                                         .executes((sender, args) -> {
                                             @Nullable String key = "resourcePackRepo";

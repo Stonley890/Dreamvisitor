@@ -225,7 +225,7 @@ public class Whitelist extends ListenerAdapter {
         EmbedBuilder logEmbed = new EmbedBuilder();
         logEmbed.setTitle("Whitelisted " + username + " from " + sourceName);
 
-        if (source != null) logEmbed.setDescription(source.getAsMention() + " added " + username + " to the whitelist with Dreamvisitor. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a different member.");
+        if (source != null) logEmbed.setDescription(source.getAsMention() + " added " + username + " to the whitelist with " + Dreamvisitor.TITLE + ". Use the buttons below to undo this action or `/link <username> <member>` to link this user to a different member.");
         else logEmbed.setDescription("Added " + username + " to the whitelist via the web whitelist. Use the buttons below to undo this action or `/link <username> <member>` to link this user to a Discord member.");
         return logEmbed;
     }

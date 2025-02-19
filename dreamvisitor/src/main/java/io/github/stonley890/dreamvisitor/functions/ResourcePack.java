@@ -24,7 +24,7 @@ public class ResourcePack {
             resourcePackURL = ResourcePack.getLatestReleaseURL();
             Dreamvisitor.debug("Found URL.");
         } catch (IOException e) {
-            throw new IOException("Dreamvisitor was unable to find the resource pack URL: " + e.getMessage());
+            throw new IOException(Dreamvisitor.TITLE + " was unable to find the resource pack URL: " + e.getMessage());
         }
 
         Dreamvisitor.debug("Attempting to download the resource pack.");

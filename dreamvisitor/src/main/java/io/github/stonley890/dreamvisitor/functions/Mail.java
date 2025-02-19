@@ -48,7 +48,7 @@ public class Mail {
                 if (!file.createNewFile())
                     throw new IOException("The existence of " + file.getName() + " cannot be verified!", null);
             } catch (IOException e) {
-                throw new IOException("Dreamvisitor tried to create " + file.getName() + ", but it cannot be read/written! Does the server have read/write access?", e);
+                throw new IOException(Dreamvisitor.TITLE + " tried to create " + file.getName() + ", but it cannot be read/written! Does the server have read/write access?", e);
             }
         }
         calculateMaxDistance();

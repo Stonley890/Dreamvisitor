@@ -2,6 +2,7 @@ package io.github.stonley890.dreamvisitor.commands;
 
 import dev.jorel.commandapi.*;
 import dev.jorel.commandapi.arguments.StringArgument;
+import io.github.stonley890.dreamvisitor.Dreamvisitor;
 import io.github.stonley890.dreamvisitor.data.PlayerMemory;
 import io.github.stonley890.dreamvisitor.data.PlayerUtility;
 import io.github.stonley890.dreamvisitor.functions.SystemMessage;
@@ -33,7 +34,7 @@ public class CmdDvset implements DVCommand {
 
         if (player.hasPermission("dreamvisitor.set.zoop")) {
             builder.append("\n\nDiscord Vanish: ").color(ChatColor.WHITE)
-                    .append("\nWhether to appear offline in Dreamvisitor.").color(ChatColor.GRAY)
+                    .append("\nWhether to appear offline in "+ Dreamvisitor.TITLE + ".").color(ChatColor.GRAY)
                     .append("\n[").color(ChatColor.DARK_GRAY)
                     .append(booleanToggle(memory.vanished, "vanished"))
                     .append("").reset().append("]").color(ChatColor.DARK_GRAY);
@@ -92,7 +93,7 @@ public class CmdDvset implements DVCommand {
 
         return new CommandTree("dvset")
                 .withPermission(CommandPermission.fromString("dreamvisitor.userset"))
-                .withHelp("Manage settings.", "Manage your Dreamvisitor settings.")
+                .withHelp("Manage settings.", "Manage your " + Dreamvisitor.TITLE + " settings.")
                 .executesNative(((sender, args) -> {
                     if (sender instanceof Player player && sender.hasPermission("dreamvisitor.userset")) {
                         // Player GUI
